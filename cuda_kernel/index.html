@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CUDA Kernel Practice Guide</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121923;
+      --text: #edf4ff;
+      --muted: #9fb1c7;
+      --line: #263447;
+      --accent: #76d36b;
+      --accent-2: #62c6ff;
+      --warn: #ffcc66;
+      --bad: #ff8a8a;
+      --code: #071018;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(118, 211, 107, 0.20), transparent 32rem),
+        radial-gradient(circle at 85% 10%, rgba(98, 198, 255, 0.17), transparent 30rem),
+        linear-gradient(145deg, #080b10 0%, var(--bg) 45%, #111827 100%);
+      color: var(--text);
+      font-family: "Segoe UI", "Aptos", "Noto Sans", sans-serif;
+      line-height: 1.65;
+    }
+
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 19rem minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 1.4rem;
+      border-right: 1px solid var(--line);
+      background: rgba(10, 15, 22, 0.86);
+      backdrop-filter: blur(16px);
+    }
+
+    aside h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.15rem;
+      line-height: 1.25;
+    }
+
+    aside p {
+      margin: 0 0 1.2rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    nav a {
+      display: block;
+      padding: 0.55rem 0.7rem;
+      border-radius: 0.7rem;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    main {
+      width: min(1180px, 100%);
+      padding: 3rem clamp(1.2rem, 3vw, 3rem) 5rem;
+    }
+
+    section {
+      margin: 0 0 3rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .hero {
+      padding: clamp(2rem, 4vw, 4rem);
+      border: 1px solid rgba(118, 211, 107, 0.24);
+      border-radius: calc(var(--radius) + 10px);
+      background:
+        linear-gradient(135deg, rgba(118, 211, 107, 0.16), rgba(98, 198, 255, 0.08)),
+        rgba(18, 25, 35, 0.78);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 0.45rem;
+      align-items: center;
+      padding: 0.32rem 0.65rem;
+      border: 1px solid rgba(118, 211, 107, 0.36);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h2, h3 { line-height: 1.2; }
+
+    h2 {
+      margin: 0 0 1rem;
+      font-size: clamp(1.7rem, 3vw, 2.6rem);
+    }
+
+    h3 {
+      margin: 1.5rem 0 0.55rem;
+      font-size: 1.2rem;
+    }
+
+    .hero h2 {
+      margin-top: 1.1rem;
+      font-size: clamp(2.2rem, 5vw, 4.5rem);
+      letter-spacing: -0.05em;
+    }
+
+    .hero p {
+      max-width: 72ch;
+      color: #c8d7ea;
+      font-size: 1.08rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      padding: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18, 25, 35, 0.78);
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.18);
+    }
+
+    .card strong { color: #ffffff; }
+
+    .stat {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+    }
+
+    .muted { color: var(--muted); }
+
+    code, pre { font-family: "Cascadia Code", "Consolas", monospace; }
+
+    code {
+      padding: 0.12rem 0.34rem;
+      border-radius: 0.35rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: #e8f7ff;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+      background: var(--code);
+      color: #d9f2ff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18, 25, 35, 0.75);
+    }
+
+    th, td {
+      padding: 0.85rem;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    ul, ol { padding-left: 1.25rem; }
+    li { margin: 0.3rem 0; }
+
+    .callout {
+      padding: 1rem 1.1rem;
+      border-left: 4px solid var(--accent);
+      border-radius: 1rem;
+      background: rgba(118, 211, 107, 0.10);
+    }
+
+    .callout.warn {
+      border-left-color: var(--warn);
+      background: rgba(255, 204, 102, 0.10);
+    }
+
+    .callout.bad {
+      border-left-color: var(--bad);
+      background: rgba(255, 138, 138, 0.10);
+    }
+
+    .checklist label {
+      display: block;
+      padding: 0.45rem 0;
+      color: #dce9f8;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 0.15rem 0.15rem 0.15rem 0;
+      padding: 0.18rem 0.5rem;
+      border: 1px solid rgba(98, 198, 255, 0.28);
+      border-radius: 999px;
+      color: #bdeaff;
+      font-size: 0.82rem;
+    }
+
+    .module {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18, 25, 35, 0.76);
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .module header {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .module header h3 { margin: 0; }
+    .module .body { padding: 1.2rem; }
+    .timeline { counter-reset: step; }
+
+    .step {
+      position: relative;
+      margin: 0 0 1rem;
+      padding: 1rem 1rem 1rem 3.2rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18, 25, 35, 0.72);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      width: 1.55rem;
+      height: 1.55rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #06200a;
+      font-weight: 800;
+    }
+
+    footer {
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 2rem;
+    }
+
+    @media (max-width: 920px) {
+      .layout { display: block; }
+      aside { position: static; height: auto; }
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid, .grid.two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h1>CUDA Kernel Practice</h1>
+      <p>RTX 4080 Super, CUDA 13.1, Windows, vector-search direction.</p>
+      <nav aria-label="Page navigation">
+        <a href="#overview">Overview</a>
+        <a href="#environment">Environment</a>
+        <a href="#build">Build & Run</a>
+        <a href="#mental-model">CUDA Mental Model</a>
+        <a href="#modules">Practice Modules</a>
+        <a href="#benchmarks">Current Benchmarks</a>
+        <a href="#experiments">Experiments</a>
+        <a href="#profiling">Profiling & Debugging</a>
+        <a href="#vector-search">Vector Search Path</a>
+        <a href="#roadmap">4-Week Roadmap</a>
+        <a href="#current-links">Stay Current Links</a>
+        <a href="#resources">Resources</a>
+        <a href="#interview">Interview Story</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section id="overview" class="hero">
+        <span class="eyebrow">Hands-on kernel lab</span>
+        <h2>Practice CUDA kernels by building toward vector search.</h2>
+        <p>
+          This guide turns the <code>cuda_kernel</code> repo into a structured training path:
+          start with memory bandwidth, learn reductions, then move into exact L2 vector search.
+          That sequence is intentionally chosen because vector databases and accelerator libraries
+          are built from the same primitives: move data efficiently, compute distances, reduce or
+          select top candidates, and measure everything honestly.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <strong>First target</strong>
+            <p class="muted">Understand launch configuration, grid-stride loops, and memory transfer cost.</p>
+          </div>
+          <div class="card">
+            <strong>Second target</strong>
+            <p class="muted">Learn reductions using warp shuffles and block-level aggregation.</p>
+          </div>
+          <div class="card">
+            <strong>Third target</strong>
+            <p class="muted">Build an exact L2 search baseline before moving to ANN-style algorithms.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="environment">
+        <h2>Environment</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="stat">13.1</div>
+            <strong>CUDA Toolkit</strong>
+            <p class="muted">Detected with <code>nvcc --version</code>.</p>
+          </div>
+          <div class="card">
+            <div class="stat">8.9</div>
+            <strong>Compute Capability</strong>
+            <p class="muted">RTX 4080 Super is Ada-generation; build with <code>-arch=sm_89</code>.</p>
+          </div>
+          <div class="card">
+            <div class="stat">16 GB</div>
+            <strong>GPU Memory</strong>
+            <p class="muted">Enough for serious local vector-search experiments before multi-GPU scale.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Windows note:</strong> CUDA on Windows needs the Microsoft C++ compiler
+          <code>cl.exe</code>. The included build script loads the Visual Studio environment through
+          <code>vcvars64.bat</code> automatically when possible.
+        </div>
+      </section>
+
+      <section id="build">
+        <h2>Build & Run</h2>
+        <p>From the repo root:</p>
+        <pre><code>powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1
+.\build\01_vector_add.exe
+.\build\02_dot_product_reduction.exe
+.\build\03_l2_distance_search.exe</code></pre>
+        <p>Useful environment checks:</p>
+        <pre><code>nvcc --version
+nvidia-smi
+where cl
+where ncu
+where compute-sanitizer</code></pre>
+        <p>
+          If <code>where cl</code> fails, open "Developer PowerShell for Visual Studio" or keep using
+          the repo build script, which tries to load the Visual Studio compiler path for you.
+        </p>
+      </section>
+
+      <section id="mental-model">
+        <h2>CUDA Mental Model</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Grid, Block, Thread</h3>
+            <p>
+              A kernel launch creates a grid of thread blocks. Each block contains threads.
+              Your code maps each thread to one or more data elements using built-in IDs such as
+              <code>blockIdx.x</code>, <code>blockDim.x</code>, and <code>threadIdx.x</code>.
+            </p>
+            <p>
+              Official reference:
+              <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Programming Guide</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Warp</h3>
+            <p>
+              A warp is the hardware execution group of 32 threads. Many performance questions
+              become clearer when you ask: "What are the 32 neighboring threads in this warp doing?"
+            </p>
+            <p>Practice this in the reduction example with <code>__shfl_down_sync</code>.</p>
+          </div>
+          <div class="card">
+            <h3>Global Memory</h3>
+            <p>
+              Global memory is large but high-latency. Kernel speed often depends on whether
+              neighboring threads read neighboring addresses so hardware can coalesce memory
+              transactions efficiently.
+            </p>
+            <p>
+              Read:
+              <a href="https://developer.nvidia.com/blog/unlock-gpu-performance-global-memory-access-in-cuda/" target="_blank" rel="noreferrer">Unlock GPU Performance: Global Memory Access in CUDA</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Shared Memory</h3>
+            <p>
+              Shared memory is block-local, programmer-managed memory. It is useful when threads
+              in one block reuse data or need to cooperate, but it adds synchronization and bank
+              conflict concerns.
+            </p>
+            <p>
+              Read:
+              <a href="https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/" target="_blank" rel="noreferrer">Using Shared Memory in CUDA C/C++</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Grid-Stride Loops</h3>
+            <p>
+              A grid-stride loop lets each thread process multiple elements:
+              <code>for (int i = tid; i &lt; n; i += blockDim.x * gridDim.x)</code>.
+              This makes kernels scalable and easier to debug.
+            </p>
+            <p>
+              Read:
+              <a href="https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/" target="_blank" rel="noreferrer">CUDA Pro Tip: Grid-Stride Loops</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Occupancy</h3>
+            <p>
+              Occupancy is about how many warps can be active on an SM. Higher occupancy can help
+              hide latency, but it is not automatically equal to higher performance. Registers,
+              shared memory, and block size all matter.
+            </p>
+            <p>
+              Read:
+              <a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Best Practices Guide</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="modules">
+        <h2>Practice Modules</h2>
+
+        <article class="module">
+          <header>
+            <h3>01: Vector Add</h3>
+            <span class="tag">thread indexing</span>
+            <span class="tag">grid-stride loop</span>
+            <span class="tag">memory bandwidth</span>
+          </header>
+          <div class="body">
+            <p>
+              File: <code>src/01_vector_add.cu</code>. This is the "hello, GPU memory"
+              exercise. It reads two arrays and writes one array, so the bandwidth model is roughly
+              <code>3 * n * sizeof(float)</code> bytes per iteration.
+            </p>
+            <pre><code>__global__ void vectorAddKernel(const float* a, const float* b, float* c, int n)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    for (int i = tid; i &lt; n; i += stride) {
+        c[i] = a[i] + b[i];
+    }
+}</code></pre>
+            <p><strong>What to learn:</strong> thread ID math, launch configuration, correctness checks, and event timing.</p>
+            <p><strong>Modify:</strong> try block sizes <code>128</code>, <code>256</code>, <code>512</code>, and <code>1024</code>.</p>
+          </div>
+        </article>
+
+        <article class="module">
+          <header>
+            <h3>02: Dot Product Reduction</h3>
+            <span class="tag">warp shuffle</span>
+            <span class="tag">block reduction</span>
+            <span class="tag">floating-point error</span>
+          </header>
+          <div class="body">
+            <p>
+              File: <code>src/02_dot_product_reduction.cu</code>. This kernel computes partial
+              dot-product sums on the GPU and finishes the final accumulation on CPU. That two-stage
+              pattern appears constantly in high-performance kernels.
+            </p>
+            <pre><code>__inline__ __device__ float warpReduceSum(float value)
+{
+    for (int offset = warpSize / 2; offset &gt; 0; offset /= 2) {
+        value += __shfl_down_sync(0xffffffff, value, offset);
+    }
+    return value;
+}</code></pre>
+            <p><strong>What to learn:</strong> reductions, warp-level communication, partial sums, and numerical drift.</p>
+            <p><strong>Modify:</strong> compare this approach with a naive global <code>atomicAdd</code>.</p>
+          </div>
+        </article>
+
+        <article class="module">
+          <header>
+            <h3>03: Exact L2 Distance Search</h3>
+            <span class="tag">vector search</span>
+            <span class="tag">L2 distance</span>
+            <span class="tag">top-k baseline</span>
+          </header>
+          <div class="body">
+            <p>
+              File: <code>src/03_l2_distance_search.cu</code>. This is the first bridge from CUDA
+              practice to vector database engineering. One CUDA block computes the distance from the
+              query vector to one database vector, then CPU code selects the top-k nearest results.
+            </p>
+            <pre><code>for (int d = threadIdx.x; d &lt; dim; d += blockDim.x) {
+    float diff = vector[d] - query[d];
+    sum += diff * diff;
+}</code></pre>
+            <p><strong>What to learn:</strong> exact kNN baseline, distance kernels, bandwidth limits, and top-k design.</p>
+            <p><strong>Modify:</strong> change dimensions to <code>256</code>, <code>512</code>, and <code>768</code>.</p>
+          </div>
+        </article>
+      </section>
+
+      <section id="benchmarks">
+        <h2>Current Benchmarks</h2>
+        <p>Measured locally on RTX 4080 Super. Treat these as a baseline, not a finish line.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Example</th>
+              <th>Workload</th>
+              <th>Average Kernel Time</th>
+              <th>Throughput</th>
+              <th>Correctness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>01_vector_add</code></td>
+              <td>16,777,216 elements</td>
+              <td>1.0521 ms</td>
+              <td>191.35 GB/s</td>
+              <td>Max error 0</td>
+            </tr>
+            <tr>
+              <td><code>02_dot_product_reduction</code></td>
+              <td>16,777,216 elements</td>
+              <td>0.5664 ms</td>
+              <td>236.98 GB/s, 59.25 GFLOP/s</td>
+              <td>Relative error 2.09e-05</td>
+            </tr>
+            <tr>
+              <td><code>03_l2_distance_search</code></td>
+              <td>262,144 vectors x 128 dims</td>
+              <td>1.2631 ms</td>
+              <td>207.54M vector comparisons/s</td>
+              <td>Max check error 1.67e-06</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout warn">
+          <strong>Important:</strong> the reported time is kernel time measured with CUDA events,
+          not full end-to-end time including host allocation, host-device copies, and CPU top-k.
+          For production-style benchmarking, report both.
+        </div>
+      </section>
+
+      <section id="experiments">
+        <h2>Experiments</h2>
+        <div class="timeline">
+          <div class="step">
+            <strong>Block-size sweep</strong>
+            <p>
+              Test <code>128</code>, <code>256</code>, <code>512</code>, and <code>1024</code> threads per block.
+              Record kernel time and bandwidth. Ask whether the result changed because of occupancy,
+              memory behavior, or reduction overhead.
+            </p>
+          </div>
+          <div class="step">
+            <strong>Problem-size sweep</strong>
+            <p>
+              For vector add and dot product, test <code>1&lt;&lt;20</code>, <code>1&lt;&lt;24</code>, and
+              <code>1&lt;&lt;26</code>. Small workloads may underutilize the GPU; large workloads show
+              steadier bandwidth.
+            </p>
+          </div>
+          <div class="step">
+            <strong>Dimension sweep for L2 search</strong>
+            <p>
+              Test vector dimensions <code>128</code>, <code>256</code>, <code>512</code>, and
+              <code>768</code>. This connects directly to embedding workloads such as RAG.
+            </p>
+          </div>
+          <div class="step">
+            <strong>Top-k on GPU</strong>
+            <p>
+              Current L2 search computes distances on GPU but selects top-k on CPU. The next kernel
+              should keep candidate selection on GPU to reduce transfer and improve end-to-end latency.
+            </p>
+          </div>
+          <div class="step">
+            <strong>Batched queries</strong>
+            <p>
+              Process multiple queries at once. GPU vector search often improves with batching because
+              there is more parallel work and better amortization of memory movement.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="profiling">
+        <h2>Profiling & Debugging</h2>
+        <div class="grid two">
+          <div class="card">
+            <h3>Timing With CUDA Events</h3>
+            <p>
+              CUDA events measure elapsed GPU time between recorded events. This is appropriate for
+              kernel timing, but it does not automatically include CPU work or memory allocation.
+            </p>
+            <p>
+              Reference:
+              <a href="https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html" target="_blank" rel="noreferrer">CUDA Runtime API event management</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Nsight Compute</h3>
+            <p>
+              Use Nsight Compute when you want kernel-level metrics: memory throughput, occupancy,
+              warp stalls, branch behavior, and instruction mix.
+            </p>
+            <pre><code>ncu --set basic .\build\01_vector_add.exe
+ncu --set basic .\build\03_l2_distance_search.exe</code></pre>
+            <p>
+              Reference:
+              <a href="https://docs.nvidia.com/nsight-compute/NsightCompute/index.html" target="_blank" rel="noreferrer">Nsight Compute documentation</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Nsight Systems</h3>
+            <p>
+              Use Nsight Systems for whole-application timelines: CPU activity, CUDA API calls,
+              kernel launches, copies, and overlap between compute and transfer.
+            </p>
+            <p>
+              Reference:
+              <a href="https://docs.nvidia.com/nsight-systems/UserGuide/index.html" target="_blank" rel="noreferrer">Nsight Systems User Guide</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Compute Sanitizer</h3>
+            <p>
+              Use Compute Sanitizer to catch invalid memory access, race conditions, and sync bugs.
+              It is slower than normal execution, but it is a wonderful bug net.
+            </p>
+            <pre><code>compute-sanitizer .\build\01_vector_add.exe
+compute-sanitizer --tool racecheck .\build\02_dot_product_reduction.exe</code></pre>
+            <p>
+              Reference:
+              <a href="https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html" target="_blank" rel="noreferrer">Compute Sanitizer documentation</a>.
+            </p>
+          </div>
+        </div>
+        <div class="callout">
+          A practical optimization loop: verify correctness, measure baseline, profile bottleneck,
+          change one thing, remeasure, document result. Small disciplined loops beat heroic guessing.
+        </div>
+      </section>
+
+      <section id="vector-search">
+        <h2>Vector Search Path</h2>
+        <p>
+          The current L2 kernel is an exact brute-force baseline. That baseline matters because ANN
+          systems are only meaningful when you know what exact results and exact costs look like.
+        </p>
+        <div class="grid two">
+          <div class="card">
+            <h3>Exact Search</h3>
+            <p>
+              Computes distance from query to every vector. Simple, accurate, bandwidth-heavy.
+              In Faiss vocabulary, this is like <code>IndexFlatL2</code>.
+            </p>
+            <p>
+              Read:
+              <a href="https://github.com/facebookresearch/faiss/wiki/Guidelines-to-choose-an-index" target="_blank" rel="noreferrer">Faiss guidelines to choose an index</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>ANN Search</h3>
+            <p>
+              Avoids checking every vector. IVF clusters the search space, PQ compresses vectors,
+              and graph methods like HNSW/CAGRA traverse neighbor graphs.
+            </p>
+            <p>
+              Read:
+              <a href="https://docs.nvidia.com/cuvs/index.html" target="_blank" rel="noreferrer">NVIDIA cuVS documentation</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>GPU Vector Search</h3>
+            <p>
+              GPU search depends heavily on batching, memory layout, candidate expansion, and
+              keeping enough work on-device to amortize transfers.
+            </p>
+            <p>
+              Read:
+              <a href="https://developer.nvidia.com/blog/accelerating-vector-search-fine-tuning-gpu-index-algorithms/" target="_blank" rel="noreferrer">Fine-tuning GPU index algorithms</a>.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Production Libraries</h3>
+            <p>
+              Study cuVS and Faiss after your baseline works. Then you can compare your code
+              against real systems with humility and sharper eyes.
+            </p>
+            <p>
+              Repos:
+              <a href="https://github.com/rapidsai/cuvs" target="_blank" rel="noreferrer">cuVS</a>,
+              <a href="https://github.com/facebookresearch/faiss" target="_blank" rel="noreferrer">Faiss</a>,
+              <a href="https://github.com/erikbern/ann-benchmarks" target="_blank" rel="noreferrer">ANN-Benchmarks</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <h2>4-Week Roadmap</h2>
+        <div class="grid two checklist">
+          <div class="card">
+            <h3>Week 1: CUDA Basics</h3>
+            <label><input type="checkbox"> Build and run all three examples.</label>
+            <label><input type="checkbox"> Explain grid/block/thread indexing from memory.</label>
+            <label><input type="checkbox"> Sweep block sizes and record timings.</label>
+            <label><input type="checkbox"> Read the CUDA programming model chapters.</label>
+          </div>
+          <div class="card">
+            <h3>Week 2: Memory & Reductions</h3>
+            <label><input type="checkbox"> Profile vector add with Nsight Compute.</label>
+            <label><input type="checkbox"> Compare coalesced vs strided memory access.</label>
+            <label><input type="checkbox"> Implement an atomic dot-product baseline.</label>
+            <label><input type="checkbox"> Explain why reduction order changes floating-point results.</label>
+          </div>
+          <div class="card">
+            <h3>Week 3: Vector Search Kernels</h3>
+            <label><input type="checkbox"> Sweep dimensions 128, 256, 512, 768.</label>
+            <label><input type="checkbox"> Add cosine similarity or inner product.</label>
+            <label><input type="checkbox"> Implement batched L2 search.</label>
+            <label><input type="checkbox"> Start GPU top-k selection.</label>
+          </div>
+          <div class="card">
+            <h3>Week 4: Portfolio Polish</h3>
+            <label><input type="checkbox"> Write a short benchmark report.</label>
+            <label><input type="checkbox"> Compare with Faiss or cuVS examples.</label>
+            <label><input type="checkbox"> Add profiling screenshots or metric tables.</label>
+            <label><input type="checkbox"> Prepare a 5-minute interview explanation.</label>
+          </div>
+        </div>
+      </section>
+
+      <section id="resources">
+        <h2>Useful Resources</h2>
+        <p>
+          Use this section as a living map. The first table is for staying current
+          with new CUDA, profiling, and vector-search changes. The second table is
+          the smaller minimum reading list for hands-on practice.
+        </p>
+
+        <section id="current-links">
+          <h3>Stay Current Resource Map</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Links</th>
+                <th>How To Use It</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CUDA releases and core docs</td>
+                <td>
+                  <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Programming Guide</a><br>
+                  <a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Best Practices Guide</a><br>
+                  <a href="https://docs.nvidia.com/cuda/pdf/CUDA_Toolkit_Release_Notes.pdf" target="_blank" rel="noreferrer">CUDA Toolkit Release Notes</a><br>
+                  <a href="https://developer.nvidia.com/blog/tag/cuda/" target="_blank" rel="noreferrer">NVIDIA Technical Blog: CUDA tag</a>
+                </td>
+                <td>
+                  Check after CUDA Toolkit updates. Watch for compiler changes, new architecture
+                  support, library changes, deprecations, and performance guidance.
+                </td>
+              </tr>
+              <tr>
+                <td>Profiling and debugging</td>
+                <td>
+                  <a href="https://docs.nvidia.com/nsight-compute/" target="_blank" rel="noreferrer">Nsight Compute documentation</a><br>
+                  <a href="https://docs.nvidia.com/nsight-compute/ReleaseNotes/" target="_blank" rel="noreferrer">Nsight Compute release notes</a><br>
+                  <a href="https://docs.nvidia.com/nsight-systems/UserGuide/index.html" target="_blank" rel="noreferrer">Nsight Systems User Guide</a><br>
+                  <a href="https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html" target="_blank" rel="noreferrer">Compute Sanitizer documentation</a>
+                </td>
+                <td>
+                  Use these when kernel timing is not enough. Nsight Compute tells you why one
+                  kernel is slow; Nsight Systems tells you where the whole application spends time.
+                </td>
+              </tr>
+              <tr>
+                <td>CUDA libraries and reusable primitives</td>
+                <td>
+                  <a href="https://github.com/NVIDIA/cccl" target="_blank" rel="noreferrer">NVIDIA CCCL GitHub</a><br>
+                  <a href="https://nvidia.github.io/cccl/" target="_blank" rel="noreferrer">CCCL documentation</a><br>
+                  <a href="https://nvidia.github.io/cccl/unstable/cub/developer_overview.html" target="_blank" rel="noreferrer">CUB developer overview</a><br>
+                  <a href="https://nvidia.github.io/cccl/cub/api/classcub_1_1WarpReduce.html" target="_blank" rel="noreferrer">CUB WarpReduce API</a><br>
+                  <a href="https://github.com/NVIDIA/cutlass" target="_blank" rel="noreferrer">CUTLASS GitHub</a><br>
+                  <a href="https://docs.nvidia.com/cutlass/" target="_blank" rel="noreferrer">CUTLASS documentation</a>
+                </td>
+                <td>
+                  Study these after writing your own simple kernels. They show how production CUDA
+                  code organizes reductions, scans, sorting, memory movement, and tiled compute.
+                </td>
+              </tr>
+              <tr>
+                <td>GPU vector search</td>
+                <td>
+                  <a href="https://docs.nvidia.com/cuvs/index.html" target="_blank" rel="noreferrer">NVIDIA cuVS docs</a><br>
+                  <a href="https://developer.nvidia.com/cuvs/" target="_blank" rel="noreferrer">NVIDIA cuVS developer page</a><br>
+                  <a href="https://github.com/rapidsai/cuvs" target="_blank" rel="noreferrer">cuVS GitHub</a><br>
+                  <a href="https://docs.rapids.ai/api/cuvs/nightly/" target="_blank" rel="noreferrer">cuVS nightly docs</a><br>
+                  <a href="https://developer.nvidia.com/blog/optimizing-vector-search-for-indexing-and-real-time-retrieval-with-nvidia-cuvs/" target="_blank" rel="noreferrer">cuVS indexing and retrieval blog</a><br>
+                  <a href="https://developer.nvidia.com/blog/enhancing-gpu-accelerated-vector-search-in-faiss-with-nvidia-cuvs/" target="_blank" rel="noreferrer">Faiss with cuVS blog</a>
+                </td>
+                <td>
+                  This is the closest public ecosystem to the Dnotitia vector-library role.
+                  Revisit it regularly for CAGRA, IVF-Flat, IVF-PQ, and GPU index updates.
+                </td>
+              </tr>
+              <tr>
+                <td>Faiss and ANN library practice</td>
+                <td>
+                  <a href="https://github.com/facebookresearch/faiss" target="_blank" rel="noreferrer">Faiss GitHub</a><br>
+                  <a href="https://github.com/facebookresearch/faiss/releases" target="_blank" rel="noreferrer">Faiss releases</a><br>
+                  <a href="https://github.com/facebookresearch/faiss/wiki" target="_blank" rel="noreferrer">Faiss wiki</a><br>
+                  <a href="https://github.com/facebookresearch/faiss/wiki/GPU-Faiss-with-cuVS-usage" target="_blank" rel="noreferrer">GPU Faiss with cuVS usage</a><br>
+                  <a href="https://github.com/nmslib/hnswlib" target="_blank" rel="noreferrer">hnswlib GitHub</a><br>
+                  <a href="https://github.com/microsoft/DiskANN" target="_blank" rel="noreferrer">DiskANN GitHub</a>
+                </td>
+                <td>
+                  Use Faiss for broad index vocabulary, hnswlib for readable graph ANN internals,
+                  and DiskANN for large-scale memory/disk tradeoff thinking.
+                </td>
+              </tr>
+              <tr>
+                <td>Vector database internals</td>
+                <td>
+                  <a href="https://github.com/zilliztech/knowhere" target="_blank" rel="noreferrer">Knowhere GitHub</a><br>
+                  <a href="https://milvus.io/docs/knowhere.md" target="_blank" rel="noreferrer">Milvus Knowhere docs</a><br>
+                  <a href="https://github.com/milvus-io/milvus" target="_blank" rel="noreferrer">Milvus GitHub</a><br>
+                  <a href="https://qdrant.tech/documentation/manage-data/indexing/" target="_blank" rel="noreferrer">Qdrant indexing docs</a><br>
+                  <a href="https://github.com/qdrant/qdrant" target="_blank" rel="noreferrer">Qdrant GitHub</a>
+                </td>
+                <td>
+                  Read these to understand how low-level vector indexes become a product:
+                  ingestion, filtering, segment storage, persistence, APIs, and operational tradeoffs.
+                </td>
+              </tr>
+              <tr>
+                <td>Benchmarks and evaluation</td>
+                <td>
+                  <a href="https://ann-benchmarks.com/" target="_blank" rel="noreferrer">ANN-Benchmarks website</a><br>
+                  <a href="https://github.com/erikbern/ann-benchmarks" target="_blank" rel="noreferrer">ANN-Benchmarks GitHub</a><br>
+                  <a href="https://big-ann-benchmarks.com/neurips21.html" target="_blank" rel="noreferrer">Big ANN Benchmarks</a><br>
+                  <a href="https://github.com/harsha-simhadri/big-ann-benchmarks" target="_blank" rel="noreferrer">Big ANN Benchmarks GitHub</a><br>
+                  <a href="https://proceedings.mlr.press/v176/simhadri22a.html" target="_blank" rel="noreferrer">NeurIPS 2021 Big ANN results</a><br>
+                  <a href="https://openreview.net/pdf?id=dB6W56wQL9" target="_blank" rel="noreferrer">Big ANN NeurIPS 2023 results</a><br>
+                  <a href="https://github.com/zilliztech/VectorDBBench" target="_blank" rel="noreferrer">VectorDBBench GitHub</a>
+                </td>
+                <td>
+                  Use these for evaluation discipline. Track recall@k, QPS, p50/p95 latency,
+                  build time, memory footprint, hardware cost, and dataset sensitivity.
+                </td>
+              </tr>
+              <tr>
+                <td>Core ANN papers</td>
+                <td>
+                  <a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noreferrer">HNSW paper</a><br>
+                  <a href="https://ieeexplore.ieee.org/document/5432202/" target="_blank" rel="noreferrer">Product Quantization paper</a><br>
+                  <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2013/06/cvpr13opq.pdf" target="_blank" rel="noreferrer">Optimized Product Quantization paper</a><br>
+                  <a href="https://arxiv.org/abs/2308.15136" target="_blank" rel="noreferrer">CAGRA paper</a><br>
+                  <a href="https://arxiv.org/abs/1702.05911" target="_blank" rel="noreferrer">Efficient large-scale ANN on GPU</a><br>
+                  <a href="https://arxiv.org/abs/2602.23999" target="_blank" rel="noreferrer">IVF-RaBitQ GPU ANN paper</a>
+                </td>
+                <td>
+                  Keep this list for concept depth. Do not memorize everything; focus on the
+                  tradeoffs each paper introduces: graph search, quantization, GPU parallelism,
+                  storage footprint, and recall/latency frontiers.
+                </td>
+              </tr>
+              <tr>
+                <td>Community and update feeds</td>
+                <td>
+                  <a href="https://forums.developer.nvidia.com/c/accelerated-computing/cuda/206" target="_blank" rel="noreferrer">NVIDIA CUDA Developer Forum</a><br>
+                  <a href="https://github.com/gpu-mode/lectures" target="_blank" rel="noreferrer">GPU MODE lectures</a><br>
+                  <a href="https://developer.nvidia.com/nsight-compute-videos" target="_blank" rel="noreferrer">Nsight Compute videos</a><br>
+                  <a href="https://developer.nvidia.com/additional_resources" target="_blank" rel="noreferrer">NVIDIA higher education and research resources</a>
+                </td>
+                <td>
+                  Use these for practical debugging stories, lecture material, and new tool
+                  workflows. Treat community sources as leads, then verify details in official docs
+                  or source code.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Use It For</th>
+              <th>Priority</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Programming Guide</a></td>
+              <td>Official model: kernels, thread hierarchy, memory hierarchy, runtime behavior.</td>
+              <td>Essential</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html" target="_blank" rel="noreferrer">CUDA C++ Best Practices Guide</a></td>
+              <td>Performance thinking: coalescing, occupancy, memory throughput, optimization workflow.</td>
+              <td>Essential</td>
+            </tr>
+            <tr>
+              <td><a href="https://github.com/NVIDIA/cuda-samples" target="_blank" rel="noreferrer">NVIDIA cuda-samples</a></td>
+              <td>Official sample kernels and CUDA feature examples.</td>
+              <td>Essential</td>
+            </tr>
+            <tr>
+              <td><a href="https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/" target="_blank" rel="noreferrer">Grid-Stride Loops</a></td>
+              <td>Flexible kernel structure used in the vector-add example.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://developer.nvidia.com/blog/unlock-gpu-performance-global-memory-access-in-cuda/" target="_blank" rel="noreferrer">Global Memory Access in CUDA</a></td>
+              <td>Memory coalescing, strided access, and memory transaction intuition.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://developer.nvidia.com/blog/using-shared-memory-cuda-cc/" target="_blank" rel="noreferrer">Using Shared Memory</a></td>
+              <td>Block-level cooperation and data reuse.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://developer.download.nvidia.com/compute/cuda/1.1-Beta/x86_64_website/projects/reduction/doc/reduction.pdf" target="_blank" rel="noreferrer">Optimizing Parallel Reduction in CUDA</a></td>
+              <td>Classic reduction optimization patterns.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.nvidia.com/nsight-compute/NsightCompute/index.html" target="_blank" rel="noreferrer">Nsight Compute</a></td>
+              <td>Kernel-level profiling and performance counters.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.nvidia.com/nsight-systems/UserGuide/index.html" target="_blank" rel="noreferrer">Nsight Systems</a></td>
+              <td>Whole-application timeline, copies, launches, and CPU/GPU overlap.</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html" target="_blank" rel="noreferrer">Compute Sanitizer</a></td>
+              <td>Memory and race-condition debugging.</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><a href="https://docs.nvidia.com/cuvs/index.html" target="_blank" rel="noreferrer">NVIDIA cuVS</a></td>
+              <td>GPU-accelerated vector search and clustering.</td>
+              <td>High for vector DB</td>
+            </tr>
+            <tr>
+              <td><a href="https://github.com/facebookresearch/faiss/wiki" target="_blank" rel="noreferrer">Faiss Wiki</a></td>
+              <td>Vector index concepts: Flat, IVF, PQ, HNSW, GPU indexes.</td>
+              <td>High for vector DB</td>
+            </tr>
+            <tr>
+              <td><a href="https://github.com/erikbern/ann-benchmarks" target="_blank" rel="noreferrer">ANN-Benchmarks</a></td>
+              <td>Recall/latency evaluation mindset for vector search.</td>
+              <td>Medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="interview">
+        <h2>Interview Story</h2>
+        <div class="callout">
+          <p>
+            A strong Dnotitia-style story: "I implemented CUDA kernels from scratch, starting with
+            bandwidth and reduction baselines, then used those ideas to build an exact L2 vector-search
+            kernel. I measured kernel time with CUDA events, checked correctness against CPU references,
+            and planned next steps for GPU top-k and batched search. My optimization process is:
+            correctness first, baseline second, profiling third, one controlled change at a time."
+          </p>
+        </div>
+        <h3>Questions you should be ready to answer</h3>
+        <ul>
+          <li>Why use a grid-stride loop instead of launching exactly one thread per element?</li>
+          <li>What is memory coalescing, and how would you detect poor coalescing?</li>
+          <li>Why can the GPU result differ slightly from the CPU result in a reduction?</li>
+          <li>How would you separate kernel time from end-to-end latency?</li>
+          <li>Why is brute-force exact kNN still useful when ANN algorithms exist?</li>
+          <li>What would you optimize next in the L2 search kernel?</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p>
+          Last updated: 2026-05-10. This page is designed to live in
+          <code>docs/index.html</code> so it can be served through GitHub Pages later.
+        </p>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
