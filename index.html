@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Bui Cong Nguyen's engineering portfolio: NDT ultrasonic inspection, computer vision, AI/NPU systems, EDA routing, machine vision inspection, robotics simulation, and software engineering.">
-  <title>Bui Cong Nguyen | NDT Ultrasonic Inspection, Computer Vision, and AI Systems</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Selected engineering projects by Bui Cong Nguyen in ultrasonic NDT, computer vision, CUDA, AI/NPU systems, and robotics simulation.">
+  <title>Bui Cong Nguyen | Engineering Projects</title>
+  <link rel="stylesheet" href="styles.css?v=20260712-1">
 </head>
 <body>
   <header class="site-header">
@@ -14,12 +14,9 @@
       <span>Bui Cong Nguyen</span>
     </a>
     <nav aria-label="Primary navigation">
-      <a href="#focus">Focus</a>
-      <a href="#work">Work</a>
-      <a href="https://buicongnguyen.github.io/NDT/">NDT</a>
-      <a href="https://buicongnguyen.github.io/computer_vision/">Computer Vision</a>
-      <a href="https://buicongnguyen.github.io/NPU/">NPU</a>
-      <a href="#all-links">All Links</a>
+      <a href="#work">Projects</a>
+      <a href="#study-notes">Study Notes</a>
+      <a href="playground.html">Playground</a>
       <a href="https://www.linkedin.com/in/cong-nguyen-bui/">LinkedIn</a>
       <a href="https://github.com/buicongnguyen">GitHub</a>
     </nav>
@@ -28,311 +25,163 @@
   <main id="top">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">NDT ultrasonic inspection | computer vision | AI systems</p>
+        <p class="eyebrow">Selected engineering work</p>
         <h1>Bui Cong Nguyen</h1>
-        <p class="lede">
-          PhD computer scientist and senior/principal software engineer with 15+ years building
-          high-performance inspection, vision, AI, EDA, and robotics simulation systems.
-        </p>
+        <p class="lede">Principal Software Engineer building high-performance computer vision, AI/NPU, CUDA, and ultrasonic NDT systems.</p>
         <div class="hero-actions">
-          <a class="button" href="#work">View Projects</a>
+          <a class="button" href="#work">Explore Projects</a>
+          <a class="button secondary" href="https://github.com/buicongnguyen">GitHub</a>
           <a class="button secondary" href="https://www.linkedin.com/in/cong-nguyen-bui/">LinkedIn</a>
-          <a class="button secondary" href="https://github.com/buicongnguyen">GitHub Profile</a>
         </div>
       </div>
 
-      <div class="identity-panel" aria-label="Profile summary">
-        <img class="portrait" src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="Portrait of Bui Cong Nguyen">
+      <div class="identity-panel text-only" aria-label="Portfolio purpose">
         <div>
-          <h2>Engineering Background</h2>
-          <p>
-            Current work centers on NDT ultrasonic inspection, with broader experience in computer vision,
-            AI/NPU systems, EDA routing, machine vision inspection, C++, CUDA, and Python.
-          </p>
+          <p class="eyebrow">What this site shows</p>
+          <h2>Engineering evidence</h2>
+          <p>Public projects organized around system flow, design choices, trade-offs, implementation, and reproducible demonstrations.</p>
         </div>
-      </div>
-    </section>
-
-    <section id="focus" class="section">
-      <div class="section-heading">
-        <p class="eyebrow">Current direction</p>
-        <h2>Focused Work</h2>
-      </div>
-
-      <div class="focus-grid">
-        <article>
-          <span>01</span>
-          <h3>NDT Ultrasonic Inspection</h3>
-          <p>Industrial inspection software, automation workflows, signal/vision processing, and simulation-oriented tooling.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <h3>Computer Vision and AI Systems</h3>
-          <p>High-performance vision, AI/NPU, machine inspection, and production-grade systems work.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h3>Isaac Sim and Isaac Lab</h3>
-          <p>Learning tracks for simulation, sensors, ROS 2, robot learning, and reproducible robotics demos.</p>
-        </article>
-        <article>
-          <span>04</span>
-          <h3>Interactive Web Apps</h3>
-          <p>Browser projects with clear deployment paths, mobile-friendly UI, offline support, and fast iteration.</p>
-        </article>
       </div>
     </section>
 
     <section id="work" class="section">
       <div class="section-heading">
         <p class="eyebrow">Recommended entry points</p>
-        <h2>Featured Work</h2>
+        <h2>Selected Engineering Projects</h2>
+        <p class="section-note">Six focused projects spanning inspection, perception, acceleration, compiler systems, simulation, and deployed AI.</p>
       </div>
 
       <div class="project-grid">
         <article class="project-card featured">
           <div>
-            <p class="tag">Computer vision systems</p>
-            <h3>Computer Vision Systems Study Lab</h3>
-            <p>
-              A senior-level learning and portfolio hub spanning image formation, classical and deep
-              vision, detection and segmentation, calibration, bird's-eye-view perception, temporal
-              tracking, sensor fusion, autonomous-driving systems, deployment, and research workflow.
-              Includes tested Python exercises, coding practice, decision frameworks, project templates,
-              and source-backed study material.
-            </p>
-          </div>
-          <div class="project-links">
-            <a href="https://buicongnguyen.github.io/computer_vision/">Open CV Systems Lab</a>
-            <a href="https://buicongnguyen.github.io/computer_vision/perception.html">Perception systems</a>
-            <a href="https://buicongnguyen.github.io/computer_vision/autonomous-driving.html">Autonomous driving</a>
-            <a href="https://buicongnguyen.github.io/computer_vision/coding.html">Coding lab</a>
-            <a href="https://github.com/buicongnguyen/computer_vision">Repository</a>
-          </div>
-        </article>
-
-        <article class="project-card featured">
-          <div>
             <p class="tag">Ultrasonic inspection</p>
             <h3>NDT · SAM Wafer Inspection Guide</h3>
-            <p>
-              A source-backed engineering guide to Scanning Acoustic Microscopy for bonded wafers, MEMS,
-              and semiconductor packages. Includes OKOS and Nordson systems, the pulser/receiver and ADC
-              signal chain, PRF and encoder synchronization, transducer selection, and inspection diagrams.
-            </p>
+            <p>A source-backed engineering guide to scanning acoustic microscopy for bonded wafers, MEMS, and semiconductor packages. Follow the acquisition chain, synchronization flow, transducer-selection logic, and inspection architecture.</p>
           </div>
           <div class="project-links">
-            <a href="https://buicongnguyen.github.io/NDT/">Open NDT guide</a>
-            <a href="https://buicongnguyen.github.io/NDT/#transducer">Transducer research</a>
+            <a href="https://buicongnguyen.github.io/NDT/">Open guide</a>
+            <a href="https://buicongnguyen.github.io/NDT/#system">System flow</a>
+            <a href="https://buicongnguyen.github.io/NDT/#transducer">Selection guide</a>
             <a href="https://github.com/buicongnguyen/NDT">Repository</a>
           </div>
         </article>
 
         <article class="project-card featured">
           <div>
-            <p class="tag">Study guide</p>
-            <h3>NPU, VPU &amp; LPU Study Guide</h3>
-            <p>
-              A self-study reference comparing NPU, VPU, LPU, GPU, and TPU accelerators, how models are
-              deployed, and the LLVM/MLIR compiler path &mdash; with a Tenstorrent case study and a
-              searchable 50-question interview Q&amp;A bank.
-            </p>
+            <p class="tag">Computer vision systems</p>
+            <h3>Computer Vision Systems Lab</h3>
+            <p>A systems-oriented lab covering image formation, classical and deep vision, calibration, tracking, sensor fusion, autonomous-driving perception, deployment decisions, and tested Python exercises.</p>
           </div>
           <div class="project-links">
-            <a href="https://buicongnguyen.github.io/NPU/">Open study guide</a>
-            <a href="https://buicongnguyen.github.io/NPU/#qa">50 Q&amp;A</a>
+            <a href="https://buicongnguyen.github.io/computer_vision/">Open lab</a>
+            <a href="https://buicongnguyen.github.io/computer_vision/perception.html">Perception flow</a>
+            <a href="https://buicongnguyen.github.io/computer_vision/projects.html">Projects</a>
+            <a href="https://github.com/buicongnguyen/computer_vision">Repository</a>
+          </div>
+        </article>
+
+        <article class="project-card featured">
+          <div>
+            <p class="tag">GPU performance</p>
+            <h3>CUDA Kernel Engineering Lab</h3>
+            <p>Working CUDA kernels with correctness checks, benchmark methodology, profiling guidance, and decision paths for memory access, occupancy, fusion, and optimization trade-offs.</p>
+          </div>
+          <div class="project-links">
+            <a href="https://buicongnguyen.github.io/cuda_kernel/">Open lab</a>
+            <a href="https://github.com/buicongnguyen/cuda_kernel">Repository</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div>
+            <p class="tag">AI accelerator systems</p>
+            <h3>NPU, VPU &amp; LPU Study Guide</h3>
+            <p>Compare accelerator choices, trace model deployment and LLVM/MLIR compiler flow, examine data movement, and study a Tenstorrent-centered NPU case.</p>
+          </div>
+          <div class="project-links">
+            <a href="https://buicongnguyen.github.io/NPU/">Open guide</a>
+            <a href="https://buicongnguyen.github.io/NPU/#qa">Technical Q&amp;A</a>
             <a href="https://github.com/buicongnguyen/NPU">Repository</a>
           </div>
         </article>
 
         <article class="project-card">
           <div>
-            <p class="tag">Interview practice</p>
-            <h3>Deep Learning, OS, and Embedded Q&amp;A</h3>
-            <p>
-              Categorized interview questions for neural networks, Linux operating systems, RTOS concepts,
-              firmware, linker scripts, interrupts, and embedded debugging.
-            </p>
-          </div>
-          <div class="project-links">
-            <a href="interview-practice.html">Overview</a>
-            <a href="deep-learning-practice.html">Deep Learning</a>
-            <a href="os-practice.html">OS</a>
-            <a href="embedded-practice.html">Embedded</a>
-            <a href="npu-practice.html">NPU Q&amp;A</a>
-          </div>
-        </article>
-
-        <article class="project-card">
-          <div>
-            <p class="tag">Assessment prep</p>
-            <h3>Engineering Study Hubs</h3>
-            <p>
-              Interactive question banks for assessment preparation: software engineering (coding, debugging,
-              compilers, tooling), C# and .NET, C++, systems/hardware (DSP, GPU kernels, embedded firmware),
-              systems design (databases, OS/concurrency, distributed systems, networking, infra), and GPU
-              kernel optimization &mdash; with single-answer, multi-select, and step-ordering formats plus
-              senior/principal-level scenario questions, and a Glassdoor/LeetCode-sourced coding-interview
-              drill with worked answers (Two Sum, linked lists, Kadane's, LRU cache, and more).
-            </p>
-          </div>
-          <div class="project-links">
-            <a href="https://buicongnguyen.github.io/Outlier_coding/coding-interview.html">Interview Q&amp;A</a>
-            <a href="https://buicongnguyen.github.io/Outlier_coding/">Software Eng</a>
-            <a href="https://buicongnguyen.github.io/Outlier_csharp/">C# / .NET</a>
-            <a href="https://buicongnguyen.github.io/Outlier_cpp/">C++</a>
-            <a href="https://buicongnguyen.github.io/Outlier_hardware/">Systems &amp; HW</a>
-            <a href="https://buicongnguyen.github.io/Outlier_systems/">Systems Design</a>
-            <a href="https://buicongnguyen.github.io/Mercor_cuda/">GPU Kernels</a>
-            <a href="https://buicongnguyen.github.io/cuda_kernel/">CUDA Lab</a>
-          </div>
-        </article>
-
-        <article class="project-card">
-          <div>
-            <p class="tag">Robotics</p>
+            <p class="tag">Robotics simulation</p>
             <h3>Isaac Sim Learning Hub</h3>
-            <p>
-              Public roadmap for Isaac Sim, Isaac Lab, ROS 2, humanoid reinforcement learning,
-              and the Hiking in the Wild reproduction track.
-            </p>
+            <p>A reproducible roadmap for Isaac Sim, Isaac Lab, ROS 2, sensors, humanoid reinforcement learning, and simulation-to-robotics study tracks.</p>
           </div>
           <div class="project-links">
-            <a href="https://buicongnguyen.github.io/isaac-sim-learning-plan/">Open site</a>
+            <a href="https://buicongnguyen.github.io/isaac-sim-learning-plan/">Open hub</a>
             <a href="https://github.com/buicongnguyen/isaac-sim-learning-plan">Repository</a>
           </div>
         </article>
 
         <article class="project-card">
           <div>
-            <p class="tag">AI tool</p>
+            <p class="tag">Deployed AI tool</p>
             <h3>KO-EN Live Translator</h3>
-            <p>Live Korean-to-English translator with a GitHub Pages demo and optional GPU backend.</p>
+            <p>A deployed Korean-to-English translation interface with a browser demonstration and an optional GPU-backed service path.</p>
           </div>
           <div class="project-links">
             <a href="https://buicongnguyen.github.io/ko-en-live-translator/">Open app</a>
             <a href="https://github.com/buicongnguyen/ko-en-live-translator">Repository</a>
           </div>
         </article>
-
-        <article class="project-card">
-          <div>
-            <p class="tag">Learning app</p>
-            <h3>CS Study Lab v3</h3>
-            <p>Spaced repetition flashcards, quizzes, progress tracking, and offline PWA support.</p>
-          </div>
-          <div class="project-links">
-            <a href="https://buicongnguyen.github.io/study_computer_science_v3/">Open app</a>
-            <a href="https://github.com/buicongnguyen/study_computer_science_v3">Repository</a>
-          </div>
-        </article>
-
-        <article class="project-card">
-          <div>
-            <p class="tag">Simulation game</p>
-            <h3>Pixel Life Journey v3</h3>
-            <p>The newest build: v2's life sim plus a day/night theme toggle, a wide landscape layout, an analog thumb-stick, and a Collect interaction with sky-area feedback.</p>
-          </div>
-          <div class="project-links">
-            <a href="https://buicongnguyen.github.io/pixel-life-journey-v3/">Open game</a>
-            <a href="https://github.com/buicongnguyen/pixel-life-journey-v3">Repository</a>
-          </div>
-        </article>
       </div>
     </section>
 
-    <section id="all-links" class="section">
+    <section id="study-notes" class="section">
       <div class="section-heading">
-        <p class="eyebrow">Complete directory</p>
-        <h2>All Live Links</h2>
-        <p class="section-note">
-          Versioned projects are intentionally listed separately. Many v1, v2, and v3 entries are different
-          repositories or different playable builds. Directory refreshed July 11, 2026.
-        </p>
+        <p class="eyebrow">Supporting material</p>
+        <h2>Technical Study Notes</h2>
+        <p class="section-note">Practice tools and reference collections are grouped here so the selected engineering work remains the primary focus.</p>
       </div>
 
       <div class="directory-grid">
         <article class="directory-group">
-          <h3>Learning, AI, and Robotics</h3>
+          <h3>Systems and AI Practice</h3>
           <ul>
-            <li><span>Computer Vision Systems Study Lab</span><a href="https://buicongnguyen.github.io/computer_vision/">Open</a><a href="https://buicongnguyen.github.io/computer_vision/projects.html">Projects</a><a href="https://github.com/buicongnguyen/computer_vision">Repo</a></li>
-            <li><span>NDT · SAM Wafer Inspection Guide</span><a href="https://buicongnguyen.github.io/NDT/">Open</a><a href="https://buicongnguyen.github.io/NDT/#system">System</a><a href="https://buicongnguyen.github.io/NDT/#transducer">Transducer</a><a href="https://github.com/buicongnguyen/NDT">Repo</a></li>
-            <li><span>NPU, VPU &amp; LPU Study Guide</span><a href="https://buicongnguyen.github.io/NPU/">Open</a><a href="https://buicongnguyen.github.io/NPU/#qa">Q&amp;A</a><a href="https://github.com/buicongnguyen/NPU">Repo</a></li>
-            <li><span>Deep Learning, OS, Embedded Q&amp;A</span><a href="interview-practice.html">Open</a><a href="deep-learning-practice.html">Deep</a><a href="os-practice.html">OS</a><a href="embedded-practice.html">Embedded</a></li>
-            <li><span>Isaac Sim Learning Plan</span><a href="https://buicongnguyen.github.io/isaac-sim-learning-plan/">Open</a><a href="https://github.com/buicongnguyen/isaac-sim-learning-plan">Repo</a></li>
-            <li><span>KO-EN Live Translator</span><a href="https://buicongnguyen.github.io/ko-en-live-translator/">Open</a><a href="https://github.com/buicongnguyen/ko-en-live-translator">Repo</a></li>
-            <li><span>Study Computer Science</span><a href="https://buicongnguyen.github.io/study_computer_science/">Open</a><a href="https://github.com/buicongnguyen/study_computer_science">Repo</a></li>
-            <li><span>CS Study Lab v3</span><a href="https://buicongnguyen.github.io/study_computer_science_v3/">Open</a><a href="https://github.com/buicongnguyen/study_computer_science_v3">Repo</a></li>
-            <li><span>Software Engineering Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_coding/">Open</a><a href="https://github.com/buicongnguyen/Outlier_coding">Repo</a></li>
-            <li><span>C# &amp; .NET Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_csharp/">Open</a><a href="https://github.com/buicongnguyen/Outlier_csharp">Repo</a></li>
-            <li><span>Systems &amp; Hardware Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_hardware/">Open</a><a href="https://github.com/buicongnguyen/Outlier_hardware">Repo</a></li>
-            <li><span>C++ Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_cpp/">Open</a><a href="https://github.com/buicongnguyen/Outlier_cpp">Repo</a></li>
-            <li><span>Systems Design Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_systems/">Open</a><a href="https://github.com/buicongnguyen/Outlier_systems">Repo</a></li>
-            <li><span>GPU Kernel Optimization Study Hub</span><a href="https://buicongnguyen.github.io/Mercor_cuda/">Open</a><a href="https://github.com/buicongnguyen/Mercor_cuda">Repo</a></li>
-            <li><span>CUDA Kernel Engineering Lab</span><a href="https://buicongnguyen.github.io/cuda_kernel/">Open</a><a href="https://github.com/buicongnguyen/cuda_kernel">Repo</a></li>
+            <li><span>Deep Learning, OS, and Embedded Q&amp;A</span><a href="interview-practice.html">Open</a></li>
+            <li><span>Computer Science Study Lab</span><a href="https://buicongnguyen.github.io/study_computer_science_v3/">Open</a><a href="https://github.com/buicongnguyen/study_computer_science_v3">Repo</a></li>
+            <li><span>Software Engineering Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_coding/">Open</a></li>
+            <li><span>C++ Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_cpp/">Open</a></li>
+            <li><span>C# &amp; .NET Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_csharp/">Open</a></li>
           </ul>
         </article>
 
         <article class="directory-group">
-          <h3>Life, Family, and Vietnamese Apps</h3>
+          <h3>Architecture and Performance</h3>
           <ul>
-            <li><span>Pixel Life Journey</span><a href="https://buicongnguyen.github.io/pixel-life-journey/">Open</a><a href="https://github.com/buicongnguyen/pixel-life-journey">Repo</a></li>
-            <li><span>Pixel Life Journey v2</span><a href="https://buicongnguyen.github.io/pixel-life-journey-v2/">Open</a><a href="https://github.com/buicongnguyen/pixel-life-journey-v2">Repo</a></li>
-            <li><span>Pixel Life Journey v3</span><a href="https://buicongnguyen.github.io/pixel-life-journey-v3/">Open</a><a href="https://github.com/buicongnguyen/pixel-life-journey-v3">Repo</a></li>
-            <li><span>LichAm</span><a href="https://buicongnguyen.github.io/LichAm/">Open</a><a href="https://github.com/buicongnguyen/LichAm">Repo</a></li>
-            <li><span>LichAm v2</span><a href="https://buicongnguyen.github.io/LichAm_v2/">Open</a><a href="https://github.com/buicongnguyen/LichAm_v2">Repo</a></li>
-            <li><span>Giapha</span><a href="https://buicongnguyen.github.io/Giapha/">Open</a><a href="https://github.com/buicongnguyen/Giapha">Repo</a></li>
-            <li><span>Giapha v2</span><a href="https://buicongnguyen.github.io/Giapha_v2/">Open</a><a href="https://github.com/buicongnguyen/Giapha_v2">Repo</a></li>
-          </ul>
-        </article>
-
-        <article class="directory-group">
-          <h3>Games and Playable Builds</h3>
-          <ul>
-            <li><span>Operation Iron Vengeance / Rambo</span><a href="https://buicongnguyen.github.io/rambo_game/">Open</a><a href="https://github.com/buicongnguyen/rambo_game">Repo</a></li>
-            <li><span>Operation Iron Vengeance v2</span><a href="https://buicongnguyen.github.io/rambo_game_v2/">Open</a><a href="https://github.com/buicongnguyen/rambo_game_v2">Repo</a></li>
-            <li><span>Operation Iron Vengeance v3</span><a href="https://buicongnguyen.github.io/rambo_game_v3/">Open</a><a href="https://github.com/buicongnguyen/rambo_game_v3">Repo</a></li>
-            <li><span>Sidewalk Iced Tea</span><a href="https://buicongnguyen.github.io/sidewalk-iced-tea/">Open</a><a href="https://github.com/buicongnguyen/sidewalk-iced-tea">Repo</a></li>
-            <li><span>Sidewalk Iced Tea v2</span><a href="https://buicongnguyen.github.io/sidewalk-iced-tea-v2/">Open</a><a href="https://github.com/buicongnguyen/sidewalk-iced-tea-v2">Repo</a></li>
-            <li><span>Sidewalk Iced Tea v3</span><a href="https://buicongnguyen.github.io/sidewalk-iced-tea-v3/">Open</a><a href="https://github.com/buicongnguyen/sidewalk-iced-tea-v3">Repo</a></li>
-            <li><span>Games collection</span><a href="https://buicongnguyen.github.io/Games/">Open</a><a href="https://github.com/buicongnguyen/Games">Repo</a></li>
-            <li><span>Games / Sky Drill 2 path</span><a href="https://buicongnguyen.github.io/Games/skydrill2/">Open</a><a href="https://github.com/buicongnguyen/Games">Repo</a></li>
-            <li><span>SkyDrill2</span><a href="https://buicongnguyen.github.io/SkyDrill2/">Open</a><a href="https://github.com/buicongnguyen/SkyDrill2">Repo</a></li>
-            <li><span>Queens Garden</span><a href="https://buicongnguyen.github.io/queens-garden/">Open</a><a href="https://github.com/buicongnguyen/queens-garden">Repo</a></li>
-            <li><span>Cloud Pop Express</span><a href="https://buicongnguyen.github.io/cloud-pop-express/">Open</a><a href="https://github.com/buicongnguyen/cloud-pop-express">Repo</a></li>
-            <li><span>Tetris Classic</span><a href="https://buicongnguyen.github.io/tetris-classic/">Open</a><a href="https://github.com/buicongnguyen/tetris-classic">Repo</a></li>
-            <li><span>Math Block Academy</span><a href="https://buicongnguyen.github.io/math-block-academy/">Open</a><a href="https://github.com/buicongnguyen/math-block-academy">Repo</a></li>
-            <li><span>Hint Trap</span><a href="https://buicongnguyen.github.io/hint-trap/">Open</a><a href="https://github.com/buicongnguyen/hint-trap">Repo</a></li>
+            <li><span>Systems Design Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_systems/">Open</a></li>
+            <li><span>Systems &amp; Hardware Study Hub</span><a href="https://buicongnguyen.github.io/Outlier_hardware/">Open</a></li>
+            <li><span>GPU Kernel Optimization Notes</span><a href="https://buicongnguyen.github.io/Mercor_cuda/">Open</a></li>
           </ul>
         </article>
       </div>
     </section>
 
-    <section id="projects" class="section">
+    <section class="section">
       <div class="section-heading">
-        <p class="eyebrow">Code-only repositories</p>
-        <h2>Additional Source Projects</h2>
-        <p class="section-note">Older source repositories without a dedicated GitHub Pages site.</p>
+        <p class="eyebrow">Experiments and playable work</p>
+        <h2>Playground</h2>
+        <p class="section-note">Games, family applications, Vietnamese tools, and versioned browser experiments have their own directory.</p>
       </div>
-
-      <div class="index-list">
-        <a href="https://github.com/buicongnguyen/pathPlanningA_Star_Python">A* path planning in Python</a>
-        <a href="https://github.com/buicongnguyen/countFreeRegions">Free-region counting algorithm</a>
-        <a href="https://github.com/buicongnguyen/mfc4_8_project">MFC random-circle project</a>
-        <a href="https://github.com/buicongnguyen/mfcExam">MFC programming exercise</a>
-        <a href="https://github.com/buicongnguyen/LCSolution">Legacy coding solutions</a>
-        <a href="https://github.com/buicongnguyen?tab=repositories">All repositories</a>
+      <div class="hero-actions">
+        <a class="button" href="playground.html">Open Playground</a>
+        <a class="button secondary" href="https://github.com/buicongnguyen?tab=repositories">All repositories</a>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Built as a clean public hub for GitHub Pages projects and engineering notes.</p>
+    <p>Selected public engineering projects and technical notes.</p>
     <div class="footer-links">
       <a href="https://www.linkedin.com/in/cong-nguyen-bui/">LinkedIn</a>
+      <a href="https://github.com/buicongnguyen">GitHub</a>
       <a href="https://github.com/buicongnguyen/buicongnguyen.github.io">Source</a>
     </div>
   </footer>
-  <script src="./theme-toggle.js"></script>
+  <script src="./theme-toggle.js?v=20260712-1"></script>
 </body>
 </html>

@@ -208,6 +208,10 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.identity-panel.text-only {
+  grid-template-columns: 1fr;
+}
+
 .portrait {
   width: 100%;
   max-width: 170px;
