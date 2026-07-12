@@ -25,6 +25,7 @@
       <a href="#fast-track">14-day track</a>
       <a href="#flow">Flow</a>
       <a href="architecture.html">Architecture</a>
+      <a href="reasoning.html">Reasoning</a>
       <a href="#definitions">Definitions</a>
       <a href="#curriculum">Modules</a>
       <a href="#capstone">Capstone</a>
@@ -47,6 +48,7 @@
         <div class="hero-actions">
           <a class="button" href="#fast-track">Start the 14-day sprint</a>
           <a class="button secondary" href="architecture.html">See the system &amp; debug map</a>
+          <a class="button secondary" href="reasoning.html">Open reasoning &amp; code flows</a>
           <a class="button secondary" href="resources.html">Open deep resource guide</a>
           <a class="button secondary" href="practice.html">Open 50-question lab</a>
           <a class="button secondary" href="#capstone">View the capstone</a>
@@ -343,6 +345,11 @@ Set-Location C:\isaacsim
       <div class="callout">
         <strong>Dependency rule:</strong> model gate → physics gate → control/contact gate → interface gate →
         evaluation gate. Reinforcement learning is optional; these five gates are not.
+      </div>
+      <div class="callout">
+        <strong>Reason through the execution:</strong> the <a href="reasoning.html">Reasoning &amp; Code Flow Atlas</a>
+        maps this learning order onto startup code, one physics step, data lineage, runtime messages, episode states,
+        timing, causal tests, and the CIDER interview-answer framework.
       </div>
     </section>
 
@@ -1116,6 +1123,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
                     <div><dt>TF and optical frames</dt><dd>TF is a timestamped single-parent transform tree. Camera optical axes differ from body-frame conventions; every measurement names its frame.</dd></div>
                     <div><dt>QoS compatibility</dt><dd>Reliability, durability, history, and depth determine whether endpoints can communicate—not merely speed or buffering.</dd></div>
                     <div><dt>Rate, latency, jitter</dt><dd>Messages per simulated second, measurement-to-receipt delay, and delay variation. Physics, render, sensor, control, and ROS rates are distinct.</dd></div>
+                    <div><dt>Sensor tick in 6.0</dt><dd>For RTX sensors, use the prim’s <code>omni:sensor:tickRate</code>. A nonzero legacy <code>frameSkipCount</code> is deprecated and can create unexpected cadence.</dd></div>
                     <div><dt>Sensor error model</dt><dd>White noise, fixed bias, drift, dropout, quantization, and latency require separate parameters and statistical checks.</dd></div>
                   </dl>
                 </section>
@@ -1125,6 +1133,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
                     <li><strong>No external topic:</strong> compare ROS environment, domain ID, DDS profile/firewall, bridge status, and QoS in both terminals.</li>
                     <li><strong>TF looks plausible but data is wrong:</strong> inspect parent, optical/body axes, units, timestamp, and duplicate publishers.</li>
                     <li><strong>Rate mismatch:</strong> separate physics, timeline, render, sensor tick, wall-rate capacity, and queue backpressure.</li>
+                    <li><strong>Stale or mixed-time data:</strong> log source acquisition, ROS header, publish, and receipt times; use <code>/clock</code> and TF at the message stamp.</li>
                     <li><strong>IMU/camera mismatch:</strong> validate against stationary gravity or known 3D landmarks before adding noise.</li>
                     <li><strong>Robot keeps moving:</strong> test command age, watchdog clock source, safe command, and controller reset behavior.</li>
                   </ul>
@@ -1165,6 +1174,7 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html"><span class="ref-type">Official · install first</span><strong>ROS 2 on Windows</strong><small>Current native Jazzy/Pixi environment route for Isaac Sim integration.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/ros2_reference_architecture.html"><span class="ref-type">Official · architecture</span><strong>ROS 2 Reference Architecture</strong><small>Asset, sensor, bridge/OmniGraph, command, and software-stack boundaries.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_clock.html"><span class="ref-type">Official · Lab 1</span><strong>ROS 2 Clock</strong><small><code>/clock</code>, <code>use_sim_time</code>, and simulation-time behavior.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_publish_rate.html"><span class="ref-type">Official · timing</span><strong>ROS 2 Publish Rates</strong><small>Physics, timeline, run-loop, sensor tick, and achieved wall-rate relationships in Isaac Sim 6.0.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/isaacsim_sensors_physics.html"><span class="ref-type">Official · Lab 2</span><strong>Physics-Based Sensors</strong><small>Current experimental contact, effort, IMU, and joint-state sensor APIs; older extension is deprecated in 6.0.</small></a>
                 </div>
               </div>
@@ -1884,6 +1894,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
     <p>Original self-study material for measurable robotics simulation engineering practice.</p>
     <div class="footer-links">
       <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="reasoning.html">Reasoning &amp; code flows</a>
       <a href="resources.html">Deep resources</a>
       <a href="practice.html">Practice</a>
       <a href="../index.html">Portfolio</a>

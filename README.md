@@ -17,6 +17,7 @@ sim-to-real methods, parallel performance, CI, MuJoCo, and Gazebo.
 - 14-day fast track: https://buicongnguyen.github.io/robotics-simulation-engineer/#fast-track
 - Detailed modules: https://buicongnguyen.github.io/robotics-simulation-engineer/#curriculum
 - System architecture and debugging field guide: https://buicongnguyen.github.io/robotics-simulation-engineer/architecture.html
+- Reasoning and code-flow atlas: https://buicongnguyen.github.io/robotics-simulation-engineer/reasoning.html
 - Deep resource route: https://buicongnguyen.github.io/robotics-simulation-engineer/resources.html
 - Practice lab: https://buicongnguyen.github.io/robotics-simulation-engineer/practice.html
 - Capstone: https://buicongnguyen.github.io/robotics-simulation-engineer/#capstone

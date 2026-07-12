@@ -21,7 +21,9 @@
     <nav aria-label="Practice navigation">
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture</a>
+      <a href="reasoning.html">Reasoning</a>
       <a href="resources.html">Resources</a>
+      <a href="#answer-framework">Answer framework</a>
       <a href="#questions">50 questions</a>
       <a href="#scenarios">Diagnostics</a>
       <a href="#coding">Coding drills</a>
@@ -43,6 +45,7 @@
         <div class="hero-actions">
           <a class="button" href="#questions">Start the question bank</a>
           <a class="button secondary" href="architecture.html#isolation">Open the debug map</a>
+          <a class="button secondary" href="#answer-framework">Use CIDER reasoning</a>
           <a class="button secondary" href="index.html#curriculum">Review the course</a>
           <a class="button secondary" href="resources.html">Deep resources</a>
           <a class="button secondary" href="#coding">Open coding drills</a>
@@ -73,6 +76,23 @@
         <article class="card"><span class="number">Session 5</span><h3>Transfer and production</h3><p>Design identification splits, justify randomization, isolate catastrophic failures, and choose robust CI gates.</p></article>
         <article class="card"><span class="number">Final pass</span><h3>Explain aloud</h3><p>Use the six diagnostics as mock interviews. Lead with observations, ranked hypotheses, discriminating tests, and decision criteria.</p></article>
       </div>
+    </section>
+
+    <section id="answer-framework" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Answer correctly, not just confidently</p>
+        <h2>Use CIDER for every diagnostic and interview answer</h2>
+        <p class="section-note">State the contract and the evidence before proposing a fix. A good answer includes a result that would falsify its own hypothesis.</p>
+      </div>
+      <div class="study-grid">
+        <article class="card"><span class="number">C · Contract</span><h3>What should be true?</h3><p>Name the invariant, boundary, lifecycle phase, unit, frame, time, rate, and failure behavior.</p></article>
+        <article class="card"><span class="number">I · Identity</span><h3>What is frozen?</h3><p>Commit, config/assets, runtime, hardware, seed, x₀, action trace, and workload.</p></article>
+        <article class="card"><span class="number">D · Discriminate</span><h3>What separates causes?</h3><p>Rank hypotheses and run one experiment for which they predict different results.</p></article>
+        <article class="card"><span class="number">E · Evidence</span><h3>What changes the decision?</h3><p>Point to the first bad sample or boundary comparison—not only the final symptom.</p></article>
+        <article class="card"><span class="number">R · Repair/regress</span><h3>What remains true later?</h3><p>Change one variable, restore and counter-test, land a regression, and state the limit.</p></article>
+        <article class="card"><span class="number">Full visual guide</span><h3>Trace the whole answer</h3><p>Use the lifecycle, data, sequence, state, and causal-proof diagrams in the <a href="reasoning.html#interview-framework">Reasoning &amp; Code Flow Atlas</a>.</p></article>
+      </div>
+      <div class="callout"><strong>One-sentence start:</strong> “At phase ___, I expected invariant ___ but observed ___ at the first boundary between ___ and ___.”</div>
     </section>
 
     <section id="knowledge" class="section">
@@ -335,6 +355,7 @@
     <div class="footer-links">
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="reasoning.html">Reasoning &amp; code flows</a>
       <a href="../index.html">Portfolio</a>
       <a href="#main">Back to top</a>
     </div>

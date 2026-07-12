@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A visual reasoning and code-flow atlas for Isaac Sim robotics engineering: thinking loops, executable lifecycle, data lineage, sequence diagrams, state machines, causal decision logic, and interview answers.">
+  <meta name="theme-color" content="#087968">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Robotics Simulation Reasoning and Code Flow Atlas">
+  <meta property="og:description" content="Learn how code, data, time, state, and evidence move through a robotics simulation—and how to reason from the first failed contract.">
+  <meta property="og:url" content="https://buicongnguyen.github.io/robotics-simulation-engineer/reasoning.html">
+  <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/reasoning.html">
+  <title>Reasoning &amp; Code Flow Atlas | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css">
+  <link rel="stylesheet" href="reasoning.css?v=20260713-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to reasoning atlas</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Robotics Simulation Engineering course home">
+      <img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="">
+      <span>Robotics Simulation Engineering</span>
+    </a>
+    <nav aria-label="Reasoning atlas navigation">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="#thinking">Thinking</a>
+      <a href="#code-flow">Code flow</a>
+      <a href="#data-lineage">Data</a>
+      <a href="#runtime-sequence">Sequence</a>
+      <a href="#state-machines">State</a>
+      <a href="#decision-logic">Decisions</a>
+      <a href="practice.html">Practice</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero reasoning-hero" aria-labelledby="reasoning-title">
+      <div>
+        <p class="eyebrow">Thinking flow · code lifecycle · data lineage · causal proof</p>
+        <h1 id="reasoning-title">Understand what happens, why it happens, and what to test next.</h1>
+        <p class="lede">
+          This atlas turns robotics simulation code into visible contracts. Follow the execution order, trace every
+          important value from immutable configuration to a published claim, recognize legal runtime states, and
+          answer debugging or interview questions with a falsifiable chain of reasoning instead of parameter guesses.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#thinking">Start with the thinking loop</a>
+          <a class="button secondary" href="#code-flow">Trace the code</a>
+          <a class="button secondary" href="#decision-logic">Use decision logic</a>
+          <a class="button secondary" href="#worked-failures">Study failures</a>
+        </div>
+      </div>
+
+      <aside class="hero-panel" aria-label="Senior engineering rule">
+        <p class="eyebrow">The rule behind every diagram</p>
+        <ol>
+          <li>Name the expected invariant.</li>
+          <li>Find the first boundary where it fails.</li>
+          <li>Explain a mechanism that predicts a unique signal.</li>
+          <li>Run the smallest experiment that could prove you wrong.</li>
+          <li>Turn the result into a regression and a bounded claim.</li>
+        </ol>
+        <p class="section-note">A strong engineer does not begin with a favorite tuning knob.</p>
+      </aside>
+    </section>
+
+    <section id="diagram-index" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Visual index</p>
+        <h2>Choose the diagram that matches your question</h2>
+      </div>
+      <nav class="diagram-index" aria-label="Diagram index">
+        <a href="#thinking"><strong>1 · Thinking flow</strong><span>How should I reason from symptom to proof?</span></a>
+        <a href="#code-flow"><strong>2 · Code lifecycle</strong><span>What must execute first, and where should I assert?</span></a>
+        <a href="#step-loop"><strong>3 · One-step loop</strong><span>How does observation become physical motion and evidence?</span></a>
+        <a href="#data-lineage"><strong>4 · Data lineage</strong><span>Where did this metric, plot, or claim come from?</span></a>
+        <a href="#runtime-sequence"><strong>5 · Sequence diagram</strong><span>Which component sends what, in which order?</span></a>
+        <a href="#state-machines"><strong>6 · State machines</strong><span>What operations are legal in the current phase?</span></a>
+        <a href="#time-rates"><strong>7 · Time and rates</strong><span>Which clock or cadence owns this event?</span></a>
+        <a href="#decision-logic"><strong>8 · Decision logic</strong><span>What result supports or falsifies the hypothesis?</span></a>
+      </nav>
+    </section>
+
+    <section id="mental-model" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Five questions at every boundary</p>
+        <h2>Use the same mental model from configuration to ROS and CI</h2>
+        <p class="section-note">If one answer is missing, the boundary is not yet debuggable.</p>
+      </div>
+      <div class="question-grid">
+        <article class="question-card"><span>Owner</span><strong>Who writes this value?</strong><p>One source of truth, one lifecycle phase, explicit override precedence.</p></article>
+        <article class="question-card"><span>Contract</span><strong>What must be true?</strong><p>Type, shape, unit, frame, rate, range, ordering, timeout, and failure behavior.</p></article>
+        <article class="question-card"><span>State</span><strong>When is it valid?</strong><p>Before Play, after reset, pre-step, post-step, after sensor acquisition, or terminal.</p></article>
+        <article class="question-card"><span>Evidence</span><strong>What would reveal failure?</strong><p>First bad sample, requested/applied pair, source timestamp, raw contact, or resource trace.</p></article>
+        <article class="question-card"><span>Decision</span><strong>What changes my mind?</strong><p>A predicted signature, restoration, counter-example, and precommitted pass criterion.</p></article>
+      </div>
+    </section>
+
+    <section id="thinking" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Engineering thinking flow</p>
+        <h2>Debugging reduces uncertainty one boundary at a time</h2>
+        <p class="section-note">
+          Do not ask “Which parameter should I change?” Ask “Which observable distinguishes the top explanations?”
+        </p>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="thinking-flow-caption">
+        <div class="reasoning-flow">
+          <div class="reasoning-node"><span>01 · Frame</span><strong>Define the observable</strong><small>Operating point, expected behavior, threshold, and allowed uncertainty.</small></div>
+          <div class="reasoning-node"><span>02 · Locate</span><strong>Name the owning contract</strong><small>Layer, component, input/output, unit, frame, time, rate, and owner.</small></div>
+          <div class="reasoning-node"><span>03 · Diverge</span><strong>Find the first bad sample</strong><small>Last valid input, first invalid output, requested/applied pair, and timestamp.</small></div>
+          <div class="reasoning-node"><span>04 · Predict</span><strong>Rank hypotheses</strong><small>Give each cause a unique expected signature and a falsifying observation.</small></div>
+          <div class="reasoning-node"><span>05 · Test</span><strong>Run one experiment</strong><small>Baseline, one-variable intervention, restoration, and counter-example.</small></div>
+          <div class="reasoning-node"><span>06 · Decide</span><strong>Compare evidence</strong><small>Falsified, inconclusive, or supported—never “it looked better.”</small></div>
+          <div class="reasoning-node"><span>07 · Retain</span><strong>Create engineering memory</strong><small>Minimal reproduction, fix, regression, artifact, owner, and limitation.</small></div>
+        </div>
+        <div class="reasoning-feedback" role="group" aria-label="Reasoning feedback paths">
+          <div><strong>Observable ambiguous</strong>Redefine the success criterion.</div>
+          <div><strong>Boundary invisible</strong>Instrument before tuning.</div>
+          <div><strong>Hypothesis falsified</strong>Test the next ranked cause.</div>
+          <div><strong>Restoration fails</strong>Investigate nondeterminism or a confound.</div>
+          <div><strong>Side effect appears</strong>Narrow the claim or redesign the fix.</div>
+        </div>
+        <figcaption id="thinking-flow-caption"><strong>Reason why:</strong> a controlled loop prevents symptom removal from being mistaken for causal proof.</figcaption>
+      </figure>
+
+      <h3>Turn the analysis into an interview answer</h3>
+      <div class="answer-chain" role="group" aria-label="Interview answer chain">
+        <div>Claim</div><div>Evidence</div><div>Mechanism</div><div>Discriminating test</div><div>Scope and limit</div><div>Next action</div>
+      </div>
+      <div class="callout">
+        <strong>Answer template:</strong> “I would first verify <em>invariant</em> because <em>mechanism</em>. I would
+        compare <em>signal A</em> against <em>signal B</em>. If the cause is <em>hypothesis</em>, I expect
+        <em>unique outcome</em>. Otherwise I reject it and inspect <em>next boundary</em>. This proves
+        <em>bounded claim</em> under <em>conditions</em>; it does not yet prove <em>limitation</em>.”
+      </div>
+    </section>
+
+    <section id="code-flow" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Isaac Sim 6.0 standalone code lifecycle</p>
+        <h2>Initialization order is part of correctness</h2>
+        <p class="section-note">
+          This sequence matches the installed <code>C:\isaacsim</code> 6.0 RC pattern. Parse ordinary Python
+          arguments first, create <code>SimulationApp</code>, and only then import APIs supplied by the running Kit
+          application. Mark version-sensitive code and never mix 4.x/5.x snippets into a 6.0 project without an API check.
+        </p>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="lifecycle-caption">
+        <div class="lifecycle-grid">
+          <div class="lifecycle-node phase-runtime"><span>01 · Shell</span><strong>Exact command</strong><small><code>C:\isaacsim\python.bat run.py --config …</code></small></div>
+          <div class="lifecycle-node"><span>02 · Python</span><strong>Parse CLI</strong><small>Headless flag, config path, seed, scenario, output directory.</small></div>
+          <div class="lifecycle-node phase-runtime"><span>03 · Runtime</span><strong>Create SimulationApp</strong><small>Start Kit and its extension/plugin system before dependent imports.</small></div>
+          <div class="lifecycle-node phase-runtime"><span>04 · Runtime</span><strong>Import Isaac APIs</strong><small>Enable required extensions; record runtime and API identity.</small></div>
+          <div class="lifecycle-node"><span>05 · Config</span><strong>Resolve and validate</strong><small>Defaults + file + CLI overrides → typed immutable snapshot + hash.</small></div>
+          <div class="lifecycle-node"><span>06 · World</span><strong>Create simulation context</strong><small>Declare SI units, physics dt, render dt, backend, and device.</small></div>
+          <div class="lifecycle-node"><span>07 · Stage</span><strong>Compose assets</strong><small>Robot, scene, colliders, inertials, materials, and authored ownership.</small></div>
+          <div class="lifecycle-node"><span>08 · Components</span><strong>Register interfaces</strong><small>Controllers, views, sensors, logger, evaluator, and watchdog.</small></div>
+          <div class="lifecycle-node"><span>09 · Barrier</span><strong>Reset world</strong><small>Initialize physics/views; seed owners; apply x₀ and sampled parameters.</small></div>
+          <div class="lifecycle-node"><span>10 · Assert</span><strong>Validate reset</strong><small>Finite state, limits, separation, buffer validity, counts, and time.</small></div>
+          <div class="lifecycle-node phase-loop"><span>11 · Episode</span><strong>Run step loop</strong><small>Observe → command → step → sense → log → evaluate.</small></div>
+          <div class="lifecycle-node phase-loop"><span>12 · Terminal</span><strong>Classify outcome</strong><small>Exactly one of success, failure, timeout, or aborted—with first bad step.</small></div>
+          <div class="lifecycle-node phase-close"><span>13 · Evidence</span><strong>Flush artifacts</strong><small>Write partial evidence even after an exception.</small></div>
+          <div class="lifecycle-node phase-close"><span>14 · Finally</span><strong>Close SimulationApp</strong><small>Stop owners, release resources, preserve the correct exit code.</small></div>
+        </div>
+        <div class="branch-grid" role="group" aria-label="Lifecycle failure branches">
+          <div class="branch-note"><strong>Invalid configuration</strong>Exit before stage creation; retain schema errors and resolved inputs.</div>
+          <div class="branch-note"><strong>Asset unresolved</strong>Fail with prim path, asset path/hash, edit target, and property owner.</div>
+          <div class="branch-note"><strong>Reset invariant fails</strong>Do not send the first command or publish a “ready” status.</div>
+          <div class="branch-note"><strong>Exception</strong>Retain the partial bundle and first bad context, then close in <code>finally</code>.</div>
+        </div>
+        <figcaption id="lifecycle-caption"><strong>Reason why:</strong> correct components in the wrong lifecycle phase still produce invalid handles, stale buffers, misleading logs, and nondeterministic teardown.</figcaption>
+      </figure>
+
+      <div class="code-layout">
+        <pre><code># Isaac Sim 6.0 project skeleton — helper functions are project hooks.
+from enum import Enum, auto
+from time import perf_counter
+from isaacsim import SimulationApp        # runtime boundary
+
+app = SimulationApp({"headless": args.headless})
+
+# Import Kit/Isaac APIs only after the app exists.
+from isaacsim.core.api import World
+
+class Phase(Enum):
+    APP_READY = auto(); STAGE_READY = auto(); RESETTING = auto()
+    READY = auto(); RUNNING = auto(); TERMINAL = auto()
+    FLUSHING = auto(); FAULT = auto()
+
+phase, writer = Phase.APP_READY, None
+try:
+    cfg = load_and_validate_config(args.config)
+    identity = capture_identity(cfg, args.seed)
+    writer = open_bundle(identity)
+
+    world = World(
+        stage_units_in_meters=1.0,
+        physics_dt=cfg.physics_dt,
+        rendering_dt=cfg.render_dt,
+    )
+    handles = build_and_audit_scene(world, cfg)
+    phase = Phase.STAGE_READY
+
+    for episode in range(cfg.episodes):
+        phase = Phase.RESETTING
+        reset_all_owners(handles, cfg, args.seed, episode)
+        world.reset()                       # initialization barrier
+        reset_snapshot = assert_reset_contract(handles)
+        writer.write_reset(reset_snapshot)
+        phase = Phase.READY
+
+        requested = applied = None
+        wall_start = perf_counter()
+        phase = Phase.RUNNING
+
+        for step in range(cfg.max_steps):
+            state_k = read_control_state(handles)
+            if step % cfg.control_decimation == 0:
+                requested = controller(state_k)
+                applied = actuator_contract(requested, state_k)
+                apply_action(handles.robot, applied)
+
+            writer.write_pre_step(step, requested, applied)
+            world.step(render=should_render(step, cfg))
+
+            state_next = read_physics_state(handles)
+            contacts = read_raw_contacts(handles)
+            sensors = acquire_due_sensors(handles)
+            assert_step_contract(step, state_next, sensors)
+            result = evaluator(state_next, contacts, sensors)
+            writer.write_post_step(step, state_next, contacts, sensors, result)
+
+            if result.terminal:
+                phase = Phase.TERMINAL
+                break
+
+        writer.finish_episode(episode, result, perf_counter() - wall_start)
+        phase = Phase.FLUSHING
+except Exception as error:
+    phase = Phase.FAULT
+    if writer:
+        writer.write_fault(error, capture_first_bad_context())
+    raise
+finally:
+    if writer:
+        writer.close()
+    app.close()</code></pre>
+
+        <div class="code-checkpoints">
+          <div class="code-checkpoint"><span>A</span><div><strong>Before runtime startup</strong><small>Only parse ordinary CLI inputs. Failure here should not require GPU, assets, or Kit.</small></div></div>
+          <div class="code-checkpoint"><span>B</span><div><strong>After configuration resolution</strong><small>Persist the resolved configuration and hash—not only the YAML the user supplied.</small></div></div>
+          <div class="code-checkpoint"><span>C</span><div><strong>After stage composition</strong><small>Audit composed values and edit targets. USD source opinions are not the same as final stage values.</small></div></div>
+          <div class="code-checkpoint"><span>D</span><div><strong>Immediately after reset</strong><small>Read finite pose/velocity, joint limits, collision separation, buffers, and owners before any action.</small></div></div>
+          <div class="code-checkpoint"><span>E</span><div><strong>Immediately before physics</strong><small>Record requested action, applied action, saturation, watchdog state, and controller update tick.</small></div></div>
+          <div class="code-checkpoint"><span>F</span><div><strong>Immediately after physics</strong><small>Record x<sub>k+1</sub>, raw contacts, constraint/energy signals, and the first failed invariant.</small></div></div>
+          <div class="code-checkpoint"><span>G</span><div><strong>At sensor acquisition</strong><small>Record source simulation time, frame, calibration, sequence, and payload identity.</small></div></div>
+          <div class="code-checkpoint"><span>H</span><div><strong>At terminal and shutdown</strong><small>Write one terminal class, replay locator, step/resource metrics, and partial evidence on faults.</small></div></div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Project-hook rule:</strong> functions such as <code>build_and_audit_scene</code>,
+        <code>actuator_contract</code>, and <code>assert_step_contract</code> are intentionally yours. Their job is to
+        make ownership and failure behavior explicit; do not hide these contracts inside a monolithic loop.
+      </div>
+    </section>
+
+    <section id="step-loop" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">One simulation step</p>
+        <h2>Trace cause and effect from x<sub>k</sub> to x<sub>k+1</sub></h2>
+        <p class="section-note">The controller reacts to the previous valid state. Physics produces the next state. Sensors report a measurement of that state at a declared event and time.</p>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="step-caption">
+        <div class="step-loop">
+          <div class="lifecycle-node phase-loop"><span>Input</span><strong>Read x<sub>k</sub> + task context</strong><small>State/frame/time valid at the control boundary.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Intent</span><strong>Compute u<sub>requested</sub></strong><small>Controller target before real actuator constraints.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Contract</span><strong>Produce u<sub>applied</sub></strong><small>Delay, rate limit, saturation, drive semantics, and watchdog.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Transition</span><strong>Physics step</strong><small>Integrate, collide, solve constraints, and advance simulation time.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Output</span><strong>Read x<sub>k+1</sub> + contacts</strong><small>Ground truth after the state transition.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Measurement</span><strong>Acquire, publish, log, evaluate</strong><small>Sensor value + source stamp + frame → observation and verdict.</small></div>
+        </div>
+        <figcaption id="step-caption"><strong>Reason why:</strong> logging only a target cannot explain motion. Limits, delay, watchdogs, actuator models, and contact can make the applied action different.</figcaption>
+      </figure>
+
+      <div class="contract-grid">
+        <article class="contract-card"><code>RunIdentity</code><strong>Immutable per run</strong><span>Commit/dirty, runtime, hardware, config/asset hashes, seed, dt, render settings.</span></article>
+        <article class="contract-card"><code>ResetSnapshot</code><strong>Fully declares x₀</strong><span>Episode, sampled parameters, pose/velocity, controller/sensor/task state.</span></article>
+        <article class="contract-card"><code>StepRecord</code><strong>Native-rate evidence</strong><span>Step/time, requested/applied action, state, contact, source sensor stamps.</span></article>
+        <article class="contract-card"><code>EpisodeResult</code><strong>One terminal class</strong><span>Success/failure/timeout/aborted, first bad step, metrics, replay locator.</span></article>
+        <article class="contract-card"><code>AggregateReport</code><strong>Regenerated view</strong><span>Split-preserving statistics and confidence intervals derived from raw bundles.</span></article>
+      </div>
+    </section>
+
+    <section id="data-lineage" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Data lineage and provenance</p>
+        <h2>Every published claim must trace backward to immutable inputs</h2>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="lineage-caption">
+        <div class="lineage-source-grid">
+          <div class="lineage-source">Commit + dirty state</div>
+          <div class="lineage-source">Sim / Kit / Python / driver</div>
+          <div class="lineage-source">Hardware identity</div>
+          <div class="lineage-source">Asset files + hashes</div>
+          <div class="lineage-source">Schema + overrides</div>
+          <div class="lineage-source">Scenario + data split</div>
+          <div class="lineage-source">Seed + RNG states</div>
+        </div>
+        <div class="manifest-gate"><strong>Resolve → validate → snapshot → hash</strong><span><code>run_id</code> + <code>resolved_manifest.json</code> become the immutable experiment identity.</span></div>
+        <div class="graph-scroll" tabindex="0" aria-label="Horizontally scrollable data lineage">
+          <div class="data-lane">
+            <div class="data-node"><span>Configuration</span><strong>Resolved manifest</strong><small>Declared parameter values, units, owners, rates, limits, and split.</small></div>
+            <div class="data-node"><span>Reset</span><strong>x₀ + realized θ</strong><small>Initial state and the actual random values sampled for this episode.</small></div>
+            <div class="data-node"><span>Control</span><strong>u<sub>requested</sub> → u<sub>applied</sub></strong><small>Target, limiter, saturation, delay, drive, watchdog, and update tick.</small></div>
+            <div class="data-node"><span>Physics</span><strong>x<sub>k+1</sub> + contact λ</strong><small>Rigid-body state, constraint/contact result, and first broken invariant.</small></div>
+            <div class="data-node"><span>Sensor</span><strong>y + source stamp + frame</strong><small>Measurement, calibration, acquisition event, validity, and sequence.</small></div>
+            <div class="data-node"><span>Transport</span><strong>ROS publish → receipt</strong><small>Header, TF at stamp, QoS, publish time, receipt time, and queue behavior.</small></div>
+            <div class="data-node"><span>Episode</span><strong>Terminal + metrics</strong><small>One terminal class, task oracle, safety/fidelity/throughput, replay locator.</small></div>
+            <div class="data-node"><span>Report</span><strong>Split-aware claim</strong><small>Aggregate distributions and confidence intervals linked to source bundles.</small></div>
+          </div>
+        </div>
+        <div class="bundle-grid" role="group" aria-label="Episode bundle contents">
+          <code>identity.json</code><code>resolved_config.json</code><code>asset_hashes.json</code><code>initial_state.json</code>
+          <code>sampled_parameters.json</code><code>requested_action.csv</code><code>applied_action.csv</code><code>state.csv</code>
+          <code>contact.csv</code><code>sensor_timestamps.csv</code><code>events.jsonl</code><code>terminal.json</code>
+          <code>resource_metrics.csv</code><code>rosbag/</code><code>video.mp4</code><code>debug_report.md</code>
+        </div>
+        <figcaption id="lineage-caption"><strong>Reason why:</strong> a report is a view. The manifest and raw native-rate traces are the source. Held-out data must never flow backward into parameter fitting.</figcaption>
+      </figure>
+
+      <div class="evidence-pair-grid">
+        <article class="evidence-pair"><h3>Do not collapse these pairs</h3><ul><li>Declared parameter versus sampled realization</li><li>Requested target versus applied action</li><li>Physics truth versus sensor output</li><li>Acquisition time versus publish/receipt time</li><li>Reward versus independent physical success</li></ul></article>
+        <article class="evidence-pair"><h3>Calibration and randomization flow</h3><ul><li>Fit split + reference traces → M7 identifier</li><li>Identifier → versioned parameter manifest</li><li>Manifest + justified residual uncertainty → M8 distribution</li><li>Distribution → recorded sampled parameters</li><li>Nominal and held-out results remain separate</li></ul></article>
+      </div>
+    </section>
+
+    <section id="runtime-sequence" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Runtime sequence diagram</p>
+        <h2>Ordering is part of system behavior</h2>
+        <p class="section-note">Correct components executed in the wrong sequence can create stale observations, delayed commands, invalid handles, and misleading timestamps.</p>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="sequence-caption">
+        <div class="table-wrap" tabindex="0">
+          <table class="sequence-table">
+            <thead><tr><th>Step</th><th>From</th><th>Direction</th><th>To</th><th>Message or action</th><th>Invariant/evidence at this boundary</th></tr></thead>
+            <tbody>
+              <tr><td><span class="sequence-step">1</span></td><td>Shell</td><td class="sequence-arrow">→</td><td>Config resolver</td><td>Launch exact command and overrides.</td><td>Command, cwd, environment, commit, dirty state, runtime, and hardware retained.</td></tr>
+              <tr><td><span class="sequence-step">2</span></td><td>Config resolver</td><td class="sequence-arrow">→</td><td>Logger</td><td>Write identity and resolved-config hash.</td><td>Validation succeeds before stage mutation.</td></tr>
+              <tr><td><span class="sequence-step">3</span></td><td>Shell/runner</td><td class="sequence-arrow">→</td><td>SimulationApp/World</td><td>Create runtime and simulation context.</td><td>Runtime-dependent imports occur after app startup; one loop owner.</td></tr>
+              <tr><td><span class="sequence-step">4</span></td><td>World</td><td class="sequence-arrow">→</td><td>USD stage</td><td>Compose robot and scene assets.</td><td>Units, frames, topology, properties, edit targets, and asset hashes auditable.</td></tr>
+              <tr><td><span class="sequence-step">5</span></td><td>Scenario</td><td class="sequence-arrow">→</td><td>All reset owners</td><td>Seed RNGs; sample θ; apply x₀; clear controller/sensor/task state.</td><td>Sampled realization is recorded, not inferred from the seed later.</td></tr>
+              <tr><td><span class="sequence-step">6</span></td><td>World</td><td class="sequence-arrow">→</td><td>Physics</td><td>Reset/initialize simulation and views.</td><td>No observation, command, or publication crosses the reset barrier early.</td></tr>
+              <tr><td><span class="sequence-step">7</span></td><td>Physics</td><td class="sequence-arrow">→</td><td>Scenario/logger</td><td>Reset complete; finite state available.</td><td>x₀, limits, separation, buffers, counts, and time pass assertions.</td></tr>
+              <tr><td><span class="sequence-step">8</span></td><td>Scenario</td><td class="sequence-arrow">→</td><td>Controller</td><td>Send observation x<sub>k</sub> and task context.</td><td>Frame, unit, time, shape, validity, and controller update tick declared.</td></tr>
+              <tr><td><span class="sequence-step">9</span></td><td>Controller</td><td class="sequence-arrow">→</td><td>Actuator contract</td><td>Produce u<sub>requested</sub>.</td><td>Controller alone does not claim the physical command.</td></tr>
+              <tr><td><span class="sequence-step">10</span></td><td>Actuator contract</td><td class="sequence-arrow">→</td><td>Robot/World</td><td>Apply delay, limits, saturation, watchdog → u<sub>applied</sub>.</td><td>Requested/applied values and limiter flags logged before stepping.</td></tr>
+              <tr><td><span class="sequence-step">11</span></td><td>World</td><td class="sequence-arrow">→</td><td>Physics</td><td>Advance one physics step or declared substeps.</td><td>Physics dt, decimation, substeps, render decision, and step ID retained.</td></tr>
+              <tr><td><span class="sequence-step">12</span></td><td>Physics</td><td class="sequence-arrow">→</td><td>World/logger</td><td>Return x<sub>k+1</sub>, contacts, and constraint results.</td><td>First failed invariant is identified before later symptoms overwrite context.</td></tr>
+              <tr><td><span class="sequence-step">13</span></td><td>World/renderer</td><td class="sequence-arrow">→</td><td>Sensor</td><td>Acquire due measurements at source simulation time.</td><td>Acquisition event, source stamp, frame, calibration, and validity recorded.</td></tr>
+              <tr><td><span class="sequence-step">14</span></td><td>Sensor</td><td class="sequence-arrow">→</td><td>ROS bridge</td><td>Send payload + frame + source timestamp.</td><td>Sensor production is distinguished from DDS transport.</td></tr>
+              <tr><td><span class="sequence-step">15</span></td><td>ROS bridge</td><td class="sequence-arrow">→</td><td>Consumer</td><td>Publish under configured QoS with TF at the message stamp.</td><td>Source → publish → receipt order and command/sensor age are measurable.</td></tr>
+              <tr><td><span class="sequence-step">16</span></td><td>Scenario</td><td class="sequence-arrow">→</td><td>Evaluator</td><td>Evaluate success, failure, timeout, and safety candidates.</td><td>Reward is not the only physical-success oracle.</td></tr>
+              <tr><td><span class="sequence-step">17</span></td><td>Evaluator</td><td class="sequence-arrow">→</td><td>Runner/logger</td><td>Continue or emit exactly one terminal reason.</td><td>Terminal record includes first bad step and retained evidence.</td></tr>
+              <tr><td><span class="sequence-step">18</span></td><td>Runner</td><td class="sequence-arrow">→</td><td>Logger/SimulationApp</td><td>Flush episode bundle, stop owners, and close.</td><td>Artifacts finish before shutdown; fault paths retain partial evidence.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ordering-rules">
+          <div class="ordering-rule"><strong>Reset barrier</strong>Before observation, command, sensing, evaluation, or “ready” publication.</div>
+          <div class="ordering-rule"><strong>Command ordering</strong>Apply and log u<sub>applied</sub> before the physics step it affects.</div>
+          <div class="ordering-rule"><strong>Sensor ordering</strong>Acquire after the declared physics/render event, not “whenever the loop sees it.”</div>
+          <div class="ordering-rule"><strong>Timestamp ordering</strong>Source stamp ≤ publish time ≤ receipt time for a forward-moving clock.</div>
+          <div class="ordering-rule"><strong>Shutdown ordering</strong>Terminal record and artifacts flush before runtime close.</div>
+        </div>
+        <figcaption id="sequence-caption"><strong>Read it vertically:</strong> each row is both a message and an opportunity to assert a contract. The first incorrect row owns the next hypothesis.</figcaption>
+      </figure>
+    </section>
+
+    <section id="state-machines" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Episode and safety state machines</p>
+        <h2>Make legal operations and failure transitions explicit</h2>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="episode-state-caption">
+        <h3>Episode lifecycle</h3>
+        <div class="state-rail">
+          <div class="state-node"><span>BOOT</span><strong>Capture identity</strong><small>Command, runtime, hardware, commit, output path.</small></div>
+          <div class="state-node"><span>VALIDATING</span><strong>Check contracts</strong><small>Schema, assets, versions, capabilities, and owners.</small></div>
+          <div class="state-node"><span>LOADING</span><strong>Compose stage</strong><small>Create World and load versioned robot/scene layers.</small></div>
+          <div class="state-node"><span>RESETTING</span><strong>Declare x₀</strong><small>Seed, sample, set state, clear every stateful owner.</small></div>
+          <div class="state-node state-active"><span>READY</span><strong>Barrier passed</strong><small>Finite/in-limit/separated state and valid buffers.</small></div>
+          <div class="state-node state-active"><span>RUNNING</span><strong>Step episode</strong><small>Control, physics, sensing, logging, and evaluation enabled.</small></div>
+          <div class="state-node state-terminal"><span>TERMINAL</span><strong>Classify once</strong><small>Success, failure, timeout, or aborted.</small></div>
+        </div>
+        <div class="terminal-fanout" role="group" aria-label="Terminal states">
+          <div class="state-node state-terminal"><span>SUCCESS</span><strong>Task oracle passed</strong><small>Safety and validity gates also pass.</small></div>
+          <div class="state-node state-terminal"><span>FAILURE</span><strong>Invariant/task failed</strong><small>First bad sample retained.</small></div>
+          <div class="state-node state-terminal"><span>TIMEOUT</span><strong>Step/time budget reached</strong><small>Not silently counted as success.</small></div>
+          <div class="state-node state-terminal"><span>ABORTED</span><strong>Config/asset/exception/stop</strong><small>Partial evidence still flushes.</small></div>
+        </div>
+        <div class="state-tail">
+          <div class="state-node"><span>FINALIZING</span><strong>Write terminal + artifacts</strong><small>Metrics, replay locator, traces, resources, and limitations.</small></div>
+          <div class="state-node"><span>CLOSED</span><strong>Release runtime</strong><small>Logger closed; SimulationApp shutdown complete.</small></div>
+        </div>
+        <figcaption id="episode-state-caption"><strong>Critical rule:</strong> controller execution is illegal during <code>RESETTING</code>. In an evaluation run, finalize a failure before starting another episode; do not erase the evidence with an immediate reset.</figcaption>
+      </figure>
+
+      <div class="table-wrap" tabindex="0">
+        <table class="transition-table">
+          <thead><tr><th>From</th><th>Guard or event</th><th>Action</th><th>To</th></tr></thead>
+          <tbody>
+            <tr><td>BOOT</td><td>Identity bundle captured</td><td>Freeze output/run ID</td><td>VALIDATING</td></tr>
+            <tr><td>VALIDATING</td><td>Schema, assets, capabilities valid</td><td>Start runtime/world creation</td><td>LOADING</td></tr>
+            <tr><td>VALIDATING</td><td>Invalid configuration/capability</td><td>Write validation failure</td><td>ABORTED</td></tr>
+            <tr><td>LOADING</td><td>Stage and component ownership resolved</td><td>Begin reset transaction</td><td>RESETTING</td></tr>
+            <tr><td>LOADING</td><td>Asset or composition failure</td><td>Retain path/hash/property stack</td><td>ABORTED</td></tr>
+            <tr><td>RESETTING</td><td>Barrier and all invariants pass</td><td>Write reset snapshot; enable action</td><td>READY</td></tr>
+            <tr><td>RESETTING</td><td>NaN, overlap, invalid limit, stale buffer, timeout</td><td>Retain x₀ and first-step context</td><td>FAILURE</td></tr>
+            <tr><td>READY</td><td>start_episode</td><td>Enable controller/sensor/logger cadence</td><td>RUNNING</td></tr>
+            <tr><td>RUNNING</td><td>Physical task oracle passes</td><td>Record success evidence</td><td>SUCCESS</td></tr>
+            <tr><td>RUNNING</td><td>Failed invariant/task condition</td><td>Record first bad step</td><td>FAILURE</td></tr>
+            <tr><td>RUNNING</td><td>step ≥ max_steps</td><td>Record budget and final state</td><td>TIMEOUT</td></tr>
+            <tr><td>Any active state</td><td>Exception or external stop</td><td>Capture partial bundle/fault</td><td>ABORTED</td></tr>
+            <tr><td>Any terminal state</td><td>Terminal record complete</td><td>Flush full/partial artifacts</td><td>FINALIZING</td></tr>
+            <tr><td>FINALIZING</td><td>Artifacts durably written</td><td>Close owners and runtime</td><td>CLOSED</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="diagram-card" aria-labelledby="watchdog-caption">
+        <h3>Command watchdog safety machine</h3>
+        <div class="watchdog-rail">
+          <div class="state-node"><span>STARTUP_WAIT</span><strong>Safe zero/hold</strong><small>Reset complete but no accepted command yet.</small></div>
+          <div class="state-node state-active"><span>ACTIVE</span><strong>Bounded command</strong><small>Fresh, finite, correctly framed and within safe range.</small></div>
+          <div class="state-node state-terminal"><span>GRACE_HOLD</span><strong>Soft timeout</strong><small>Short configured hold or zero while waiting for recovery.</small></div>
+          <div class="state-node state-terminal"><span>SAFE_STOP</span><strong>Hard timeout</strong><small>Explicit safe-stop command; old command is never reused.</small></div>
+          <div class="state-node state-terminal"><span>LATCHED_FAULT</span><strong>Explicit reset required</strong><small>NaN, invalid frame/shape/range, impossible stamp, or backward clock jump.</small></div>
+        </div>
+        <div class="callout"><strong>Freshness contract:</strong> <code>command_age = current_sim_time − accepted_command_time</code>. A reset or backward time jump must not make old data appear new.</div>
+        <figcaption id="watchdog-caption"><strong>Reason why:</strong> freshness is a state machine, not a single <code>if</code>. Define acceptance, recovery, soft timeout, hard timeout, and reset behavior before connecting a remote command source.</figcaption>
+      </figure>
+    </section>
+
+    <section id="time-rates" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Time, rates, and sensor cadence in Isaac Sim 6.0</p>
+        <h2>“60 Hz” is meaningless until you name the clock and event</h2>
+      </div>
+      <div class="question-grid">
+        <article class="question-card"><span>Physics</span><strong>State-transition cadence</strong><p><code>physics_dt</code>, substeps, solver work, and simulated time advanced per physics step.</p></article>
+        <article class="question-card"><span>Timeline</span><strong>Playback time</strong><p>Timeline tick and time-code behavior; pause/stop/reset policy must be declared.</p></article>
+        <article class="question-card"><span>App/render</span><strong>Update cadence</strong><p>On Playback Tick and rendering can be limited by workload and need not equal physics cadence.</p></article>
+        <article class="question-card"><span>Sensor</span><strong>Acquisition cadence</strong><p>RTX sensors use the sensor prim’s <code>omni:sensor:tickRate</code>; production cost can still miss wall-rate targets.</p></article>
+        <article class="question-card"><span>ROS/wall</span><strong>Transport and capacity</strong><p><code>/clock</code> carries simulation time; <code>ros2 topic hz</code> observes wall-time arrival frequency.</p></article>
+      </div>
+
+      <div class="evidence-pair-grid">
+        <article class="evidence-pair">
+          <h3>Choose the event intentionally</h3>
+          <ul>
+            <li><strong>On Physics Step:</strong> align a graph action with each physics transition.</li>
+            <li><strong>On Playback Tick:</strong> align with each application/render playback update.</li>
+            <li><strong>Sensor tick:</strong> acquire only when that sensor is due.</li>
+            <li><strong>Control decimation:</strong> update control every N physics steps while holding the applied action.</li>
+          </ul>
+        </article>
+        <article class="evidence-pair">
+          <h3>Record the complete timing tuple</h3>
+          <ul>
+            <li>Physics step ID and simulation time</li>
+            <li>Sensor acquisition/source timestamp</li>
+            <li>ROS header and TF timestamp</li>
+            <li>Publish and consumer receipt wall times</li>
+            <li>Expected cadence, observed cadence, latency, jitter, and dropped/held policy</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Current 6.0 update:</strong> for RTX sensors, prefer the sensor prim’s
+        <code>omni:sensor:tickRate</code>. A nonzero legacy <code>frameSkipCount</code> is deprecated and can interact
+        badly with the sensor tick. Use the measurement’s source simulation time—not an unrelated wall or current
+        timeline read—as its timestamp. Publish <code>/clock</code>, set downstream <code>use_sim_time=true</code>, and
+        look up TF at the message stamp.
+      </div>
+      <div class="callout">
+        <strong>Installed-RC caution:</strong> current NVIDIA 6.0 documentation describes a full-UI crash when changing
+        physics/timeline rates away from the default and then playing. Test rate changes in a minimal standalone
+        reproduction against <code>6.0.0-rc.59</code> before adopting a stable-6.0.1 example.
+      </div>
+    </section>
+
+    <section id="decision-logic" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Causal-proof decision logic</p>
+        <h2>Symptom removal is not proof of root cause</h2>
+        <p class="section-note">Prediction, restoration, and counter-testing distinguish a real explanation from a coincidental improvement.</p>
+      </div>
+
+      <div class="proof-chain">
+        <div class="proof-step"><div class="proof-question"><span>Gate 1 · reproduce</span><strong>Did the fixed-identity baseline reproduce?</strong><small>Same commit, runtime, hardware, config/assets, seed, x₀, and action trace.</small></div><div class="proof-outcome"><span>Improve identity</span><strong>Capture a bounded reproduction bundle.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 2 · locate</span><strong>Can you name the first failed invariant and boundary?</strong><small>Not the final visible symptom—the first incorrect output after a valid input.</small></div><div class="proof-outcome"><span>Improve observability</span><strong>Add instrumentation at the adjacent boundaries.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 3 · predict</span><strong>Does the hypothesis predict a unique measurable signature?</strong><small>State what should change and what should stay unchanged.</small></div><div class="proof-outcome"><span>Refine hypothesis</span><strong>Split broad explanations into falsifiable causes.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 4 · intervene</span><strong>Did one variable move the predicted signal?</strong><small>Hold the resolved manifest and workload fixed.</small></div><div class="proof-outcome"><span>Falsified</span><strong>Test the next ranked cause.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 5 · restore</span><strong>Did restoring the baseline bring the failure back?</strong><small>Repeat enough times to expose intermittent behavior.</small></div><div class="proof-outcome"><span>Confounded</span><strong>Investigate nondeterminism or an uncontrolled change.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 6 · counter-test</span><strong>Did a predicted unaffected case remain unchanged?</strong><small>This tests whether the intervention is specific to the proposed mechanism.</small></div><div class="proof-outcome"><span>Non-specific</span><strong>The intervention is broad; narrow the claim.</strong></div></div>
+        <div class="proof-step"><div class="proof-question"><span>Gate 7 · land</span><strong>Does the fix pass nominal, held-out, safety, and performance gates?</strong><small>Retain failing-then-passing regression evidence and known limitations.</small></div><div class="proof-outcome"><span>Incomplete fix</span><strong>Measure the trade-off or redesign.</strong></div></div>
+      </div>
+
+      <h3>Where should the next probe go?</h3>
+      <div class="table-wrap" tabindex="0">
+        <table>
+          <thead><tr><th>First incorrect value appears…</th><th>Lowest starting contract</th><th>First measurement</th><th>Do not start with</th></tr></thead>
+          <tbody>
+            <tr><td>Before the first physics step</td><td>Configuration, asset, USD ownership, reset</td><td>x₀, velocities, limits, collider separation, property stack</td><td>Controller gains or domain randomization</td></tr>
+            <tr><td>Immediately after an action</td><td>Control, actuator, contact, dt</td><td>Requested/applied action, saturation, one-step state/contact</td><td>Reward shaping</td></tr>
+            <tr><td>Inside the raw sensor</td><td>Sensor model/acquisition/calibration</td><td>Known target, truth, raw payload, frame, source time</td><td>QoS or subscriber code</td></tr>
+            <tr><td>Only after ROS publication</td><td>Clock, frame/TF, QoS, transport, consumer</td><td>Internal/published/received sample identity and timestamps</td><td>Physics tuning</td></tr>
+            <tr><td>Only in the task metric</td><td>Observation/evaluator/terminal oracle</td><td>Frozen episode scored by an independent physical oracle</td><td>Policy retraining</td></tr>
+            <tr><td>Only under render/sensor/parallel load</td><td>Scheduling, synchronization, resources, cadence</td><td>Feature-toggle matrix, p50/p95, hashes, VRAM/RAM</td><td>Comparing GUI FPS alone</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="interview-framework" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">CIDER answer framework</p>
+        <h2>Give interview answers that expose your engineering judgment</h2>
+      </div>
+      <div class="trace-grid">
+        <article class="trace-card"><span>C</span><h3>Contract</h3><p>Name the expected invariant, boundary, lifecycle phase, unit, frame, time, and rate.</p></article>
+        <article class="trace-card"><span>I</span><h3>Identity</h3><p>Freeze commit, config/assets, seed, runtime, hardware, initial state, and workload.</p></article>
+        <article class="trace-card"><span>D</span><h3>Discriminate</h3><p>Rank hypotheses and choose one test with different predicted outcomes.</p></article>
+        <article class="trace-card"><span>E</span><h3>Evidence</h3><p>Name the exact trace, first bad sample, or boundary comparison that changes the decision.</p></article>
+        <article class="trace-card"><span>R</span><h3>Repair/regress</h3><p>Change one variable, restore/counter-test, land a gate, and state what remains unproven.</p></article>
+      </div>
+      <pre><code>At phase __________ and step/time __________,
+I expected __________ but observed __________.
+
+I would freeze: ______________________________________________.
+The lowest plausible failed contract is: ______________________.
+My ranked hypotheses are: 1) __________ 2) __________ 3) ______.
+
+I would change only __________ because:
+- result A would support/reject __________________________________;
+- result B would support/reject __________________________________.
+
+I retain this evidence: ________________________________________.
+The regression is: _____________________________________________.
+This still does not prove: _____________________________________.</code></pre>
+    </section>
+
+    <section id="worked-failures" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Worked reasoning examples</p>
+        <h2>Follow the evidence chain, not the tempting shortcut</h2>
+      </div>
+      <div class="failure-list">
+        <details class="failure-case" open>
+          <summary>Failure A · Robot explodes on the first physics step</summary>
+          <div class="failure-grid">
+            <div><strong>Observation</strong><span>State is finite before reset; extreme velocity or NaN appears on the first physics step before a meaningful command.</span></div>
+            <div><strong>Contract</strong><span>RESETTING must finish with finite in-limit state, declared velocity, separated colliders, valid inertia, and controller disabled.</span></div>
+            <div><strong>Hypotheses</strong><span>Reset penetration/stale velocity; bad scale/inertia/joint; duplicate command owner; dt/mass-ratio instability.</span></div>
+            <div><strong>Discriminating test</strong><span>Capture x₀/separation/action. Step once controller-free and gravity-off; restore gravity, contact, then controller independently.</span></div>
+            <div><strong>Decision</strong><span>Stable without contact but explosive with contact points to reset overlap/collider—not gains. Change only to a validated separated pose.</span></div>
+            <div><strong>Regression</strong><span>100 reset/one-step cycles assert finite state, velocity, separation, first impulse, resources; a planted overlap must fail.</span></div>
+          </div>
+        </details>
+
+        <details class="failure-case">
+          <summary>Failure B · Sensor is plausible internally but stale and rotated in ROS</summary>
+          <div class="failure-grid">
+            <div><strong>Observation</strong><span>Internal sample matches the scene; subscriber view lags and a known target is rotated after TF.</span></div>
+            <div><strong>Contract</strong><span>Same sample identity, source simulation stamp, frame/extrinsic, compatible QoS, and TF lookup at that exact stamp.</span></div>
+            <div><strong>Hypotheses</strong><span>Mixed sim/wall time; optical/body frame error; TF lookup at wrong stamp; QoS backlog; acquisition/publish cadence mismatch.</span></div>
+            <div><strong>Discriminating test</strong><span>Join internal → publisher → subscriber by sequence/hash. Log acquisition, header, receipt, frame, and T<sub>world,sensor</sub> at stamp.</span></div>
+            <div><strong>Decision</strong><span>Fix only time first. If lag disappears but rotation remains, these are two faults; then change only optical extrinsic/frame.</span></div>
+            <div><strong>Regression</strong><span>Monotonic stamps, bounded age, expected cadence, exact-stamp TF, known-axis check, pause/reset/replay cases.</span></div>
+          </div>
+        </details>
+
+        <details class="failure-case">
+          <summary>Failure C · Cameras make the run slow and the same seed diverges</summary>
+          <div class="failure-grid">
+            <div><strong>Observation</strong><span>Physics-only is fast; cameras reduce real-time factor, add p95 spikes, and same-seed trajectories diverge.</span></div>
+            <div><strong>Contract</strong><span>Control cadence is physics-owned; sensors are timestamped and consumed by policy; workload and warm-up are fixed.</span></div>
+            <div><strong>Hypotheses</strong><span>Control tied to render cadence; RTX/readback sync; blocking logging; resource accumulation; warm-up; GPU scheduling.</span></div>
+            <div><strong>Discriminating test</strong><span>Frozen matrix: physics → controller → render → one camera → all sensors → ROS/logging. Record RTF, p50/p95, memory, hashes.</span></div>
+            <div><strong>Decision</strong><span>If first divergence appears only with render, move control to physics cadence and use explicit timestamped sensor hold/drop policy.</span></div>
+            <div><strong>Regression</strong><span>Hardware/version-stamped scaling matrix, RTF/p95 budgets, bounded memory, correctness, and same-hardware hash/tolerance.</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="answer-practice" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Reasoning practice</p>
+        <h2>Answer “why” before revealing the path</h2>
+      </div>
+      <div class="question-list">
+        <details class="reasoning-question"><summary>Why must SimulationApp exist before most Isaac/Omniverse imports in standalone code?</summary><div><p>The APIs are supplied by the running Kit extension/plugin system. Creating the app establishes that runtime. The engineering consequence is that import order becomes a startup contract: ordinary CLI parsing can precede it, but runtime-dependent imports follow it.</p></div></details>
+        <details class="reasoning-question"><summary>Why is reset a barrier rather than “just set the poses”?</summary><div><p>Reset coordinates every stateful owner: physics/views, pose and velocity, controller memory, sensor buffers, task counters, sampled parameters, and time policy. Control or sensing before the barrier can consume stale or invalid state, so readiness must be asserted explicitly.</p></div></details>
+        <details class="reasoning-question"><summary>Why log requested and applied actions separately?</summary><div><p>Delay, rate limits, saturation, actuator/drive semantics, safety state, and watchdogs can change the physical command. Motion responds to the applied action. Without both values, controller error can be confused with actuator or safety behavior.</p></div></details>
+        <details class="reasoning-question"><summary>Why inspect raw contact before tuning friction?</summary><div><p>Collider geometry, initial penetration, mass/inertia, contact/rest offsets, dt, and solver resolution decide whether and how constraints form. A filtered sensor can also hide raw contacts through thresholds. Friction tuning around a geometry or timing defect hides the cause.</p></div></details>
+        <details class="reasoning-question"><summary>Why is a seed not a complete reproduction identity?</summary><div><p>The sampled sequence also depends on code/config/assets, RNG owners/order, runtime/physics version, hardware, initialization order, and action trace. GPU scheduling and floating-point order can diverge across environments. Record the realized parameters and x₀, not only the seed.</p></div></details>
+        <details class="reasoning-question"><summary>Why can a ROS topic be discovered but still deliver no useful samples?</summary><div><p>Discovery only proves DDS participants see endpoints. Publisher/consumer QoS can be incompatible, queues can retain stale data, the graph trigger or sensor may not execute, frames/time can be invalid, and bandwidth/consumer work can miss deadlines. Trace one sample end to end.</p></div></details>
+        <details class="reasoning-question"><summary>Why is GUI FPS not simulation throughput?</summary><div><p>GUI FPS describes render/app updates. Physics steps, simulated seconds per wall second, sensor production, environment steps, and p95 latency are separate quantities. Define a workload and measure the rate that matches the engineering claim.</p></div></details>
+        <details class="reasoning-question"><summary>What makes a change causal evidence rather than a lucky improvement?</summary><div><p>The hypothesis predicts a unique signal; one variable moves that signal; restoring the baseline restores the failure; an unaffected counter-example stays unchanged; and the candidate fix passes nominal, held-out, safety, and performance gates.</p></div></details>
+      </div>
+      <div class="card-actions"><a class="button" href="practice.html#scenarios">Continue with diagnostic scenarios</a><a class="button secondary" href="architecture.html#matrix">Use the symptom matrix</a></div>
+    </section>
+
+    <section id="version-guard" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Version and API guard</p>
+        <h2>Keep the learning path aligned with Isaac Sim 6.0</h2>
+      </div>
+      <div class="evidence-pair-grid">
+        <article class="evidence-pair"><h3>Use now</h3><ul><li>Installed <code>6.0.0-rc.59</code> identity in every run</li><li>Isaac Sim 6.0/6.0.1 documentation with local API verification</li><li><code>isaacsim.sensors.experimental.physics</code> for current physics sensors</li><li>Isaac Lab when parallel learning/randomization becomes necessary</li></ul></article>
+        <article class="evidence-pair"><h3>Avoid category mistakes</h3><ul><li>Do not install deprecated standalone Isaac Gym/IsaacGymEnvs</li><li>Do not copy 4.x/5.x imports into 6.0 without checking</li><li>Do not read runtime handles before initialization/reset</li><li>Do not let two loop owners advance physics</li></ul></article>
+      </div>
+    </section>
+
+    <section id="references" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Official source map · reviewed 13 July 2026</p>
+        <h2>Read the source that owns the contract</h2>
+      </div>
+      <div class="reference-grid">
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/workflows.html">Isaac Sim workflows<span>GUI, extension, and standalone execution semantics.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/py/source/extensions/isaacsim.simulation_app/docs/api.html">SimulationApp API<span>Runtime construction, update, lifecycle, cleanup, and exit code.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/core_api_tutorials/tutorial_core_hello_world.html">6.0 standalone Hello World<span>App-before-import ordering and the World reset/step pattern.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/py/source/extensions/isaacsim.core.simulation_manager/docs/index.html">Simulation Manager<span>Play/setup/step/pause/stop lifecycle and event boundaries.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/physics/simulation_fundamentals.html">Physics fundamentals<span>Timestep, stepping, contact, collision, and simulation behavior.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/physics/new_physics_engine.html">Physics data flow<span>USD authoring, physics tensors, Fabric, and engine integration.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/sensors/isaacsim_sensors_physics_contact.html">Contact sensor<span>Filtered versus raw contact data and diagnostic fields.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/isaacsim_sensors_multitick_rendering.html">Multi-tick rendering<span>Sensor scheduling, source timing, and multi-rate rendering.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_clock.html">ROS 2 clock<span><code>/clock</code>, <code>use_sim_time</code>, reset, and system-time distinction.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_publish_rate.html">ROS 2 publish rates<span>Physics, timeline, app-loop, sensor tick, and wall-rate capacity.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_qos.html">Isaac Sim ROS 2 QoS<span>Publisher/subscriber QoS configuration and compatibility.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_tf.html">Isaac Sim ROS 2 TF<span>Transforms, odometry, frames, and publication flow.</span></a>
+        <a href="https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html">ROS 2 QoS concepts<span>Reliability, durability, history, depth, and endpoint compatibility.</span></a>
+        <a href="https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Tf2/Adding-A-Frame-Py.html">ROS 2 tf2 frames<span>Single-parent frame trees and local sensor-frame reasoning.</span></a>
+        <a href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_base_env.html">Isaac Lab environment flow<span>Environment reset/step and control decimation.</span></a>
+        <a href="https://isaac-sim.github.io/IsaacLab/main/source/features/reproducibility.html">Isaac Lab reproducibility<span>Seed scope, hardware/runtime identity, and determinism limits.</span></a>
+        <a href="https://isaac-sim.github.io/IsaacLab/main/source/migration/migrating_from_isaacgymenvs.html">Isaac Gym migration<span>Why Isaac Lab replaces deprecated IsaacGymEnvs workflows.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/omniverse_usd/open_usd.html">OpenUSD in Isaac Sim<span>Stages, layers, prims, attributes, and composition.</span></a>
+        <a href="https://openusd.org/release/glossary.html">OpenUSD glossary<span>Edit targets, session layers, authored opinions, and composition terms.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/reference_material/sim_performance_optimization_handbook.html">Performance handbook<span>Workload design, scaling, bottlenecks, and optimization boundaries.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html">Tracy profiling<span>CPU/GPU timeline inspection and profiler-overhead cautions.</span></a>
+        <a href="architecture.html">Course architecture guide<span>Layer ownership, fault isolation matrix, playbooks, and evidence packet.</span></a>
+        <a href="resources.html">Deep resource route<span>Task-indexed reading with extraction and build stop conditions.</span></a>
+        <a href="practice.html">Practice lab<span>Interview questions, diagnostics, and coding drills.</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Think in contracts, sequences, states, evidence, and falsifiable decisions.</p>
+    <div class="footer-links">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="resources.html">Deep resources</a>
+      <a href="practice.html">Practice</a>
+      <a href="../index.html">Portfolio</a>
+      <a href="#main">Back to top</a>
+    </div>
+  </footer>
+</body>
+</html>
