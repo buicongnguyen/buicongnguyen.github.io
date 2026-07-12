@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A 14-day practical fast track and deep robotics simulation engineering course for Isaac Sim, robot models, dynamics, contact, ROS 2, sensors, validation, performance, and CI.">
+  <meta name="theme-color" content="#087968">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Robotics Simulation Engineering: Model, Validate, Scale">
+  <meta property="og:description" content="A portfolio-oriented course for building, validating, and scaling high-fidelity robot simulations.">
+  <meta property="og:url" content="https://buicongnguyen.github.io/robotics-simulation-engineer/">
+  <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/">
+  <title>Robotics Simulation Engineering Course | Bui Cong Nguyen</title>
+  <link rel="stylesheet" href="course.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to course content</a>
+
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="Bui Cong Nguyen portfolio home">
+      <img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="">
+      <span>Bui Cong Nguyen</span>
+    </a>
+    <nav aria-label="Course navigation">
+      <a href="#fast-track">14-day track</a>
+      <a href="#flow">Flow</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="#definitions">Definitions</a>
+      <a href="#curriculum">Modules</a>
+      <a href="#capstone">Capstone</a>
+      <a href="resources.html">Deep resources</a>
+      <a href="practice.html">Practice</a>
+      <a href="../index.html">Portfolio</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="course-title">
+      <div>
+        <p class="eyebrow">RTX 4080 SUPER · Isaac Sim installed · application fast track</p>
+        <h1 id="course-title">Robotics Simulation Engineering: Model, Validate, Scale</h1>
+        <p class="lede">
+          Start with the installed Isaac Sim runtime and build one measured manipulation pipeline quickly. The
+          14-day route prioritizes robot-model audit, physics/contact validation, control, ROS 2, sensors, seeded
+          evaluation, profiling, and public evidence. The ten-module route then develops the deeper theory.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#fast-track">Start the 14-day sprint</a>
+          <a class="button secondary" href="architecture.html">See the system &amp; debug map</a>
+          <a class="button secondary" href="resources.html">Open deep resource guide</a>
+          <a class="button secondary" href="practice.html">Open 50-question lab</a>
+          <a class="button secondary" href="#capstone">View the capstone</a>
+        </div>
+      </div>
+
+      <aside class="hero-panel" aria-label="Course summary">
+        <p class="eyebrow">Fastest credible path</p>
+        <dl>
+          <div><dt>Apply-ready</dt><dd>14 days</dd></div>
+          <div><dt>Primary</dt><dd>Isaac Sim</dd></div>
+          <div><dt>Local GPU</dt><dd>4080 SUPER</dd></div>
+          <div><dt>Deep track</dt><dd>10 modules</dd></div>
+          <div><dt>Interview</dt><dd>50 MCQs</dd></div>
+          <div><dt>Flagship</dt><dd>Pick &amp; place</dd></div>
+        </dl>
+        <p class="section-note">
+          Apply from Day 8 with honest v0.1 evidence; keep improving while interviews run. Progress is stored only
+          in this browser and never represents a credential.
+        </p>
+      </aside>
+    </section>
+
+    <div class="progress-shell">
+      <div class="progress-inner">
+        <strong>Course progress</strong>
+        <progress
+          id="course-progress-bar"
+          class="course-progress"
+          aria-label="Completed course modules"
+          max="100"
+          value="0"
+        >0%</progress>
+        <div>
+          <span id="course-progress-count" class="progress-count" aria-live="polite">0 / 10 modules · 0%</span>
+          <button id="course-progress-reset" class="text-button" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="fast-track" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">14-day application-ready sprint</p>
+        <h2>Build one flagship pipeline before surveying everything</h2>
+        <p class="section-note">
+          Target project: <strong>Franka contact-calibrated pick-and-place validation pipeline</strong>. Work in a
+          daily loop: no more than 45 minutes of targeted reading, then build, measure, record, and publish. A day
+          is complete only when its evidence gate passes. The 14-day target assumes 6–8 focused hours per day;
+          keep the same order and stretch the calendar if your available time is lower.
+        </p>
+      </div>
+
+      <div class="callout">
+        <strong>Application strategy:</strong> publish v0.1 and begin applying on Day 8. Continue calibration,
+        robustness, performance, and documentation while interviews are in progress. Do not wait to finish every
+        deep module before contacting employers. Start the ROS 2/Pixi setup on Day 1 in parallel; if the local RC
+        bridge is incompatible, keep the standalone Isaac v0.1 moving and label the ROS contract as not yet executed.
+      </div>
+
+      <div class="machine-grid">
+        <article class="card">
+          <span class="status-badge">Ready</span>
+          <h3>RTX 4080 SUPER</h3>
+          <p>16,376 MiB VRAM, compute capability 8.9, driver 591.86. Suitable for Isaac Sim; benchmark adaptive environment counts instead of promising a fixed maximum.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge">Pin this build</span>
+          <h3>Isaac Sim 6.0 RC</h3>
+          <p><code>C:\isaacsim</code>, build <code>6.0.0-rc.59</code>, Kit 110.1.1, bundled Python 3.12.13. Record the full VERSION string in every experiment.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge gap">First gap</span>
+          <h3>Full ROS 2 environment</h3>
+          <p>Isaac bundles Jazzy bridge libraries, but <code>ros2</code> and <code>colcon</code> are not installed. Begin the NVIDIA-supported Windows Jazzy/Pixi route on Day 1 and finish bridge verification by Day 6.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge gap">Watch memory</span>
+          <h3>34 GB system RAM</h3>
+          <p>The compatibility check passed, but RAM is near NVIDIA’s minimum. Close other GPU/RAM-heavy apps for RTX sensors, Replicator, and parallel runs.</p>
+        </article>
+      </div>
+
+      <pre class="local-command"><code># Run Isaac labs with the bundled Python—not Miniconda Python 3.13 or py 3.14
+Set-Location C:\isaacsim
+.\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
+.\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py
+.\python.bat .\standalone_examples\api\isaacsim.asset.importer.urdf\urdf_import.py --test
+.\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1</code></pre>
+
+      <div class="priority-grid spaced-grid">
+        <article class="card">
+          <span class="number">Do now</span>
+          <h3>Isaac Sim + Python + evidence</h3>
+          <p>Standalone scripting, robot import/audit, physics checks, joint gains, manipulation, sensors, ROS 2 contract, evaluation, profiling, tests, and documentation.</p>
+        </article>
+        <article class="card">
+          <span class="number">Add after Day 8</span>
+          <h3>Isaac Lab and robustness</h3>
+          <p>Vectorized environments, domain randomization, controlled scaling, and optional small policy training only after the scripted baseline and metrics work.</p>
+        </article>
+        <article class="card">
+          <span class="number">Defer</span>
+          <h3>Secondary stacks</h3>
+          <p>MuJoCo/MJX, Gazebo, custom C++, GR00T, HIL, and multi-simulator parity are useful extensions, not prerequisites for the first application package.</p>
+        </article>
+      </div>
+
+      <div class="sprint-progress-panel">
+        <strong>14-day sprint progress</strong>
+        <progress id="sprint-progress-bar" class="course-progress" aria-label="Completed fast-track days" max="100" value="0">0%</progress>
+        <div>
+          <span id="sprint-progress-count" aria-live="polite">0 / 14 days · 0%</span>
+          <button id="sprint-progress-reset" class="text-button" type="button">Reset</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="sprint-table">
+          <caption>Fourteen-day practical learning and portfolio schedule</caption>
+          <thead>
+            <tr>
+              <th scope="col">Done</th>
+              <th scope="col">Day and focus</th>
+              <th scope="col">Build and publish</th>
+              <th scope="col">Evidence gate</th>
+              <th scope="col">Just-in-time reading</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" value="day-1" data-sprint-check aria-label="Mark Day 1 complete"></td>
+              <th scope="row"><span class="day-title">Day 1 · Preflight and baseline</span>Record Sim/Kit/Python/driver/VRAM/RAM, units, axes, timestep, seed, and launch mode. Start ROS 2 Jazzy/Pixi installation in parallel.</th>
+              <td><code>environment.md</code>, version manifest, bounded headless smoke command, two same-seed runs, ROS setup log.</td>
+              <td>One documented command exits 0 twice, produces finite state, and requires no GUI interaction after launch.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/workflows.html">Workflows</a><a class="day-link" href="https://docs.nvidia.com/learning/physical-ai/getting-started-with-isaac-sim/latest/index.html">NVIDIA course</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-2" data-sprint-check aria-label="Mark Day 2 complete"></td>
+              <th scope="row"><span class="day-title">Day 2 · Robot import, repair, and audit</span>Use the installed Franka asset; separately exercise the built-in UR10 importer. Repair one deliberately bad inertial/collider or author a payload/tool link with calculated inertia.</th>
+              <td>Importer command/script, model card, before/after repair evidence, collision screenshots, automated inertia and joint-tree checks.</td>
+              <td>All movable joints traverse declared limits; masses/inertias are valid; the repair test fails before and passes after. A 10,000-step finite-state run proves stability only, not model accuracy.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/import_urdf.html">URDF import</a><a class="day-link" href="https://docs.ros.org/en/jazzy/Tutorials/Intermediate/URDF/Adding-Physical-and-Collision-Properties-to-a-URDF-Model.html">URDF physics</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-3" data-sprint-check aria-label="Mark Day 3 complete"></td>
+              <th scope="row"><span class="day-title">Day 3 · Canonical physics</span>Script free fall, pendulum, and inclined-plane/slide tests before tuning the gripper.</th>
+              <td>CSV/JSON traces, analytical comparison plots, timestep/substep sweep, findings note.</td>
+              <td>Record formula, observable, initial conditions, and units. The chosen project targets (&lt;3% fall time, &lt;5% period, &lt;2% repeat variance) must converge under a smaller timestep or be revised with evidence.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/physics/simulation_fundamentals.html">Physics fundamentals</a><a class="day-link" href="https://mujoco.readthedocs.io/en/stable/computation/index.html">Contact/dynamics depth</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-4" data-sprint-check aria-label="Mark Day 4 complete"></td>
+              <th scope="row"><span class="day-title">Day 4 · Joint control</span>Run step/chirp responses, tune stiffness/damping, add velocity/effort saturation and delay, test three payloads.</th>
+              <td>Gain manifest, tracking/torque plots, failure case, and chosen configuration.</td>
+              <td>Declared joint target: &lt;10% overshoot, &lt;1° steady error, &lt;2 s settling, zero limit violations across payloads.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup_tutorials/joint_tuning.html">Gain Tuner lab</a><a class="day-link" href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/">Dynamics/control depth</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-5" data-sprint-check aria-label="Mark Day 5 complete"></td>
+              <th scope="row"><span class="day-title">Day 5 · Contact-rich manipulation</span>Implement approach, grasp, lift, hold, and place states with contact/effort logging and explicit failures. Seeded cases perturb initial pose and payload.</th>
+              <td>Config-driven workcell, state machine, failure codes, force/slip traces, 30–60 second video.</td>
+              <td>At least 18/20 declared pose/payload cases succeed; object holds for 5 seconds within force and penetration bounds defined in the task config.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/index.html">Physics sensors</a><a class="day-link" href="https://underactuated.mit.edu/contact.html">Contact depth</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-6" data-sprint-check aria-label="Mark Day 6 complete"></td>
+              <th scope="row"><span class="day-title">Day 6 · Full ROS 2 Jazzy setup</span>Install the supported Windows/Pixi development environment; bridge clock, joint state, commands, TF, and static TF.</th>
+              <td>Environment instructions, scripted bridge/graph, topic/QoS/frame contract, TF diagram, rosbag metadata.</td>
+              <td><code>ros2 topic</code> introspection works; TF is connected; achieved rates are within 10% of configured simulation-time rates; stamps are monotonic sim time; commands move named joints.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">Windows ROS 2</a><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/ros2_reference_architecture.html">Reference architecture</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-7" data-sprint-check aria-label="Mark Day 7 complete"></td>
+              <th scope="row"><span class="day-title">Day 7 · Sensor pipeline</span>Add RGB-D plus contact/effort sensing; validate frame, rate, timestamp, noise/latency, and schema.</th>
+              <td>RGB/depth sample, calibration/config card, rate/timestamp report, 60-second capture.</td>
+              <td>Known target projects into the expected frame; rates meet the configured tolerance; stamps align within one declared sim step; invalid frames are zero unless deliberately injected.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/isaacsim_sensors_camera.html">Camera sensors</a><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_camera.html">ROS camera</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-8" data-sprint-check aria-label="Mark Day 8 complete"></td>
+              <th scope="row"><span class="day-title">Day 8 · Experiment runner; apply</span>Build config-driven run, sweep, evaluate, and replay commands with seeded resets and automatic artifacts.</th>
+              <td>Public v0.1 case study, short README, architecture sketch, limitations, result table, Day-5 demo, per-episode metrics, aggregate summary, and captured failures.</td>
+              <td>A fresh Isaac terminal runs one command and creates config snapshot, environment manifest, metrics, and failure replay artifacts; a reviewer can understand the result in under ten minutes.</td>
+              <td><a class="day-link" href="#module-6">Evaluation module</a><a class="day-link" href="resources.html#stage-5">Task resources</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-9" data-sprint-check aria-label="Mark Day 9 complete"></td>
+              <th scope="row"><span class="day-title">Day 9 · Calibration</span>Run sensitivity/identifiability checks, then fit only supported parameters with separate calibration and held-out traces. A phone-recorded ramp or pendulum is a valuable small physical check.</th>
+              <td>Parameter sweep/optimizer, parameter provenance, train/held-out curves, residual analysis.</td>
+              <td>Held-out error improves beyond the measured repeatability/noise bound; otherwise report no demonstrated calibration benefit. Without physical data, label it sim-to-sim surrogate calibration.</td>
+              <td><a class="day-link" href="#module-7">Calibration module</a><a class="day-link" href="https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/01-overview.html">Sim-to-real course</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-10" data-sprint-check aria-label="Mark Day 10 complete"></td>
+              <th scope="row"><span class="day-title">Day 10 · Randomization and robustness</span>Run standalone seeded Monte Carlo first; derive ranges from uncertainty and vary mass, friction, gains, delay, pose, and noise separately and together. Isaac Lab is optional after an RC compatibility check.</th>
+              <td>Typed distributions, 200+ seeded episodes, ablation plot, failure heatmap, nominal/held-out/worst-quartile table.</td>
+              <td>Every range has provenance; exact seeds reproduce sampled parameters/results within tolerance; failure boundary is reported honestly.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/replicator_tutorials/tutorial_replicator_ur10_palletizing.html">UR10 randomization</a><a class="day-link" href="resources.html#stage-6">Isaac Lab route</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-11" data-sprint-check aria-label="Mark Day 11 complete"></td>
+              <th scope="row"><span class="day-title">Day 11 · RTX 4080 SUPER profiling</span>Profile the actual capstone and label <code>benchmark_core_world</code> separately. Compare headless/rendered and sensors off/on; try 1/16/64/256 only where the workload supports cloning.</th>
+              <td>Hardware/version-stamped benchmark, RTF or steps/s, reset latency, VRAM/utilization chart, Tracy capture, before/after optimization.</td>
+              <td>At least three controlled configurations, one variable per comparison, and one measured optimization. Claim only observed numbers.</td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html">Tracy</a><a class="day-link" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/how-to/simulation_performance.html">Isaac Lab tuning</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-12" data-sprint-check aria-label="Mark Day 12 complete"></td>
+              <th scope="row"><span class="day-title">Day 12 · Regression tests and CI</span>Add model, inertia, limit, finite-state, reset, ROS contract, and metric gates.</th>
+              <td>Pure-Python public CI plus local Isaac verification suite; JUnit/JSON failure output and injected-bad-model proof.</td>
+              <td>Public CI and local GPU suite pass; a deliberate bad inertia or NaN fails the intended gate. Do not imply hosted CI runs Isaac.</td>
+              <td><a class="day-link" href="resources.html#stage-7">Performance and CI guide</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-13" data-sprint-check aria-label="Mark Day 13 complete"></td>
+              <th scope="row"><span class="day-title">Day 13 · Portfolio and interview</span>Produce architecture/TF diagrams, README, model/physics cards, results table, limitations, and a 2–3 minute demo.</th>
+              <td>Five-minute technical walkthrough and 45-minute mock interview across six failure scenarios.</td>
+              <td>A colleague follows the quickstart; every plot/parameter has an explanation; weak mock-interview answers are repaired.</td>
+              <td><a class="day-link" href="practice.html">50-question lab</a><a class="day-link" href="#finish-line">Public finish line</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" value="day-14" data-sprint-check aria-label="Mark Day 14 complete"></td>
+              <th scope="row"><span class="day-title">Day 14 · Release and apply</span>Fresh-clone review, provenance/license check, secrets/large-file cleanup, release tag, Pages case study, resume bullets, targeted pitch.</th>
+              <td>Public repo, page, demo, versioned results, prerequisites, three-command reproduction path, tailored application.</td>
+              <td>All public links work and every application claim points to measured evidence with exact version, hardware, seed, and sample count.</td>
+              <td><a class="day-link" href="#job-map">Job-skill map</a><a class="day-link" href="#capstone">Evidence package</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="outcomes" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Completion standard</p>
+        <h2>What this course is designed to prove</h2>
+        <p class="section-note">
+          Reading is preparation. Completion requires source-controlled artifacts, repeatable commands, measured
+          results, and an honest record of limitations.
+        </p>
+      </div>
+      <div class="outcome-grid">
+        <article class="card">
+          <span class="number">01 · Model</span>
+          <h3>Engineer robot assets</h3>
+          <p>Author or repair URDF/MJCF/SDF/USD assets with explicit frames, joints, limits, mass, inertia, collision, and actuator properties.</p>
+        </article>
+        <article class="card">
+          <span class="number">02 · Measure</span>
+          <h3>Validate physical behavior</h3>
+          <p>Use drop, slide, pendulum, tracking, and contact experiments to separate model errors from solver and control errors.</p>
+        </article>
+        <article class="card">
+          <span class="number">03 · Integrate</span>
+          <h3>Connect the robotics stack</h3>
+          <p>Publish sensors and joint state, consume commands, maintain TF and simulation time, and capture replayable ROS 2 runs.</p>
+        </article>
+        <article class="card">
+          <span class="number">04 · Transfer</span>
+          <h3>Calibrate before randomizing</h3>
+          <p>Fit uncertain parameters on calibration traces, evaluate held-out motions, and randomize around defensible uncertainty ranges.</p>
+        </article>
+        <article class="card">
+          <span class="number">05 · Scale</span>
+          <h3>Profile parallel simulation</h3>
+          <p>Benchmark headless throughput, rendering and sensor cost, reset paths, host-device transfers, and batched environments.</p>
+        </article>
+        <article class="card">
+          <span class="number">06 · Deliver</span>
+          <h3>Build production evidence</h3>
+          <p>Add finite-state checks, seeded tests, CI smoke runs, config provenance, architecture notes, and an asynchronous handoff.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="flow" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Important learning order</p>
+        <h2>Follow this flow; do not skip ahead</h2>
+        <p class="section-note">
+          Each stage removes a different class of error. Do not tune a policy around a broken robot model, and do
+          not call randomization “sim-to-real” before the nominal physics and controller have measurable baselines.
+        </p>
+      </div>
+      <div class="pipeline">
+        <div><strong>1 · Reproduce</strong><span>pin versions, units, seed, timestep, launch</span></div>
+        <div><strong>2 · Model and audit</strong><span>frames, joints, limits, mass, inertia, collision</span></div>
+        <div><strong>3 · Validate physics</strong><span>drop, slide, pendulum, solver and contact</span></div>
+        <div><strong>4 · Control contact</strong><span>gains, limits, delay, grasp, failure states</span></div>
+        <div><strong>5 · Integrate</strong><span>ROS 2, TF, clock, commands, sensors, QoS</span></div>
+        <div><strong>6 · Evaluate</strong><span>calibrate, seed, randomize, ablate, replay</span></div>
+        <div><strong>7 · Deliver</strong><span>profile, regress, document, publish, apply</span></div>
+      </div>
+      <div class="callout">
+        <strong>Dependency rule:</strong> model gate → physics gate → control/contact gate → interface gate →
+        evaluation gate. Reinforcement learning is optional; these five gates are not.
+      </div>
+    </section>
+
+    <section id="definitions" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Important definitions</p>
+        <h2>Know these well enough to diagnose a failure</h2>
+        <p class="section-note">
+          Memorize the contract and the failure mode—not only the vocabulary. Use the linked
+          <a href="resources.html">deep resource route</a> when a definition is still fuzzy.
+        </p>
+      </div>
+      <div class="definition-grid">
+        <article class="card">
+          <h3>USD stage, prim, and layer</h3>
+          <p>A stage is the composed scene, a prim is a named scene object, and layers contribute ordered property opinions.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a session-layer edit disappears, or a stronger layer silently overrides the value you tuned.</p>
+        </article>
+        <article class="card">
+          <h3>Link, joint, and articulation</h3>
+          <p>A link is a rigid body; a joint constrains relative motion; an articulation solves a connected multibody tree as one system.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> the joint axis, parent/child frame, limit, or articulation root is wrong.</p>
+        </article>
+        <article class="card">
+          <h3>Visual versus collision geometry</h3>
+          <p>Visual meshes create appearance. Collision shapes define the geometry the physics solver actually contacts.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a beautiful high-poly or concave mesh causes slow, noisy, or impossible contact.</p>
+        </article>
+        <article class="card">
+          <h3>Mass, center of mass, and inertia</h3>
+          <p>Mass sets translational resistance, the center of mass locates it, and the inertia tensor sets rotational resistance about an inertial frame.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> non-positive or physically impossible inertia makes the robot explode or rotate unrealistically.</p>
+        </article>
+        <article class="card">
+          <h3>Frame and unit convention</h3>
+          <p>A value is meaningful only with a named reference frame, axis/handedness convention, unit, and timestamp; poses also require a rotation convention.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> meters/millimeters, degrees/radians, quaternion order, or optical/body frames are silently mixed.</p>
+        </article>
+        <article class="card">
+          <h3>Verification, validation, and calibration</h3>
+          <p>Verification asks whether the implementation matches its specification; validation asks whether it matches the intended observable; calibration estimates parameters from data.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a test that proves code consistency is presented as proof of physical accuracy.</p>
+        </article>
+        <article class="card">
+          <h3>Forward and inverse kinematics</h3>
+          <p>Forward kinematics maps joint coordinates to a pose. Inverse kinematics finds joint coordinates for a desired pose, often with multiple or no solutions.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> an unreachable target or frame mismatch is misdiagnosed as a controller problem.</p>
+        </article>
+        <article class="card">
+          <h3>Contact, friction, and restitution</h3>
+          <p>Contact constraints limit and resolve interpenetration according to geometry, offsets, timestep, and solver settings; friction opposes tangential motion and restitution controls rebound.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> extreme friction is used to hide bad collision shapes, mass, gains, or gripper force.</p>
+        </article>
+        <article class="card">
+          <h3>Timestep, substep, and solver iteration</h3>
+          <p>The timestep advances simulation time; substeps divide integration; solver iterations improve constraint convergence within a step.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> changing <code>dt</code> also changes the controller or sensor rate and invalidates the comparison.</p>
+        </article>
+        <article class="card">
+          <h3>PD control and critical damping</h3>
+          <p>PD control uses position and velocity error. Critical damping is a useful single-DOF starting estimate, not a universal articulated-robot gain.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> gains ignore effective inertia, units, command rate, saturation, and payload.</p>
+        </article>
+        <article class="card">
+          <h3>Actuator model</h3>
+          <p>The actuator contract includes command mode, gear/transmission, effort and velocity limits, saturation, deadband, friction, and delay.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> an ideal unlimited drive makes a task look easier than any physical motor can achieve.</p>
+        </article>
+        <article class="card">
+          <h3>Simulation time, wall time, and RTF</h3>
+          <p>Simulation time belongs to the virtual world; wall time is elapsed real time; real-time factor is simulated time divided by wall time.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a ROS node uses wall time while the simulator pauses or runs faster than real time.</p>
+        </article>
+        <article class="card">
+          <h3>URDF, MJCF, SDF, and USD</h3>
+          <p>URDF describes robot trees, MJCF is MuJoCo-native, SDF covers models and worlds, and USD composes rich scenes and schemas.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> successful conversion is mistaken for identical joints, contacts, drives, and solver semantics.</p>
+        </article>
+        <article class="card">
+          <h3>ROS graph, QoS, TF, and clock</h3>
+          <p>Nodes exchange topics, services, and actions; QoS controls delivery; TF relates timestamped frames; <code>/clock</code> provides simulation time.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> matching topic names still fail because QoS, frame IDs, timestamps, or <code>use_sim_time</code> disagree.</p>
+        </article>
+        <article class="card">
+          <h3>Calibration versus randomization</h3>
+          <p>Calibration/system identification estimates parameters from data. Domain randomization samples justified uncertainty around a model.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a broad randomization range hides a biased nominal model instead of explaining it.</p>
+        </article>
+        <article class="card">
+          <h3>Sensitivity and identifiability</h3>
+          <p>Sensitivity measures how an observable changes with a parameter. A parameter is identifiable only when the available excitation/data can distinguish its effect.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> friction, damping, inertia, and delay are fit together even though many combinations explain the same trace.</p>
+        </article>
+        <article class="card">
+          <h3>Solver convergence and contact offsets</h3>
+          <p>Residual/convergence describe how well constraints are solved. Contact and rest offsets control when contact is generated and the separation the solver targets.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> more iterations appear to fix contact while the collider, offset, timestep, or mass ratio remains wrong.</p>
+        </article>
+        <article class="card">
+          <h3>Determinism and reproducibility</h3>
+          <p>Determinism concerns repeated outcomes; reproducibility also records code, config, versions, hardware, seed, commands, and tolerance.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> “same seed” is treated as sufficient despite changed assets, parallel ordering, or GPU/runtime versions.</p>
+        </article>
+        <article class="card">
+          <h3>Headless and vectorized simulation</h3>
+          <p>Headless runs without an interactive UI; vectorized simulation batches many environments to amortize work and exploit parallel hardware.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> Python loops, rendering, sensors, or synchronization erase the expected GPU scaling.</p>
+        </article>
+        <article class="card">
+          <h3>Fidelity and sim-to-real evidence</h3>
+          <p>Fidelity is accuracy for declared observables and conditions. Sim-to-real evidence requires measured performance on physical hardware.</p>
+          <p class="failure-note"><strong>Failure to catch:</strong> a realistic render or synthetic held-out test is presented as proof of real-world transfer.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="simulators" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Tool selection</p>
+        <h2>Choose by evidence need, not brand</h2>
+        <p class="section-note">
+          Finish one primary track deeply. Use a second simulator only when it answers a real validation or integration question.
+        </p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Recommended role for each simulator in this course</caption>
+          <thead>
+            <tr>
+              <th scope="col">Simulator</th>
+              <th scope="col">Best course use</th>
+              <th scope="col">Native model emphasis</th>
+              <th scope="col">Evidence to produce</th>
+              <th scope="col">Watch for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">NVIDIA Isaac Sim / Isaac Lab</th>
+              <td>Primary GPU track for articulated robots, rich sensors, synthetic data, ROS 2, and parallel learning workflows.</td>
+              <td>USD assets, imported URDF/MJCF, PhysX articulations.</td>
+              <td>Scripted scene, sensor/ROS graph, reset test, parallel benchmark, optional policy.</td>
+              <td>Rendering cost, extension/API changes, asset units, CPU/GPU synchronization.</td>
+            </tr>
+            <tr>
+              <th scope="row">MuJoCo / MJX</th>
+              <td>Compact dynamics and control reference, canonical physics experiments, optimization, and batched rollouts.</td>
+              <td>MJCF; URDF can be loaded but usually needs simulator-specific completion.</td>
+              <td>Analytical checks, controller response, parameter sweep, cross-simulator metrics.</td>
+              <td>Model conversion semantics, contact differences, hidden defaults, apples-to-oranges solver settings.</td>
+            </tr>
+            <tr>
+              <th scope="row">Gazebo</th>
+              <td>ROS 2-centered integration, SDF worlds, sensor and plugin workflows, and simulator-agnostic interface practice.</td>
+              <td>SDF plus URDF/Xacro and ros2_control integration.</td>
+              <td>Launch package, bridge configuration, TF/topic contract, headless integration test.</td>
+              <td>ROS/Gazebo release compatibility, bridge QoS, plugin availability, simulation-time setup.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <strong>Recommended path:</strong> ship the Isaac Sim v0.1 before adding a second simulator. After Day 8,
+        use MuJoCo for one dynamics/control reference or Gazebo for one ROS 2 parity lab only when the comparison
+        answers a stated engineering question.
+      </div>
+    </section>
+
+    <section id="curriculum" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">80–120 hour engineering curriculum</p>
+        <h2>Ten detailed modules, ten evidence gates</h2>
+        <p class="section-note">
+          Each module now includes applied definitions, a three-lab sequence, failure-diagnosis prompts, exact
+          deliverables, and just-in-time references. Check it only when its gate passes; reading alone never counts.
+          Time ranges assume prior Python and general software-engineering experience.
+        </p>
+      </div>
+
+      <nav id="module-index" class="module-jump-grid" aria-label="Detailed module index">
+        <a href="#module-0"><span>Module 0</span>Baseline and provenance</a>
+        <a href="#module-1"><span>Module 1</span>Dynamics and contact</a>
+        <a href="#module-2"><span>Module 2</span>Robot model engineering</a>
+        <a href="#module-3"><span>Module 3</span>Isaac scene pipeline</a>
+        <a href="#module-4"><span>Module 4</span>Actuation and control</a>
+        <a href="#module-5"><span>Module 5</span>Sensors and ROS 2</a>
+        <a href="#module-6"><span>Module 6</span>Task and evaluation</a>
+        <a href="#module-7"><span>Module 7</span>Calibration and transfer</a>
+        <a href="#module-8"><span>Module 8</span>Randomization and Lab</a>
+        <a href="#module-9"><span>Module 9</span>Performance and CI</a>
+      </nav>
+
+      <div class="callout">
+        <strong>Version contract:</strong> local commands below were verified to exist in
+        <code>C:\isaacsim</code> build <code>6.0.0-rc.59</code>. Linked documentation follows the current stable
+        6.0.x/Isaac Lab beta route, so record any API difference instead of assuming parity. Paths containing
+        <code>experimental</code> are non-deprecated in this installation but API-unstable; NVIDIA assets may require
+        network access on first use.
+      </div>
+
+      <div class="module-list">
+        <article id="module-0" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-0" data-module-check> Module 0</label>
+            <span class="hours">6–8 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Reproducible simulation baseline</h2>
+            <p>Define the experiment contract before tuning physics. Pin the environment, establish units and frame conventions, and make a headless smoke run repeatable.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>World, body, joint, sensor, and optical frames.</li>
+                  <li>SI units, handedness, quaternion ordering, and angle conventions.</li>
+                  <li>Simulation timestep, control period, sensor period, and wall time.</li>
+                  <li>Seeds, deterministic expectations, config hashing, and software provenance.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Create one command that starts a headless scene and advances 1,000 steps.</li>
+                  <li>Record simulator, driver, OS, hardware, dependencies, seed, and config.</li>
+                  <li>Log simulation time, step count, finite-state checks, and shutdown result.</li>
+                  <li>Put frame/unit/manifest tests in hosted pure-Python CI as soon as they exist.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li><code>environment.md</code>, <code>configs/smoke.yaml</code>, and a required-field manifest schema.</li>
+                  <li><code>preflight.py</code>, frame/unit fault tests, raw state trace, and two same-seed summaries.</li>
+                  <li>A bounded smoke command with documented exit codes, duration, and known determinism limits.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and invariants</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Experiment identity</dt><dd>Commit and dirty state + config and asset hashes + seed + Sim/Kit/Python/driver/hardware manifest. A seed alone is not provenance.</dd></div>
+                    <div><dt>Frame composition</dt><dd><code>T<sub>A,C</sub> = T<sub>A,B</sub>T<sub>B,C</sub></code>; test <code>RᵀR ≈ I</code>, <code>det(R) ≈ +1</code>, units, quaternion order, and active/passive convention.</dd></div>
+                    <div><dt>Clock contract</dt><dd>Physics time is <code>t<sub>k</sub> = kΔt<sub>p</sub></code>. Control, rendering, and sensor periods are separate and should use declared integer decimation where possible.</dd></div>
+                    <div><dt>Verification versus validation</dt><dd>Verification checks implementation against specification; validation checks declared outputs against evidence for an intended use.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Import/startup error:</strong> confirm <code>C:\isaacsim\python.bat</code> and create <code>SimulationApp</code> before Omniverse imports.</li>
+                    <li><strong>100× scale error:</strong> inspect <code>metersPerUnit</code>, mesh scale, meters versus centimeters, and radians versus degrees.</li>
+                    <li><strong>Same seed differs:</strong> compare manifests, RNG ownership, async order, assets, and runtime before blaming PhysX.</li>
+                    <li><strong>Process hangs:</strong> reduce to initialize → bounded update/step → close; then inspect callbacks and background work.</li>
+                    <li><strong>Edit disappears:</strong> identify the USD layer/edit target and whether the value existed only in the session layer.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Platform fingerprint</strong><p>Write <code>preflight.py</code> to capture exact runtime, OS, GPU, memory, stage units/up axis, rates, Git state, config hash, and resolved assets.</p></div>
+                  <div><span>Output</span><p><code>manifest.json</code>, <code>environment.md</code>, and a schema that rejects missing required fields.</p></div>
+                  <div><span>Pass condition</span><p>Wrong Python or incomplete provenance returns a nonzero exit code instead of silently continuing.</p></div>
+                </li>
+                <li>
+                  <div><strong>Frames and units fault test</strong><p>Compose a two-hop transform, transform a known point analytically and through USD, then plant centimeter-scale and quaternion-order faults.</p></div>
+                  <div><span>Output</span><p><code>tests/test_frames_units.py</code> with clean, wrong-scale, and wrong-quaternion fixtures.</p></div>
+                  <div><span>Pass condition</span><p>Clean transforms agree within a units-based tolerance and both planted faults fail the intended assertion.</p></div>
+                </li>
+                <li>
+                  <div><strong>Bounded headless smoke</strong><p>Build a scene, reset from one seeded RNG, advance exactly 1,000 physics steps, record state/time, reject NaN/Inf, and close cleanly.</p></div>
+                  <div><span>Output</span><p><code>state.csv</code>, <code>summary.json</code>, console log, and seed-42/42/43 comparison.</p></div>
+                  <div><span>Pass condition</span><p>Final sim time matches <code>steps × dt</code>; same-seed initial conditions agree within declared tolerance.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Use the installed runtime first</h3>
+                <pre><code>Set-Location C:\isaacsim
+Get-Content .\VERSION
+.\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
+.\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py --no-window
+.\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1</code></pre>
+                <p>The installed hello-world example is a bounded startup smoke, not the required 1,000-step provenance test. The benchmark may fetch a Franka asset and uses deprecated RC-era core imports: run it as packaged, but do not copy those imports into portfolio code. Build the provenance test in the capstone repository.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/python_scripting/manual_standalone_python.html"><span class="ref-type">Official · before Lab 1</span><strong>Standalone Python Environment</strong><small>Initialization, bundled Python, launch, and shutdown contract.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/python_scripting/python_scripting_concepts.html"><span class="ref-type">Official · debug</span><strong>Python Scripting Concepts</strong><small>Choose standalone, extension, or GUI scripting deliberately.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/workflows.html"><span class="ref-type">Official · architecture</span><strong>Isaac Sim Workflows</strong><small>Record why the public runner uses standalone/headless execution.</small></a>
+                  <a class="module-reference" href="resources.html#stage-0"><span class="ref-type">Course route</span><strong>Stage 0 resource annotations</strong><small>Read/extract/build/stop guidance for the environment gate.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> Why can two runs with the same seed still differ, and what additional evidence would you record before calling that a physics defect?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> a clean checkout records a complete manifest, detects planted frame/unit faults, and runs seed 42/42/43 through exactly 1,000 finite headless physics steps with declared repeatability tolerance and clean shutdown.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-1" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-1" data-module-check> Module 1</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Rigid-body dynamics and contact fidelity</h2>
+            <p>Turn gravity, integration, constraints, friction, restitution, and contact compliance into measured experiments rather than visual guesses.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li><code>M(q)q̈ + C(q,q̇)q̇ + g(q) = τ + Jᵀf</code>.</li>
+                  <li>Mass, center of mass, inertia, constraints, and energy.</li>
+                  <li>Static versus kinetic friction, restitution, contact stiffness, and damping.</li>
+                  <li>Timestep, substeps, solver iterations, penetration, stability, and throughput.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Drop test from a known height; compare fall and rebound timing.</li>
+                  <li>Inclined-plane or slide test; estimate the friction threshold and deceleration.</li>
+                  <li>Simple pendulum; compare measured and small-angle period.</li>
+                  <li>Sweep timestep and solver settings without changing the model.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Versioned free-fall, rebound, friction, and pendulum configs plus raw CSV/JSON traces.</li>
+                  <li>Regenerable report naming formulas, assumptions, observable definitions, units, and resolution.</li>
+                  <li>Held-out parameter prediction and a deliberately bad/fixed numerical case.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and equations</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Multibody dynamics</dt><dd><code>M(q)q̈ + C(q,q̇)q̇ + g(q) = τ + J(q)ᵀλ</code>. The contact term is constrained by geometry and solver semantics.</dd></div>
+                    <div><dt>Contact idealization</dt><dd>Gap <code>φ(q) ≥ 0</code>, normal force <code>λ<sub>n</sub> ≥ 0</code>, and complementarity <code>φλ<sub>n</sub> = 0</code>; practical solvers can permit numerical penetration.</dd></div>
+                    <div><dt>Analytical baselines</dt><dd><code>t<sub>hit</sub> = √(2h/g)</code>, <code>e ≈ √(h<sub>rebound</sub>/h<sub>drop</sub>)</code>, <code>μ<sub>s</sub> ≈ tan θ<sub>c</sub></code>, and <code>T ≈ 2π√(L/g)</code> under their stated assumptions.</dd></div>
+                    <div><dt>Resolution study</dt><dd>Compare the same observable at <code>Δt</code>, <code>Δt/2</code>, and <code>Δt/4</code>; choose resolution from convergence and measurement needs, not a universal error percentage.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Impact error ≈ one step:</strong> test event/time quantization by reducing <code>dt</code> before changing gravity.</li>
+                    <li><strong>Wrong slide threshold:</strong> inspect static/dynamic material assignment, combine mode, incline frame, and residual velocity.</li>
+                    <li><strong>Pendulum period mismatch:</strong> use pivot-to-COM length and quantify amplitude before tuning damping.</li>
+                    <li><strong>Jitter/explosion:</strong> check initial overlap, mass ratio, contact offset, timestep, then solver convergence—one change per rerun.</li>
+                    <li><strong>Lower dt changes everything:</strong> remove controllers/sensors from canonical tests and record every rate.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Free fall and rebound</strong><p>Run two or three heights; detect contact from contact data; compare impact time/velocity, rebound height, and restitution at three timesteps.</p></div>
+                  <div><span>Output</span><p>Raw traces, contact-event detector, formula/assumption table, convergence plot, and restitution estimate.</p></div>
+                  <div><span>Pass condition</span><p>Chosen timestep reaches the predeclared convergence criterion or the unresolved discrepancy is reported.</p></div>
+                </li>
+                <li>
+                  <div><strong>Static and dynamic friction</strong><p>Bracket first sustained slip on an incline, then estimate kinetic friction from a horizontal slide and test it at a held-out angle/velocity.</p></div>
+                  <div><span>Output</span><p>Material/combination manifest, threshold plot, deceleration fit, uncertainty, and held-out prediction.</p></div>
+                  <div><span>Pass condition</span><p>The estimate predicts the held-out observable within a tolerance tied to angle/time measurement resolution.</p></div>
+                </li>
+                <li>
+                  <div><strong>Pendulum and solver fault isolation</strong><p>Compare small and larger initial angles, sweep timestep/iterations, then introduce one bad overlap or mass ratio and repair it.</p></div>
+                  <div><span>Output</span><p>Angle/period/energy plots plus bad/fixed manifests differing in one intended variable.</p></div>
+                  <div><span>Pass condition</span><p>The report separates analytical-approximation, model-parameter, discretization, and solver errors.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed examples and capstone commands</h3>
+                <pre><code># Installed local procedural reference (GUI, about 300 steps)
+C:\isaacsim\python.bat C:\isaacsim\standalone_examples\tutorials\getting_started\getting_started.py
+
+# Commands you implement in the capstone repository
+C:\isaacsim\python.bat .\labs\physics\free_fall.py --dt 0.0166667 0.0083333 0.0041667
+C:\isaacsim\python.bat .\labs\physics\friction.py --mode incline-and-slide
+C:\isaacsim\python.bat .\labs\physics\pendulum.py --resolution-sweep</code></pre>
+                <p>No installed non-deprecated example performs the required analytical comparisons or exports the evidence; those scripts are core portfolio work.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/physics/simulation_fundamentals.html"><span class="ref-type">Official · before all labs</span><strong>Physics Simulation Fundamentals</strong><small>Timestep, solver, materials, rigid bodies, articulations, and contact configuration.</small></a>
+                  <a class="module-reference" href="https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/guides/collision_guide.html"><span class="ref-type">Official · contact debug</span><strong>Collision Behavior Guide</strong><small>Collider approximation, offsets, CCD, and collision troubleshooting.</small></a>
+                  <a class="module-reference" href="https://underactuated.mit.edu/contact.html"><span class="ref-type">University · theory</span><strong>MIT Underactuated: Contact</strong><small>Unilateral constraints, friction cones, impact, and numerical difficulty.</small></a>
+                  <a class="module-reference" href="resources.html#stage-2"><span class="ref-type">Course route</span><strong>Stage 2 resource annotations</strong><small>Additional PhysX depth and analytical robotics references.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> A grasped object jitters and slowly escapes. Rank geometry, mass/inertia, timestep, contact, friction, and controller hypotheses, then name the first discriminating experiment.</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> all three canonical experiments report observed error, chosen tolerance, configuration, and a justified timestep/solver tradeoff.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-2" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-2" data-module-check> Module 2</label>
+            <span class="hours">10–14 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>URDF-to-USD robot model engineering</h2>
+            <p>Build a model that is physically inspectable. Keep visual, collision, and inertial geometry separate and validate the kinematic tree before adding controllers.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Link/joint trees, origins, axes, limits, and mimic joints; URDF cannot natively encode arbitrary closed kinematic loops, which require decomposition or simulator-specific constraints.</li>
+                  <li>Visual versus collision geometry and convex decomposition.</li>
+                  <li>Inertia symmetry, positive principal moments, and triangle inequalities.</li>
+                  <li>Actuators, transmissions, damping, armature, and format-specific defaults.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Author or repair a two-link arm, gripper, or mobile base description.</li>
+                  <li>Write a validator for names, tree connectivity, limits, mass, inertia, and mesh paths.</li>
+                  <li>Run the validator and planted-fault fixtures in hosted pure-Python CI immediately.</li>
+                  <li>Import into the primary simulator and one viewer or reference simulator.</li>
+                  <li>Visualize frames, centers of mass, collision proxies, and joint axes.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Source URDF/Xacro, custom payload/tool, asset license/provenance, and generated-USD policy.</li>
+                  <li>Model card plus source-to-USD table for joints, limits, mass, COM, inertia, drives, and colliders.</li>
+                  <li>Validator report, planted-fault tests, and canonical frame/COM/collision screenshots.</li>
+                </ul>
+              </div>
+            </div>
+            <pre><code># Minimum inertia checks after expressing I at the center of mass
+assert np.allclose(I, I.T, atol=tol)
+p = np.linalg.eigvalsh(I)
+assert np.all(p &gt; 0.0)
+assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and equations</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Tree and frame contract</dt><dd>An open-chain model has one root, connected/acyclic parentage, and joint axes expressed in named joint frames. Verify canonical FK, not only tree shape.</dd></div>
+                    <div><dt>Parallel-axis theorem</dt><dd><code>I<sub>O</sub> = I<sub>C</sub> + m((dᵀd)I₃ − ddᵀ)</code>. Express inertia about the COM first, then transform it deliberately.</dd></div>
+                    <div><dt>Primitive inertia</dt><dd>For a box: <code>I<sub>xx</sub> = m(b²+c²)/12</code> with cyclic permutations. Record dimensions, density/mass source, axes, and units.</dd></div>
+                    <div><dt>Conversion semantics</dt><dd>URDF source and imported USD may differ in base mode, collider approximation, articulation root, drives, self-collision, and defaults. Successful import is not equivalence.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Explodes on first step:</strong> inspect initial overlap, impossible/tiny inertia, base constraint conflict, and ground penetration.</li>
+                    <li><strong>Joint moves backward:</strong> inspect axis in the joint frame, parent/child origins, sign, and degree/radian conversion.</li>
+                    <li><strong>Visuals correct, contacts wrong:</strong> inspect collision tags, scale/origin, convex approximation, and missing colliders.</li>
+                    <li><strong>Import controls poorly:</strong> compare effort/velocity limits, drive mode, stiffness/damping, and armature before retuning.</li>
+                    <li><strong>Works only locally:</strong> remove absolute paths; verify <code>package://</code>, case sensitivity, generated assets, and license.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Author a payload or tool</strong><p>Add a primitive camera/tool/payload link to Franka or a small arm; calculate mass/COM/inertia and use simplified collision geometry.</p></div>
+                  <div><span>Output</span><p>URDF/Xacro source, calculation note, provenance/license, and model-card rows marking measured, sourced, calculated, or assumed values.</p></div>
+                  <div><span>Pass condition</span><p>Independent validator reproduces the expected primitive inertia and rejects a deliberately impossible tensor.</p></div>
+                </li>
+                <li>
+                  <div><strong>Validator and fault corpus</strong><p>Check XML, unique names, connectivity, parents, finite limits, mass/inertia, mesh paths, unit axes, scale, and initial overlaps.</p></div>
+                  <div><span>Output</span><p><code>validate_robot_model.py</code>, JUnit/JSON report, and fixtures for bad scale, axis, inertia, path, and collider overlap.</p></div>
+                  <div><span>Pass condition</span><p>Every bad fixture fails with the intended cause; the clean model passes with no suppressed warning.</p></div>
+                </li>
+                <li>
+                  <div><strong>URDF-to-USD audit</strong><p>Import with a versioned config; query structure and physical properties; visualize frames/COM/colliders; run canonical FK and a slow joint-limit sweep.</p></div>
+                  <div><span>Output</span><p><code>source_to_usd.csv</code>, import log, screenshots, limit trace, and accepted/repaired difference list.</p></div>
+                  <div><span>Pass condition</span><p>Source and USD agree on declared quantities or every difference has an explicit decision and override layer.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Verified offline importer exercises</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\api\isaacsim.asset.importer.urdf\urdf_import.py --test
+.\python.bat .\standalone_examples\api\isaacsim.asset.importer.mjcf\mjcf_import.py --test
+.\python.bat .\standalone_examples\api\isaacsim.asset.transformer\run_asset_transformer.py --test</code></pre>
+                <p>These commands use local Carter, Ant, and UR10e test assets. They exercise conversion only; no installed example supplies the required structural/inertia validator or model card.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.ros.org/en/jazzy/Tutorials/Intermediate/URDF/Adding-Physical-and-Collision-Properties-to-a-URDF-Model.html"><span class="ref-type">Official · before Lab 1</span><strong>URDF Physical and Collision Properties</strong><small>Author inertial, visual, and collision elements with explicit origins.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/import_urdf.html"><span class="ref-type">Official · before Lab 3</span><strong>Isaac Sim URDF Import</strong><small>Importer workflow, configuration, joints, colliders, and generated USD.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/ext_isaacsim_asset_importer_urdf.html"><span class="ref-type">Official · audit</span><strong>URDF Importer Reference</strong><small>Inspect format support, options, defaults, and limitations.</small></a>
+                  <a class="module-reference" href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/8-2-dynamics-of-a-single-rigid-body-part-1-of-2/"><span class="ref-type">University · inertia depth</span><strong>Modern Robotics: Rigid-Body Inertia</strong><small>Spatial inertia and physical interpretation for model review.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> A URDF imports without errors and renders correctly. What evidence is still required before trusting its dynamics, contact, and actuator behavior?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> the authored payload/tool and clean model pass the validator, every planted fault fails correctly, source-to-USD differences are documented, and a declared collision-valid joint sweep classifies expected blocks separately from unstable behavior.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-3" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-3" data-module-check> Module 3</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Isaac Sim and PhysX scene pipeline</h2>
+            <p>Move from interactive setup to scripted USD composition, articulation configuration, repeatable resets, and parameterized scene construction.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>USD stages, prim paths, references, instances, variants, and composition.</li>
+                  <li>Articulation roots, rigid bodies, colliders, physics materials, and drives.</li>
+                  <li>Application startup, scene loading, play/pause, step, reset, and shutdown lifecycle.</li>
+                  <li>Asset import settings and source-of-truth decisions.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Import the validated robot and save a documented USD derivative.</li>
+                  <li>Create a warehouse workcell from a declarative config.</li>
+                  <li>Spawn objects with stable names and collision/material settings.</li>
+                  <li>Run repeated reset/step cycles without reloading the application.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Standalone GUI/headless launch sharing one schema-validated scene builder.</li>
+                  <li>Layer/dependency diagram, property-stack audit, asset manifest, and import log.</li>
+                  <li>100-cycle reset report with state, prim/callback/sensor counts, latency, and injected-fault proof.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and invariants</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Stage, prim, and layer</dt><dd>The stage is the composed view, prims are named objects, and layers contribute ordered opinions. Record the edit target that owns every tuned value.</dd></div>
+                    <div><dt>Reference, payload, instance, variant</dt><dd>References compose assets, payloads defer loading, instances share representation, and variants select alternatives; each changes authoring and override behavior.</dd></div>
+                    <div><dt>Idempotent builder</dt><dd>Applying <code>build(scene, config)</code> twice must not duplicate prims, callbacks, sensors, or resources.</dd></div>
+                    <div><dt>Reset contract</dt><dd><code>x₀ = f(config, seed, episode_id)</code> covers pose, velocity, drive targets, controller state, timers, sensor buffers, task state, and sampled parameters.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Value reverts or differs headless/UI:</strong> inspect property stack, session layer, edit target, references, and variants.</li>
+                    <li><strong>Duplicate prim or stale contact:</strong> compare expected prim/resource counts and reset cleanup.</li>
+                    <li><strong>Invalid physics handle:</strong> reacquire after stage load/reset and avoid topology changes while simulation is active.</li>
+                    <li><strong>Reset retains motion:</strong> clear velocities, drives, controller state, sensor buffers, timers, and task state—not pose alone.</li>
+                    <li><strong>Memory rises:</strong> separate expected cache warmup from monotonic prim/callback/sensor accumulation.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>USD composition audit</strong><p>Separate robot source, physics overrides, reusable workcell, and run/session state. Author one conflicting property and inspect which opinion wins.</p></div>
+                  <div><span>Output</span><p>Layer/dependency diagram, property-stack report, and save/reopen proof showing session-only edits disappear.</p></div>
+                  <div><span>Pass condition</span><p>Every tuned property has a documented authoring layer and the reopened stage preserves only intended values.</p></div>
+                </li>
+                <li>
+                  <div><strong>Declarative workcell builder</strong><p>Define asset URIs, stable prim paths, geometry, materials, spawn regions, timestep/solver, and seed in YAML/JSON plus schema.</p></div>
+                  <div><span>Output</span><p><code>scene_builder.py</code>, <code>workcell.schema.json</code>, config, dependency list, and identical GUI/headless scene manifest.</p></div>
+                  <div><span>Pass condition</span><p>Unknown keys and invalid ranges fail early; repeated build creates no duplicate prim or resource.</p></div>
+                </li>
+                <li>
+                  <div><strong>Reset torture and injected leak</strong><p>Load once, run 100 reset/short-rollout cycles, and track state, contacts, counts, reset latency, RSS, and VRAM after warmup.</p></div>
+                  <div><span>Output</span><p><code>reset_stress.csv/html</code>, invariant tests, and a planted duplicate-spawn or uncleared-callback failure.</p></div>
+                  <div><span>Pass condition</span><p>Counts/state remain within declared invariants and the planted stale-resource bug fails the intended test.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed scene-pipeline exercises</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\tutorials\getting_started\getting_started.py
+.\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\add_cubes.py --test
+.\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\simulation_callbacks.py --test</code></pre>
+                <p><code>getting_started.py</code> and experimental <code>add_cubes.py</code> hard-code GUI mode. <code>simulation_callbacks.py</code> is headless but may download the Franka asset on first use. None implements the required declarative builder or reset-leak gate.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/core_api_tutorials/tutorial_core_hello_world.html"><span class="ref-type">Official · before Lab 2</span><strong>Core API Hello World</strong><small>World lifecycle, scene construction, reset, step, and standalone progression.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/python_scripting/python_scripting_concepts.html"><span class="ref-type">Official · lifecycle</span><strong>Python Scripting Concepts</strong><small>Initialization, async behavior, standalone execution, and clean shutdown.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/omniverse_usd/open_usd.html"><span class="ref-type">Official · before Lab 1</span><strong>OpenUSD Fundamentals</strong><small>Prims, properties, units, layers, edit targets, and introductory composition.</small></a>
+                  <a class="module-reference" href="resources.html#stage-1"><span class="ref-type">Course route</span><strong>Stage 1 resource annotations</strong><small>Read/extract/build guidance for Python and USD foundations.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> A mass value is correct in the GUI but wrong after headless reload. How do you use the USD property stack and edit targets to isolate the winning opinion?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> one schema-validated command produces the same GUI/headless scene manifest, proves the winning USD property opinions, and completes 100 idempotent reset cycles with finite state, invariant resource counts, injected-leak detection, and clean shutdown.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-4" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-4" data-module-check> Module 4</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Actuation, control, and measured response</h2>
+            <p>Treat actuator dynamics, saturation, delay, and controller rate as part of the robot model. Tune against traces, not animation quality.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Effort, velocity, and position command semantics.</li>
+                  <li>PD/PID, impedance, damping ratio, and time-domain tracking/limit metrics.</li>
+                  <li>Torque-speed limits, saturation, deadband, friction, delay, and anti-windup.</li>
+                  <li>Physics rate versus controller rate and zero-order hold.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Implement a controller with explicit state and command units.</li>
+                  <li>Run step, ramp, and chirp references under no load and payload.</li>
+                  <li>Inject one-cycle delay and actuator saturation.</li>
+                  <li>Compare direct simulator drives with an effort-based motor model.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Precommitted acceptance criteria plus raw command/state/effort/saturation traces.</li>
+                  <li>Gain, limits, payload, physics/control-rate manifest and reproducible response metrics.</li>
+                  <li>Matched implicit-versus-effort comparison and isolated oscillatory plus limit-bound failures.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and equations</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Effort PD</dt><dd><code>τ<sub>cmd</sub> = K<sub>p</sub>(q<sub>d</sub>−q) + K<sub>d</sub>(q̇<sub>d</sub>−q̇) + τ<sub>ff</sub></code>, followed by declared effort/velocity/torque-speed limits.</dd></div>
+                    <div><dt>Second-order starting model</dt><dd><code>ω<sub>n</sub>=√(K<sub>p</sub>/I<sub>eff</sub>)</code> and <code>ζ=K<sub>d</sub>/(2√(K<sub>p</sub>I<sub>eff</sub>))</code>. Effective inertia changes with arm configuration and payload.</dd></div>
+                    <div><dt>Sampled control</dt><dd>Physics period <code>T<sub>p</sub></code>, controller period <code>T<sub>c</sub>=N<sub>c</sub>T<sub>p</sub></code>, and zero-order hold must be recorded with gains.</dd></div>
+                    <div><dt>Qualification metrics</dt><dd>Per-joint RMSE, max/steady error, rise/settling band, overshoot, and saturation dwell. <code>∫|τᵀq̇|dt</code> is a proxy, not electrical energy without a motor/efficiency model.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Oscillation/NaN:</strong> remove contact, log limits, then inspect stiffness versus dt/inertia, damping, delay, mass ratio, and impulses.</li>
+                    <li><strong>Slow response:</strong> measure effort/velocity saturation before increasing gains; check overdamping and control rate.</li>
+                    <li><strong>Steady offset:</strong> inspect gravity/load torque, friction/deadband, feedforward, and saturation.</li>
+                    <li><strong>Stable free-space, bad grasp:</strong> contact geometry and payload changed effective dynamics; do not mask it with extreme friction.</li>
+                    <li><strong>Implicit/explicit mismatch:</strong> align drive mode, units, gravity compensation, clamp order, rate, and initial state.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Known one-DOF gain sanity</strong><p>Use a prismatic mass or revolute link with known effective mass/inertia; calculate gains for target <code>ω<sub>n</sub>, ζ</code> and test two rate ratios.</p></div>
+                  <div><span>Output</span><p>Predicted-versus-observed overshoot/settling plots and a note defining where the simple model stops applying.</p></div>
+                  <div><span>Pass condition</span><p>Observed response is explained from declared assumptions before any Franka tuning begins.</p></div>
+                </li>
+                <li>
+                  <div><strong>Franka qualification matrix</strong><p>Analyze one proximal and one distal joint deeply with step/chirp tests at no load and two payloads; smoke-test all joint limits.</p></div>
+                  <div><span>Output</span><p><code>acceptance.yaml</code>, gain/limit manifests, raw traces, per-joint metrics, and tuned/rejected cases.</p></div>
+                  <div><span>Pass condition</span><p>Selected gains meet the precommitted bounds with finite state and no undeclared limit violation.</p></div>
+                </li>
+                <li>
+                  <div><strong>Actuator nonideality isolation</strong><p>Match implicit and effort-PD cases, then sweep 0/1/3-cycle delay and two effort/velocity limits; create oscillatory and saturated cases.</p></div>
+                  <div><span>Output</span><p>Baseline/fault/fix plots, saturation dwell, payload/rate manifests, and one-variable diagnostic explanation.</p></div>
+                  <div><span>Pass condition</span><p>Each fault is reproduced and corrected without changing unrelated model or solver settings.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed control references</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\control_frankas.py --test --device cuda
+.\python.bat .\standalone_examples\api\isaacsim.core.experimental.actuators\newton_actuators_python_example.py
+.\python.bat .\standalone_examples\api\isaacsim.core.experimental.actuators\newton_actuators_python_example.py --non-ideal</code></pre>
+                <p>These experimental examples may fetch Franka assets and use a GUI. The non-ideal actuator example demonstrates PD, effort clamps, and a two-step delay, but it does not generate the qualification metrics required here.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup/ext_isaacsim_robot_setup_gain_tuner.html"><span class="ref-type">Official · before Lab 2</span><strong>Gain Tuner Reference</strong><small>Step, sinusoidal, and stress tests for articulation joint drives.</small></a>
+                  <a class="module-reference" href="https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/guides/articulation_stability_guide.html"><span class="ref-type">Official · debug</span><strong>Articulation Stability Guide</strong><small>Timestep, mass ratio, drive, joint, and contact stability factors.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/core-concepts/actuators.html"><span class="ref-type">Official · actuator model</span><strong>Isaac Lab Actuator Concepts</strong><small>Implicit/explicit model groups, armature, transfer considerations, and abstraction boundaries.</small></a>
+                  <a class="module-reference" href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/11-4-motion-control-with-torque-or-force-inputs-part-1-of-3/"><span class="ref-type">University · control depth</span><strong>Modern Robotics: Torque/Force Control</strong><small>Motion control assumptions and manipulator dynamics context.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> A joint is slow and has steady error under payload. Which measurements distinguish weak gains from effort saturation, velocity limits, gravity load, friction, and low controller rate?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> precommitted criteria are met for the declared joints/payloads/rates, all limit and saturation dwell is measured, and matched implicit-versus-effort tests isolate one oscillatory and one limit-bound case without claiming formal stability margins.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-5" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-5" data-module-check> Module 5</label>
+            <span class="hours">10–14 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Sensors and ROS 2 integration</h2>
+            <p>Make sensor and control data temporally meaningful. Define frame, timestamp, update-rate, noise, latency, QoS, and failure behavior for every interface.</p>
+            <p class="module-prerequisite"><strong>Pre-module gate:</strong> verify native Jazzy/Pixi, <code>ros2</code>, <code>colcon</code>, launch, and rosbag before starting the 10–14 hour module; budget setup separately if missing. Required scope is RGB-D plus contact/effort for manipulation. IMU and LiDAR are optional.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>ROS 2 nodes, topics, services, actions, QoS, launch, parameters, and rosbag.</li>
+                  <li><code>/clock</code>, <code>use_sim_time</code>, joint state, TF, and optical-frame conventions.</li>
+                  <li>Camera intrinsics/extrinsics, LiDAR scan timing, IMU specific force, and force/torque frames.</li>
+                  <li>White noise, bias, drift, dropout, latency, and update-rate validation.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Publish joint state, TF, clock, RGB-D, and one task-relevant physics sensor such as contact/effort.</li>
+                  <li>Treat LiDAR and IMU as optional extensions for this manipulation capstone.</li>
+                  <li>Consume a trajectory or velocity command and add a stale-command watchdog.</li>
+                  <li>Record and replay a seeded run with parameters and transforms.</li>
+                  <li>Add one measured noise/latency model and test its statistics.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li><code>interface_contract.yaml</code> with type, frame, unit, target rate, QoS, clock, timeout, and owner.</li>
+                  <li>TF diagram, raw rate/latency/noise rows, calibration targets, validation plots, and bag metadata.</li>
+                  <li>Launch package, stale-command watchdog test, replay procedure, and troubleshooting runbook.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and contracts</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Simulation versus wall time</dt><dd>Physics advances virtual time, normally published on <code>/clock</code>; host wall time must not be mixed into message timestamps.</dd></div>
+                    <div><dt>TF and optical frames</dt><dd>TF is a timestamped single-parent transform tree. Camera optical axes differ from body-frame conventions; every measurement names its frame.</dd></div>
+                    <div><dt>QoS compatibility</dt><dd>Reliability, durability, history, and depth determine whether endpoints can communicate—not merely speed or buffering.</dd></div>
+                    <div><dt>Rate, latency, jitter</dt><dd>Messages per simulated second, measurement-to-receipt delay, and delay variation. Physics, render, sensor, control, and ROS rates are distinct.</dd></div>
+                    <div><dt>Sensor error model</dt><dd>White noise, fixed bias, drift, dropout, quantization, and latency require separate parameters and statistical checks.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>No external topic:</strong> compare ROS environment, domain ID, DDS profile/firewall, bridge status, and QoS in both terminals.</li>
+                    <li><strong>TF looks plausible but data is wrong:</strong> inspect parent, optical/body axes, units, timestamp, and duplicate publishers.</li>
+                    <li><strong>Rate mismatch:</strong> separate physics, timeline, render, sensor tick, wall-rate capacity, and queue backpressure.</li>
+                    <li><strong>IMU/camera mismatch:</strong> validate against stationary gravity or known 3D landmarks before adding noise.</li>
+                    <li><strong>Robot keeps moving:</strong> test command age, watchdog clock source, safe command, and controller reset behavior.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Clock, joint state, and TF contract</strong><p>Finish native Windows Jazzy/Pixi setup; publish <code>/clock</code>, <code>/joint_states</code>, <code>/tf</code>, and <code>/tf_static</code> from a documented graph/script.</p></div>
+                  <div><span>Output</span><p>Interface YAML, TF diagram, <code>use_sim_time</code> checks, rate/timestamp rows, and DDS/QoS manifest.</p></div>
+                  <div><span>Pass condition</span><p>TF is connected/acyclic, stamps are monotonic within an episode, and achieved simulated-time rates meet the predeclared tolerance.</p></div>
+                </li>
+                <li>
+                  <div><strong>Sensor geometry and statistics</strong><p>Add RGB-D plus one task-relevant contact/effort sensor; project known landmarks, measure known depth, and verify force sign/frame. IMU/LiDAR are optional extensions.</p></div>
+                  <div><span>Output</span><p>Calibration/config card, raw samples, frame/rate plots, known-target checks, and declared noise/bias/latency model.</p></div>
+                  <div><span>Pass condition</span><p>Clean ground-truth checks pass before injected noise; invalid readings occur only when deliberately modeled.</p></div>
+                </li>
+                <li>
+                  <div><strong>Command watchdog and replay</strong><p>Consume a command, stop it deliberately, enter a safe state, record a seeded run, and replay the bag without Isaac Sim.</p></div>
+                  <div><span>Output</span><p>Launch package, watchdog test, bag metadata, replay-generated plots, and one QoS/dropout fault case.</p></div>
+                  <div><span>Pass condition</span><p>Command loss reaches the declared safe state within one watchdog interval plus one physics step; replay preserves topic/frame contracts.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Verified local bridge and sensor exercises</h3>
+                <pre><code>Set-Location C:\isaacsim
+cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples\api\isaacsim.ros2.bridge\clock.py"
+.\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\imu_sensor.py --test
+.\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\contact_sensor.py --test</code></pre>
+                <p>The clock example is headless/bounded and uses bundled <code>rclpy</code>; that is not a full ROS 2 CLI/workspace. This PC still needs Jazzy, <code>ros2</code>, <code>colcon</code>, launch, and rosbag. The experimental IMU/contact examples hard-code GUI mode and require NVIDIA robot assets/network on first use.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html"><span class="ref-type">Official · install first</span><strong>ROS 2 on Windows</strong><small>Current native Jazzy/Pixi environment route for Isaac Sim integration.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/ros2_reference_architecture.html"><span class="ref-type">Official · architecture</span><strong>ROS 2 Reference Architecture</strong><small>Asset, sensor, bridge/OmniGraph, command, and software-stack boundaries.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_clock.html"><span class="ref-type">Official · Lab 1</span><strong>ROS 2 Clock</strong><small><code>/clock</code>, <code>use_sim_time</code>, and simulation-time behavior.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/isaacsim_sensors_physics.html"><span class="ref-type">Official · Lab 2</span><strong>Physics-Based Sensors</strong><small>Current experimental contact, effort, IMU, and joint-state sensor APIs; older extension is deprecated in 6.0.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> A subscriber discovers a camera topic but receives no usable images. How do you isolate QoS, tick rate, rendering, frame, timestamp, and queue/backpressure causes?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> a ROS 2 launch starts the declared interface, TF/time/rates/watchdog pass their contracts, and rosbag replay reconstructs the same message/schema/frame/timestamp analysis without claiming physical simulator-outcome replay.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-6" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-6" data-module-check> Module 6</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>End-to-end task and evaluation pipeline</h2>
+            <p>Turn a demo into an experiment: define reset, observation, action, success, failure, termination, logging, and evaluation before adding learning.</p>
+            <p class="module-prerequisite"><strong>Scope boundary:</strong> use ground-truth object pose and the existing kinematic/state-machine controller. Perception algorithm and motion-planner development are separate projects; this module measures the simulation/evaluation contract.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Reset-step-observe-act contracts and state ownership.</li>
+                  <li>Seeded scenario generation, dataset splits, and episode metadata.</li>
+                  <li>Success metrics, safety constraints, timeouts, and failure taxonomy.</li>
+                  <li>Baseline controllers and replayable evaluation.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Create pick-and-place, navigation, or tracking task configuration.</li>
+                  <li>Write a deterministic scripted baseline.</li>
+                  <li>Evaluate 100 versioned frozen scenarios, recording each scenario’s seed and per-episode results.</li>
+                  <li>Generate summary metrics from raw logs, never by hand.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Versioned task/environment contract, scenario manifests, scripted baseline, and <code>eval</code>/<code>replay</code> CLI.</li>
+                  <li>One raw row per episode, regenerated aggregates, confidence interval, and mutually exclusive failure breakdown.</li>
+                  <li>Replay bundle containing scenario ID, initial-state snapshot, seed, config hash, and exact version manifest.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and contracts</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Episode contract</dt><dd><code>reset → observe → act → step → terminate/truncate → record</code>, with explicit state ownership and ordering.</dd></div>
+                    <div><dt>Termination versus truncation</dt><dd>Task/safety conditions terminate; an external limit such as maximum duration truncates. Never merge them silently.</dd></div>
+                    <div><dt>Scenario ID versus seed</dt><dd>A scenario ID immutably describes initial conditions/disturbances; the seed is one input to generation and may not fully identify the case.</dd></div>
+                    <div><dt>Frozen evaluation set</dt><dd>Versioned cases excluded from development/tuning. Aggregate uncertainty belongs to episode outcomes, not timestep rewards.</dd></div>
+                    <div><dt>Failure taxonomy</dt><dd>Mutually exclusive machine-readable final codes such as approach timeout, missed grasp, slip, collision, limit violation, and place error.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>High reward, failed task:</strong> success must use task observables and safety conditions, not reward threshold alone.</li>
+                    <li><strong>Replay differs:</strong> compare scenario manifest, initial state, action scaling/order, reset state, runtime, and numeric tolerance.</li>
+                    <li><strong>Evaluation looks too good:</strong> detect seed/scenario overlap and config mutation during tuning.</li>
+                    <li><strong>Only summary saved:</strong> require raw episode rows and regenerate every aggregate from them.</li>
+                    <li><strong>“Other” dominates failures:</strong> inspect overlapping/unclassified codes and refine the taxonomy before optimization.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Bounded pick-and-place state machine</strong><p>Implement approach, grasp, lift, hold, place, success, timeout, and safety states before adding learning.</p></div>
+                  <div><span>Output</span><p>Task config, state diagram, observable entry/exit conditions, zero/random/scripted baselines, and explicit outcome codes.</p></div>
+                  <div><span>Pass condition</span><p>Every episode ends exactly once as success, declared physical/safety failure, or truncation.</p></div>
+                </li>
+                <li>
+                  <div><strong>Frozen 100-scenario evaluation</strong><p>Version development and frozen manifests; perturb declared pose/payload cases and retain every episode record.</p></div>
+                  <div><span>Output</span><p>Raw table, Wilson/bootstrap interval, failure heatmap, aggregate JSON, and config/seed/split manifests.</p></div>
+                  <div><span>Pass condition</span><p>Aggregates regenerate from raw rows alone, no split overlap exists, and NaN/Inf fails the run.</p></div>
+                </li>
+                <li>
+                  <div><strong>Failure replay</strong><p>Select a failed scenario, restore initial state/config, replay actions, and verify the same outcome within declared numeric tolerance.</p></div>
+                  <div><span>Output</span><p>Replay bundle with manifest, initial state, action trace, failure code, video/trace, and one-command reproduction.</p></div>
+                  <div><span>Pass condition</span><p>The replay reproduces initial conditions and failure class; any nondeterministic difference is measured and documented.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed task and recorder references</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\api\isaacsim.robot.experimental.manipulators\franka\pick_place.py --test --device cuda
+.\python.bat .\standalone_examples\api\isaacsim.replicator.episode_recorder\episode_record_replay.py --output_dir "$env:TEMP\isaac_episode" --record_steps 120 --replay --test</code></pre>
+                <p><code>pick_place.py</code> uses the experimental manipulator API; <code>episode_record_replay.py</code> is a non-deprecated packaged RC reference but imports deprecated core utilities. Run it as shipped—do not copy those imports into portfolio code. Both hard-code GUI mode and may fetch Franka assets.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://manipulation.csail.mit.edu/"><span class="ref-type">University · task design</span><strong>MIT Robotic Manipulation</strong><small>Grasping, contact, planning, perception, and task-observable reasoning.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_manager_rl_env.html"><span class="ref-type">Official · contract pattern</span><strong>Manager-Based RL Environment</strong><small>Observations, actions, events, rewards, commands, and terminations—even if no policy is trained.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/simple_agents.html"><span class="ref-type">Official · baselines</span><strong>Simple Agents</strong><small>Zero, random, and state-machine baselines for environment validation.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/features/reproducibility.html"><span class="ref-type">Official · evaluation caveat</span><strong>Reproducibility and Determinism</strong><small>Seed configuration and GPU/RTX limitations for replay expectations.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> Two systems report 90% success. What raw evidence, confidence interval, scenario coverage, safety failures, and replay artifacts do you need before deciding they are equivalent?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> one command evaluates 100 frozen scenarios, regenerates all aggregates from raw episode rows, and restores state/actions to reproduce a selected failure class—distinct from Module 5 message replay.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-8" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-8" data-module-check> Module 8</label>
+            <span class="hours">8–14 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Parallel learning and domain randomization</h2>
+            <p>Use randomization as an uncertainty model, not decoration. The learning extension is optional; a scripted controller can still support rigorous robustness experiments.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Vectorized environments, observation/action spaces, reward, termination, and curriculum.</li>
+                  <li>Policy training versus evaluation seeds and distributions.</li>
+                  <li>Dynamics, actuator, sensor, latency, geometry, and visual randomization.</li>
+                  <li>Separate nominal, identified, training, and held-out robustness distributions.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Define typed distributions with units and validation bounds.</li>
+                  <li>Randomize the two or three most sensitive and defensible parameter families one at a time.</li>
+                  <li>Run a scripted baseline or small policy under nominal and randomized conditions.</li>
+                  <li>Ablate the most influential randomization factors.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Typed/unit-aware manifest with range provenance, correlations, validation bounds, and seed/split policy.</li>
+                  <li>Offline sample artifact and tests for physical validity, units, distribution shape, and reproducibility.</li>
+                  <li>Separate nominal, identified, training-range, and held-out tables with confidence intervals and family-by-family ablation.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and contracts</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Vectorized environment</dt><dd>Independent task instances advanced in batches. Verify semantic equivalence to the one-environment task before trusting throughput.</dd></div>
+                    <div><dt>Domain randomization</dt><dd>Sampling declared model/environment uncertainty—not decoration or a substitute for fixing a biased nominal model.</dd></div>
+                    <div><dt>Nominal, identified, training, held out</dt><dd>Best estimate, measurement-derived uncertainty, sampled training distribution, and excluded evaluation variation remain separate in code and reporting.</dd></div>
+                    <div><dt>Correlated parameters</dt><dd>Quantities such as actuator gain/limit or mass/inertia may require joint distributions rather than independent sampling.</dd></div>
+                    <div><dt>Ablation</dt><dd>Remove or isolate one randomization family while keeping the evaluation set fixed to measure its actual influence.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Invalid samples:</strong> catch negative mass/delay, impossible inertia, units errors, and geometry overlap before simulation.</li>
+                    <li><strong>Robust score but poor nominal:</strong> inspect whether broad ranges conceal a wrong model or reward/task loophole.</li>
+                    <li><strong>Held-out gain looks suspicious:</strong> verify scenario/seed/distribution isolation and privileged observations.</li>
+                    <li><strong>Scaling stalls:</strong> profile Python loops, sensors/rendering, cloning, synchronization, and memory—not GPU name alone.</li>
+                    <li><strong>Same seed changes:</strong> record when GPU runtime material updates or parallel ordering alter deterministic expectations.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Distribution design and offline validation</strong><p>Define mass, friction, damping, gain, delay, pose, and sensor-bias distributions with units, bounds, source, and correlations.</p></div>
+                  <div><span>Output</span><p>Manifest, 10,000-sample artifact, histograms, seeded repeat test, and invalid-sample unit tests.</p></div>
+                  <div><span>Pass condition</span><p>No sample violates a declared physical bound; repeated seed recreates the exact sampled parameter manifest.</p></div>
+                </li>
+                <li>
+                  <div><strong>Standalone robustness and ablation</strong><p>Evaluate the scripted baseline one family at a time, then combined, on fixed nominal, training-range, and held-out scenarios.</p></div>
+                  <div><span>Output</span><p>An episode budget justified by target confidence-interval precision, score intervals, failure heatmap, and one row per selected-family ablation.</p></div>
+                  <div><span>Pass condition</span><p>Every range has provenance and every family has an honest measured effect—even when robustness gets worse.</p></div>
+                </li>
+                <li>
+                  <div><strong>Optional Isaac Lab vectorization extension</strong><p>Outside the core 8–14 hours, check RC compatibility and match the single-environment contract at geometric counts as memory allows; zero/random actions pass before training.</p></div>
+                  <div><span>Output</span><p>Pinned Lab commit/runtime manifest, equivalence checks, actual environment counts, steps/s, VRAM/RAM, and optional small policy.</p></div>
+                  <div><span>Pass condition</span><p>Task metrics agree within declared tolerance at tested counts; scale stops at a measured resource/stability limit.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed standalone randomization exercise</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\api\isaacsim.replicator.experimental.domain_randomization\randomization_demo.py --num-envs 4 --reset-interval 50 --max-frames 200</code></pre>
+                <p>This bounded experimental example hard-codes GUI mode, randomizes gravity, forces, joint state, and poses across clones, and may fetch Franka assets. It does not supply uncertainty provenance, friction/mass/latency ablations, split isolation, or evaluation statistics.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html#domain-randomization"><span class="ref-type">Official · physics DR</span><strong>Direct-Workflow Domain Randomization</strong><small>Event-based physics randomization plus action and observation noise.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/policy_deployment/04_reach/reach_policy.html"><span class="ref-type">Official · applied example</span><strong>Reach Policy Deployment</strong><small>Concrete gain, friction, reset, and deployment randomization; adapt concepts, not claims.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/features/reproducibility.html"><span class="ref-type">Official · caveat</span><strong>Reproducibility and Determinism</strong><small>Seed and GPU/RTX limitations, including runtime material-update effects.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html"><span class="ref-type">Official · optional install</span><strong>Pinned Isaac Lab Quickstart</strong><small>Use a separate compatible installation; do not assume the local RC matches stable APIs.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> With no robot data, how would you justify a friction or actuator-delay range, prevent it from hiding model bias, and design the held-out test?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> sampled parameters stay physically valid, evaluation distributions are isolated from training, and the report shows which uncertainties actually change performance.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-7" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-7" data-module-check> Module 7</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Calibration, system identification, and transfer</h2>
+            <p>Estimate only parameters the data can excite. Separate calibration and held-out trajectories, report uncertainty, and avoid claiming real-world transfer without physical evidence.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Excitation design, identifiable parameters, objective functions, and sensitivity.</li>
+                  <li>Friction, damping, inertia, motor gain, deadband, delay, and sensor bias fitting.</li>
+                  <li>Calibration/validation splits and cross-simulator parity.</li>
+                  <li>Residual analysis, parameter uncertainty, and non-uniqueness.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Collect real traces if available; otherwise declare a reference simulator or withheld synthetic generator.</li>
+                  <li>Sweep or optimize a small, justified parameter set.</li>
+                  <li>Evaluate before/after error on held-out motions and contacts.</li>
+                  <li>Compare targeted calibration with broad domain randomization.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Trace schema, excitation plan, raw/aligned traces, and disjoint calibration/validation manifests.</li>
+                  <li>Prior/bounds/fitted/uncertainty table plus sensitivity, parameter-profile, residual, and held-out plots.</li>
+                  <li>Explicit evidence label: synthetic hidden truth, sim-to-sim, cross-simulator, recorded hardware, HIL, or live hardware.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and equations</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>System identification</dt><dd>Infer model structure or parameters from input/output data. Calibration adjusts a chosen model; neither guarantees validation outside tested conditions.</dd></div>
+                    <div><dt>Excitation and identifiability</dt><dd>Inputs must expose a parameter’s effect. Sensitivity/Jacobian columns that are weak or correlated signal non-identifiability.</dd></div>
+                    <div><dt>Residual objective</dt><dd><code>r(θ)=y<sub>ref</sub>−y<sub>sim</sub>(θ)</code>; fit bounded parameters with units-aware scaling and a robust loss when outliers are expected.</dd></div>
+                    <div><dt>Structural versus parameter uncertainty</dt><dd>Missing model form cannot always be repaired by changing friction, damping, inertia, gain, delay, or noise values.</dd></div>
+                    <div><dt>Held-out validation</dt><dd>Choose bounds/objective using calibration traces only; report improvement relative to repeat variability on untouched motions/contacts.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Delay appears as damping:</strong> align clocks/resampling and estimate timing before fitting dynamic loss.</li>
+                    <li><strong>Many fits work equally:</strong> inspect sensitivity, parameter correlation, profile cost, and excitation coverage; fit fewer parameters.</li>
+                    <li><strong>Optimizer hits a bound:</strong> check units/sign/frame, initial state, objective scaling, identifiability, and bound rationale.</li>
+                    <li><strong>Training fit improves, validation degrades:</strong> detect leakage, overfitting, structural mismatch, and unmodeled operating conditions.</li>
+                    <li><strong>Contact fit is erratic:</strong> discontinuities may defeat smooth optimization; use controlled sweeps/robust objectives and separate contact modes.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Hidden-truth identifiability lab</strong><p>Generate noisy traces from withheld parameters; design separate free, step/chirp, and slide/contact excitations; rank finite-difference sensitivities.</p></div>
+                  <div><span>Output</span><p>Truth manifest kept outside fitting input, trace schema, sensitivity matrix/plot, and selected identifiable parameter subset.</p></div>
+                  <div><span>Pass condition</span><p>Chosen parameters are recovered within predeclared synthetic tolerance; correlated/weak parameters are explicitly excluded.</p></div>
+                </li>
+                <li>
+                  <div><strong>Bounded fit and held-out validation</strong><p>Time-align/resample traces, fit one or two supported parameters with robust least squares, then score untouched trajectories and residual structure.</p></div>
+                  <div><span>Output</span><p>Optimizer config, parameter profile/uncertainty, before/after held-out metrics, residual autocorrelation, and bound-hit explanations.</p></div>
+                  <div><span>Pass condition</span><p>Held-out improvement exceeds repeat variability; otherwise the result is correctly reported as no demonstrated benefit.</p></div>
+                </li>
+                <li>
+                  <div><strong>Evidence ladder</strong><p>Optionally record a phone-video pendulum or block-on-ramp trace; otherwise use a withheld simulator or MuJoCo and label it sim-to-sim/cross-simulator.</p></div>
+                  <div><span>Output</span><p>Source/provenance note, calibration/validation split, targeted-calibration versus broad-randomization comparison, and claim-boundary paragraph.</p></div>
+                  <div><span>Pass condition</span><p>Every report sentence distinguishes synthetic, cross-simulator, or physical evidence and limits the claim to measured observables.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Implementation boundary on this installation</h3>
+                <pre><code># No supported standalone calibration example is installed.
+# Build and run your project scripts with Isaac's Python:
+C:\isaacsim\python.bat .\experiments\calibration\generate_hidden_truth.py
+C:\isaacsim\python.bat .\experiments\calibration\fit_parameters.py --config .\configs\calibration.yaml
+C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pre>
+                <p>Gain Tuner is UI-oriented. Bundled MuJoCo includes the official <code>mujoco.sysid</code> API, but there is no ready Isaac/PhysX calibration CLI. Trace collection, fitting, uncertainty, and held-out evaluation remain portfolio code you must author.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://underactuated.csail.mit.edu/sysid.html"><span class="ref-type">University · theory</span><strong>MIT Underactuated: System Identification</strong><small>Model learning, parameter estimation, excitation, and identifiability.</small></a>
+                  <a class="module-reference" href="https://docs.scipy.org/doc/scipy-1.17.0/reference/generated/scipy.optimize.least_squares.html"><span class="ref-type">Primary · fitting</span><strong>SciPy 1.17 Bounded Least Squares</strong><small>Matches the bundled runtime family; record exact version, bounds, robust loss, Jacobian, and tolerances.</small></a>
+                  <a class="module-reference" href="https://mujoco.readthedocs.io/en/stable/computation/index.html"><span class="ref-type">Official · optional parity</span><strong>MuJoCo Computation</strong><small>Dynamics/contact/actuator semantics for a narrowly scoped cross-simulator comparison.</small></a>
+                  <a class="module-reference" href="https://github.com/google-deepmind/mujoco/blob/main/python/mujoco/sysid/README.md"><span class="ref-type">Official · optional toolbox</span><strong>MuJoCo SysID README</strong><small>Bundled Python system-identification API; useful as a reference, not an Isaac/PhysX calibration solution.</small></a>
+                  <a class="module-reference" href="https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/01-overview.html"><span class="ref-type">Official · transfer context</span><strong>NVIDIA SO-101 Sim-to-Real</strong><small>SO-101-specific DR, sim/real evaluation, dataset augmentation, deployment, and actuation-gap learning—not classical system identification.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> Friction, damping, and delay combinations fit one trajectory equally well. How do you redesign excitation, analyze identifiability, and avoid presenting an arbitrary fit as truth?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> calibration and validation cases are disjoint, sensitivity supports the fitted subset, held-out change is compared with repeat variability, and the report states exactly what its synthetic, cross-simulator, or physical evidence does—and does not—support.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-9" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-9" data-module-check> Module 9</label>
+            <span class="hours">8–12 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Performance, CI, and asynchronous delivery</h2>
+            <p>Profile the pipeline as a system, aggregate the hosted/local tests introduced by earlier modules, define regression thresholds, and leave enough evidence for a remote collaborator to reproduce and challenge the result.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Real-time factor, steps/s, environments/s, sensor throughput, latency percentiles, and memory.</li>
+                  <li>Warmup, synchronization, batched operations, reset cost, render cost, and host-device transfer.</li>
+                  <li>Fast smoke tests versus controlled performance benchmarks.</li>
+                  <li>Config schemas, architecture decisions, experiment manifests, and known limitations.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Use a geometric environment-count sequence until the first measured throughput knee, resource limit, or stability limit; report actual counts.</li>
+                  <li>Separate physics-only, sensor-enabled, and rendered workloads.</li>
+                  <li>Add model validation, reset, finite-state, determinism, and interface smoke tests.</li>
+                  <li>Write a clean-room reproduction guide and handoff checklist.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Raw benchmark JSON/CSV, workload manifest, scaling plot, profile trace, and one-change optimization report.</li>
+                  <li>Public pure-Python CI plus hardware-stamped local Isaac validation with injected-failure artifacts.</li>
+                  <li>Architecture decisions, config reference, clean-checkout runbook, handoff checklist, and known limitations.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and measurements</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>RTF and steps/s</dt><dd><code>RTF = simulated elapsed time / wall elapsed time</code>. Specify physics or control steps; GUI FPS is neither measure.</dd></div>
+                    <div><dt>Environment-steps/s</dt><dd><code>num_envs × control_steps/s</code>. Larger batches can improve throughput while increasing per-step latency.</dd></div>
+                    <div><dt>Warmup and synchronization</dt><dd>Exclude compilation/cache/GPU-clock warmup and synchronize queued GPU work before timing boundaries that require completion.</dd></div>
+                    <div><dt>p50/p95 and variation</dt><dd>Report median/tail latency and repeat variation; an optimization should exceed run noise while preserving correctness tolerances.</dd></div>
+                    <div><dt>CI split</dt><dd>Hosted CI verifies pure-Python schema/math/config logic. Local or self-hosted RTX validation proves Isaac physics/reset/sensor/ROS behavior.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Great “FPS,” poor physics:</strong> define the measured loop and compare simulated time, control steps, and wall time.</li>
+                    <li><strong>Benchmark is noisy:</strong> separate startup/shader compilation, warmup, GPU synchronization, thermal/background load, and fixed repetitions.</li>
+                    <li><strong>Sensors destroy throughput:</strong> isolate resolution, count, tick rate, rendering mode, readback, DDS, and host-device transfer.</li>
+                    <li><strong>Scaling stops:</strong> log VRAM/RAM, contacts, collision complexity, CPU fallback, Python loops, and reset cost.</li>
+                    <li><strong>CI badge overclaims:</strong> list exactly which tests ran on hosted CPU and which require the local Isaac/RTX environment.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Controlled workload matrix</strong><p>Benchmark actual capstone physics-only, sensor-enabled, and rendered modes; name any core-world/camera reference separately and test counts supported by each workload.</p></div>
+                  <div><span>Output</span><p>Three initial repetitions per chosen case, adding repeats only when variance requires them; include warmup, manifest, RTF/steps/s/p50/p95, VRAM/RAM, and correctness.</p></div>
+                  <div><span>Pass condition</span><p>Variation meets the predeclared repeatability threshold or its environmental cause is diagnosed and retained in the report.</p></div>
+                </li>
+                <li>
+                  <div><strong>Profile and change one variable</strong><p>Capture Tracy/Nsight evidence, select one bottleneck, change only sensor rate/resolution, collision complexity, render mode, clone mode, or synchronization path.</p></div>
+                  <div><span>Output</span><p>Before/after trace, controlled manifests, performance delta versus run variation, and unchanged task/sensor correctness comparison.</p></div>
+                  <div><span>Pass condition</span><p>The bottleneck is visible in the profile and the measured gain exceeds noise without weakening evidence quality.</p></div>
+                </li>
+                <li>
+                  <div><strong>Failure-aware CI and handoff</strong><p>Add public schema/model/config tests and local Isaac reset/finite-state/interface checks; inject bad inertia, NaN action, missing frame, and stale command.</p></div>
+                  <div><span>Output</span><p>Workflow, local GPU report, JUnit/JSON artifacts, architecture diagram, exact runbook, and clean-checkout review notes.</p></div>
+                  <div><span>Pass condition</span><p>Each planted fault fails early with the intended artifact and another engineer reproduces the bounded smoke result without hidden steps.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed benchmark references</h3>
+                <pre><code>Set-Location C:\isaacsim
+.\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1 --backend-type JSONFileMetrics
+.\python.bat .\standalone_examples\benchmarks\benchmark_camera.py --num-cameras 1 --resolution 640 480 --num-frames 120 --backend-type JSONFileMetrics
+.\python.bat .\run_tests.py --dry-run --output "$env:TEMP\isaac_test_report.xml"</code></pre>
+                <p>Benchmark examples may fetch NVIDIA assets and use deprecated RC-era core imports: run them as packaged, but do not copy those imports into portfolio code. Repeat counts only while the named workload, 16 GB VRAM, 34 GB RAM, and stability permit. <code>run_tests.py</code> discovers Isaac’s suites, not your tests.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/reference_material/sim_performance_optimization_handbook.html"><span class="ref-type">Official · before Lab 1</span><strong>Isaac Sim Performance Handbook</strong><small>Physics, scene, rendering, sensor, and memory bottleneck controls.</small></a>
+                  <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html"><span class="ref-type">Official · Lab 2</span><strong>Profiling with Tracy</strong><small>CPU/GPU zones, standalone capture, profiler overhead, and bottleneck interpretation.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/testing/benchmarks.html"><span class="ref-type">Official · benchmark design</span><strong>Isaac Lab Benchmark Framework</strong><small>Phases, measurements, system/version recorders, backends, and JSON results; beta APIs may change.</small></a>
+                  <a class="module-reference" href="https://docs.github.com/en/actions/tutorials/build-and-test-code/python"><span class="ref-type">Official · Lab 3</span><strong>GitHub Actions for Python</strong><small>Pytest, matrices, caching, and artifacts; hosted runners do not provide this Isaac RTX stack.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> Throughput drops 60% after enabling RGB-D. Design a profiling matrix that distinguishes rendering, sensor tick rate, resolution, readback, ROS transport, and synchronization.</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> hosted pure-Python CI and local RTX/Isaac validation catch their declared injected failures, the benchmark names its actual workload/counts/hardware/configuration, and a reviewer—or documented fresh-clone clean-directory audit—reproduces the bounded result.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="reference" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Engineering reference</p>
+        <h2>Metrics and invariants worth memorizing</h2>
+      </div>
+      <div class="formula-grid">
+        <article class="card">
+          <h3>Free fall</h3>
+          <code>t ≈ √(2h / g)</code>
+          <p>Use before contact. Compare simulated time-to-impact with the analytical baseline and state the integration tolerance.</p>
+        </article>
+        <article class="card">
+          <h3>Pendulum</h3>
+          <code>T ≈ 2π√(L / g)</code>
+          <p>The small-angle result checks gravity, length, constraint behavior, timestep, and damping without a controller.</p>
+        </article>
+        <article class="card">
+          <h3>Critical damping</h3>
+          <code>c<sub>crit</sub> = 2√(km)</code>
+          <p>A useful single-DOF starting point; articulated effective mass changes with configuration.</p>
+        </article>
+        <article class="card">
+          <h3>Tracking RMSE</h3>
+          <code>√mean((q<sub>sim</sub> − q<sub>ref</sub>)²)</code>
+          <p>Report per joint and aggregate with explicit units, alignment, filtering, and evaluation interval.</p>
+        </article>
+        <article class="card">
+          <h3>Real-time factor</h3>
+          <code>RTF = simulated time / wall time</code>
+          <p>RTF above one is faster than real time. Also report workload, rendering, sensors, warmup, and hardware.</p>
+        </article>
+        <article class="card">
+          <h3>Physical inertia</h3>
+          <code>I₁ + I₂ ≥ I₃</code>
+          <p>Principal moments must be positive and satisfy all permutations of the triangle inequality.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="repository" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Suggested implementation</p>
+        <h2>Capstone repository blueprint</h2>
+        <p class="section-note">Keep source assets, generated artifacts, configuration, experiments, and evidence distinguishable.</p>
+      </div>
+      <div class="sim-grid">
+        <article class="card">
+          <h3>Directory contract</h3>
+          <pre class="artifact-tree"><code>robot-sim-capstone/
+├─ assets/robot/          # source model, meshes, model card
+├─ configs/               # physics, sensors, task, randomization
+├─ src/sim_pipeline/      # scene, control, evaluation, CLI
+├─ ros2_ws/src/           # description, bringup, controller/nodes
+├─ tests/                 # public schema checks + local Isaac tests
+├─ experiments/           # immutable manifests and raw metrics
+├─ reports/               # generated plots and validation report
+└─ .github/workflows/     # pure-Python schema/model/config CI</code></pre>
+        </article>
+        <article class="card">
+          <h3>Every experiment manifest</h3>
+          <ul>
+            <li>Commit ID and dirty-tree state.</li>
+            <li>Simulator/dependency versions and hardware.</li>
+            <li>Config file plus content hash.</li>
+            <li>Seed set and exact command.</li>
+            <li>Start/end time and status.</li>
+            <li>Raw output paths and generated report version.</li>
+          </ul>
+          <h3>Optional C++ proof</h3>
+          <p>Add a small ROS 2 controller or sensor-processing node with tests. Do not claim C++ simulation expertise until the artifact exists and is exercised by the pipeline.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="capstone" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Portfolio capstone</p>
+        <h2>Warehouse manipulation digital twin</h2>
+        <p class="section-note">
+          A Franka-style arm performs sensor-instrumented, contact-aware pick-and-place in a parameterized workcell. A mobile-base
+          or legged-locomotion extension is optional; model quality and evaluation depth come first.
+        </p>
+      </div>
+      <div class="capstone-grid">
+        <article class="capstone-card">
+          <span class="number">Milestone A</span>
+          <h3>Model and physics</h3>
+          <ul>
+            <li>Validated robot description and documented simulator representation.</li>
+            <li>Mass, inertia, contact, friction, actuator, timestep, and solver parameter tables.</li>
+            <li>Drop, slide, pendulum, and controller-response validation suite.</li>
+          </ul>
+        </article>
+        <article class="capstone-card">
+          <span class="number">Milestone B</span>
+          <h3>ROS 2 and sensors</h3>
+          <ul>
+            <li>Launchable joint-state, TF, command, clock, camera/depth, and force/torque pipeline.</li>
+            <li>Sensor rate, latency, frame, QoS, noise, and dropout contract.</li>
+            <li>Recorded and replayable seeded run.</li>
+          </ul>
+        </article>
+        <article class="capstone-card">
+          <span class="number">Milestone C</span>
+          <h3>Task and robustness</h3>
+          <ul>
+            <li>Scripted baseline; optional Isaac Lab policy.</li>
+            <li>At least 100 versioned frozen scenarios, each recording its seed and failure category.</li>
+            <li>Mass, friction, sensor bias, latency, and actuator ablation.</li>
+          </ul>
+        </article>
+        <article class="capstone-card">
+          <span class="number">Milestone D</span>
+          <h3>Calibration and production</h3>
+          <ul>
+            <li>Calibration and held-out traces with before/after error.</li>
+            <li>Headless scaling plot and profiler-backed optimization.</li>
+            <li>CI smoke suite, architecture/runbook, demo video, and known limitations.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="callout">
+        <strong>Claim discipline:</strong> if no physical robot data is used, describe the result as
+        <em>sim-to-sim robustness</em> or <em>cross-simulator validation</em>. Reserve <em>sim-to-real validation</em>
+        for measured hardware evidence.
+      </div>
+    </section>
+
+    <section id="job-map" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Role alignment</p>
+        <h2>Map each requirement to public evidence</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Robotics Simulation Engineer requirements and course evidence</caption>
+          <thead>
+            <tr>
+              <th scope="col">Role requirement</th>
+              <th scope="col">Course coverage</th>
+              <th scope="col">Application-ready evidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">URDF/MJCF/SDF/USD robot models</th><td>Modules 0 and 2</td><td>Source model, validator, import comparison, model card.</td></tr>
+            <tr><th scope="row">Rigid-body dynamics and contact</th><td>Modules 1, 4, and 7</td><td>Analytical experiments, response plots, calibrated parameters, held-out error.</td></tr>
+            <tr><th scope="row">Isaac Sim, MuJoCo, or Gazebo</th><td>Modules 1–9</td><td>Scripted primary simulator plus one narrowly scoped parity lab.</td></tr>
+            <tr><th scope="row">End-to-end simulation pipeline</th><td>Modules 3 and 6</td><td>Config-driven reset/rollout/evaluate/replay CLI with episode artifacts.</td></tr>
+            <tr><th scope="row">Physics and actuator tuning</th><td>Modules 1, 4, and 7</td><td>Parameter provenance, sensitivity sweep, saturation/delay tests, calibration report.</td></tr>
+            <tr><th scope="row">ROS 2 integration</th><td>Module 5</td><td>Launch package, TF diagram, topic/QoS contract, rosbag replay.</td></tr>
+            <tr><th scope="row">Python and C++</th><td>All modules; optional C++ extension</td><td>Tested Python infrastructure; optional exercised C++ ROS 2 node.</td></tr>
+            <tr><th scope="row">Domain randomization / robot learning</th><td>Module 8</td><td>Typed distributions, ablation, nominal versus held-out robustness.</td></tr>
+            <tr><th scope="row">Sensors</th><td>Module 5</td><td>RGB-D plus contact/effort frame, rate, noise, and latency validation; optional LiDAR/IMU extension.</td></tr>
+            <tr><th scope="row">Parallel performance</th><td>Module 9</td><td>Controlled scaling benchmark, profiler evidence, optimization delta.</td></tr>
+            <tr><th scope="row">CI/CD and documentation</th><td>Modules 0 and 9</td><td>Headless gates, failure artifacts, architecture decisions, runbook, limitations.</td></tr>
+            <tr><th scope="row">Remote asynchronous collaboration</th><td>Every evidence gate</td><td>Reproduction command, experiment manifest, reviewable plots, honest handoff notes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="application-copy" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Apply from Day 8</p>
+        <h2>Turn measurements into truthful application bullets</h2>
+        <p class="section-note">
+          Replace every bracketed field with a result that exists in the public report. If the measurement is not
+          ready, omit the clause instead of estimating it.
+        </p>
+      </div>
+      <div class="sim-grid">
+        <article class="card">
+          <span class="number">Pipeline bullet</span>
+          <p>Built a config-driven Isaac Sim 6.0 RC Franka pick-and-place validation pipeline with seeded reset, contact/effort logging, and ROS 2 clock/TF/joint/sensor contracts; reproduced <code>[successes]/[episodes]</code> nominal outcomes from one command.</p>
+        </article>
+        <article class="card">
+          <span class="number">Fidelity bullet</span>
+          <p>Validated free-fall, slide, joint-response, and grasp-contact behavior against declared targets; reduced held-out <code>[metric]</code> from <code>[before]</code> to <code>[after]</code> by calibrating <code>[parameters]</code>.</p>
+        </article>
+        <article class="card">
+          <span class="number">Performance bullet</span>
+          <p>Profiled <code>[actual capstone or named benchmark]</code> at <code>[tested environment counts]</code> on an RTX 4080 SUPER; improved <code>[RTF or steps/s]</code> by <code>[delta]</code> after isolating <code>[bottleneck]</code>.</p>
+        </article>
+        <article class="card">
+          <span class="number">Short pitch</span>
+          <p>I build robot simulations as testable systems: audit the model, validate canonical physics, tune control/contact, define ROS and sensor contracts, then calibrate and stress-test with reproducible metrics. My public case study shows the commands, failures, and hardware-stamped results.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <strong>Do not claim yet:</strong> “closed the sim-to-real gap,” “production-ready,” “real-time,” “robust,”
+        or “GPU accelerated” unless the public artifact defines the test and reports supporting hardware evidence.
+      </div>
+    </section>
+
+    <section id="finish-line" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Application checklist</p>
+        <h2>The public finish line</h2>
+        <p class="section-note">A hiring reviewer should understand the system, reproduce a small result, and see how you reason about fidelity in under ten minutes.</p>
+      </div>
+      <div class="check-grid">
+        <div class="check-item"><span>✓</span><span>Two-minute demo video with overlays for task state, contacts, and key metrics.</span></div>
+        <div class="check-item"><span>✓</span><span>README quick start that works from a clean checkout and states hardware needs.</span></div>
+        <div class="check-item"><span>✓</span><span>Architecture and TF diagrams with simulator, ROS 2, controller, sensor, and logger boundaries.</span></div>
+        <div class="check-item"><span>✓</span><span>Model card and parameter tables with sources, units, assumptions, and uncertainty.</span></div>
+        <div class="check-item"><span>✓</span><span>Validation report with raw traces, analytical checks, held-out evaluation, and failures.</span></div>
+        <div class="check-item"><span>✓</span><span>Performance plot naming workload, warmup, hardware, sensor/render settings, and memory.</span></div>
+        <div class="check-item"><span>✓</span><span>Public CI badge backed by schema/model/config tests; separate hardware-stamped local report for Isaac reset, physics, sensor, and ROS checks.</span></div>
+        <div class="check-item"><span>✓</span><span>Known-limitations section that clearly labels any missing physical-robot evidence.</span></div>
+      </div>
+    </section>
+
+    <section id="practice" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Interview preparation</p>
+        <h2>Explain the failure, not just the definition</h2>
+        <p class="section-note">
+          The companion lab contains 50 searchable questions across robot models, dynamics and contact, simulator
+          performance, ROS 2 and sensors, and sim-to-real/CI debugging.
+        </p>
+        <div class="card-actions">
+          <a class="button" href="practice.html">Open practice lab</a>
+          <a class="button secondary" href="#module-2">Review model engineering</a>
+          <a class="button secondary" href="#module-7">Review calibration</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Primary references</p>
+        <h2>Use the annotated route, not an endless reading list</h2>
+        <p class="section-note">The separate guide orders the official and university material by dependency and gives each link a read target, extraction task, build artifact, and stop condition. Last reviewed 12 July 2026.</p>
+        <div class="card-actions">
+          <a class="button" href="resources.html">Open the deep resource route</a>
+          <a class="button secondary" href="#fast-track">Return to the 14-day sprint</a>
+        </div>
+      </div>
+      <div class="source-grid">
+        <article class="source-card">
+          <h3>NVIDIA Isaac Sim</h3>
+          <p>Robot asset import, ROS 2 integration, synthetic data, sensor workflows, and simulator APIs.</p>
+          <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/">Isaac Sim docs</a>
+          <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/import_urdf.html">URDF import</a>
+          <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/py/source/extensions/isaacsim.ros2.bridge/docs/index.html">ROS 2 bridge</a>
+          <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/replicator_tutorials/index.html">Replicator</a>
+        </article>
+        <article class="source-card">
+          <h3>NVIDIA Isaac Lab</h3>
+          <p>Manager/direct environments, vectorized robotics tasks, training workflows, and domain randomization. Pin the branch/commit and record resolved dependencies because beta guidance can change.</p>
+          <a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Isaac Lab 3.0 beta2 quickstart</a>
+        </article>
+        <article class="source-card">
+          <h3>MuJoCo and MJX</h3>
+          <p>MJCF modeling, computation pipeline, contact, actuators, Python bindings, rollouts, and accelerated batches.</p>
+          <a href="https://mujoco.readthedocs.io/en/stable/overview.html">Overview</a>
+          <a href="https://mujoco.readthedocs.io/en/stable/modeling.html">Modeling</a>
+          <a href="https://mujoco.readthedocs.io/en/stable/computation/index.html">Computation</a>
+          <a href="https://mujoco.readthedocs.io/en/stable/mjx.html">MJX</a>
+        </article>
+        <article class="source-card">
+          <h3>ROS 2 and ros2_control</h3>
+          <p>URDF/Xacro, TF, simulation time, rosbag, controller manager, hardware interfaces, and simulator integrations.</p>
+          <a href="https://docs.ros.org/en/jazzy/Tutorials.html">ROS 2 tutorials</a>
+          <a href="https://docs.ros.org/en/ros2_packages/jazzy/api/robot_state_publisher/">Robot state publisher</a>
+          <a href="https://control.ros.org/jazzy/doc/getting_started/getting_started.html">ros2_control</a>
+          <a href="https://control.ros.org/jazzy/doc/simulators/simulators.html">Simulator integrations</a>
+        </article>
+        <article class="source-card">
+          <h3>Gazebo and SDF</h3>
+          <p>Gazebo Sim, ROS 2 transport/integration, standard simulation interfaces, worlds, physics, and sensors.</p>
+          <a href="https://gazebosim.org/docs/harmonic/getstarted/">Gazebo Harmonic</a>
+          <a href="https://gazebosim.org/docs/harmonic/ros2_integration/">ROS 2 integration</a>
+          <a href="https://gazebosim.org/docs/harmonic/sensors/">Sensors</a>
+          <a href="https://sdformat.org/spec">SDF specification</a>
+        </article>
+        <article class="source-card">
+          <h3>Course companion material</h3>
+          <p>Existing Isaac Sim roadmap, paper-reproduction notes, terminology, and robotics coding drills.</p>
+          <a href="https://buicongnguyen.github.io/isaac-sim-learning-plan/">Isaac Sim learning hub</a>
+          <a href="https://buicongnguyen.github.io/isaac-sim-learning-plan/coding-practice.html">Robotics coding practice</a>
+          <a href="practice.html">This course’s practice lab</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Original self-study material for measurable robotics simulation engineering practice.</p>
+    <div class="footer-links">
+      <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="resources.html">Deep resources</a>
+      <a href="practice.html">Practice</a>
+      <a href="../index.html">Portfolio</a>
+      <a href="https://github.com/buicongnguyen/buicongnguyen.github.io">Source</a>
+      <a href="#main">Back to top</a>
+    </div>
+  </footer>
+
+  <script src="course.js"></script>
+</body>
+</html>

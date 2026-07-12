@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fifty robotics simulation engineering interview questions plus failure-diagnosis scenarios and coding drills for robot models, dynamics, ROS 2, sensors, sim-to-real, performance, and CI.">
+  <meta name="theme-color" content="#087968">
+  <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/practice.html">
+  <title>Robotics Simulation Engineering Practice Lab</title>
+  <link rel="stylesheet" href="course.css">
+  <link rel="stylesheet" href="practice.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to practice content</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Robotics Simulation Engineering course home">
+      <img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="">
+      <span>Robotics Simulation Engineering</span>
+    </a>
+    <nav aria-label="Practice navigation">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="resources.html">Resources</a>
+      <a href="#questions">50 questions</a>
+      <a href="#scenarios">Diagnostics</a>
+      <a href="#coding">Coding drills</a>
+      <a href="#glossary">Glossary</a>
+      <a href="../index.html">Portfolio</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero practice-hero" aria-labelledby="practice-title">
+      <div>
+        <p class="eyebrow">Models · physics · ROS 2 · sensors · transfer · CI</p>
+        <h1 id="practice-title">Robotics Simulation Engineering Practice Lab</h1>
+        <p class="lede">
+          Fifty scenario-based multiple-choice questions, six failure-diagnosis walkthroughs, and six coding
+          drills. The questions test engineering judgment: what to measure, what to isolate, and what evidence
+          supports a simulator claim.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#questions">Start the question bank</a>
+          <a class="button secondary" href="architecture.html#isolation">Open the debug map</a>
+          <a class="button secondary" href="index.html#curriculum">Review the course</a>
+          <a class="button secondary" href="resources.html">Deep resources</a>
+          <a class="button secondary" href="#coding">Open coding drills</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <p class="eyebrow">Recommended loop</p>
+        <ol>
+          <li>Answer before expanding notes or documentation.</li>
+          <li>State why each tempting alternative is weaker.</li>
+          <li>Check the answer and record the missing invariant.</li>
+          <li>Turn weak areas into a small measured experiment.</li>
+        </ol>
+        <p class="section-note">Answers and score are stored only in this browser. Search and filtering do not change the score.</p>
+      </aside>
+    </section>
+
+    <section id="plan" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Five-session plan</p>
+        <h2>Practice in dependency order</h2>
+      </div>
+      <div class="study-grid">
+        <article class="card"><span class="number">Session 1</span><h3>Models and frames</h3><p>Draw transform chains, inspect inertial origins, validate mass properties, and explain why rendering parity is not physics parity.</p></article>
+        <article class="card"><span class="number">Session 2</span><h3>Dynamics and control</h3><p>Reason from force, energy, timestep, solver, actuator saturation, delay, and controller stability.</p></article>
+        <article class="card"><span class="number">Session 3</span><h3>Simulator performance</h3><p>Separate physics, sensors, rendering, resets, Python overhead, host-device transfer, and synchronization.</p></article>
+        <article class="card"><span class="number">Session 4</span><h3>ROS 2 and sensors</h3><p>Trace time, TF, QoS, frames, acquisition timestamps, noise, latency, watchdogs, and replay metadata.</p></article>
+        <article class="card"><span class="number">Session 5</span><h3>Transfer and production</h3><p>Design identification splits, justify randomization, isolate catastrophic failures, and choose robust CI gates.</p></article>
+        <article class="card"><span class="number">Final pass</span><h3>Explain aloud</h3><p>Use the six diagnostics as mock interviews. Lead with observations, ranked hypotheses, discriminating tests, and decision criteria.</p></article>
+      </div>
+    </section>
+
+    <section id="knowledge" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Knowledge map</p>
+        <h2>Six ideas that connect the whole role</h2>
+      </div>
+      <div class="knowledge-grid">
+        <article class="card"><h3>Frames are contracts</h3><p>Every pose, wrench, sensor value, and joint axis needs a named frame, convention, and timestamp.</p></article>
+        <article class="card"><h3>Fidelity is task-relative</h3><p>A model is “high fidelity” only with respect to declared observables, operating conditions, and error tolerances.</p></article>
+        <article class="card"><h3>Defaults are parameters</h3><p>Unwritten solver, material, actuator, import, and sensor defaults still shape the result and must be captured.</p></article>
+        <article class="card"><h3>Control changes physics</h3><p>Gain, rate, saturation, delay, and command semantics can dominate observed behavior even with a valid rigid-body model.</p></article>
+        <article class="card"><h3>Randomization needs a prior</h3><p>Ranges should follow measurement, identification uncertainty, or sensitivity—not an arbitrary common percentage.</p></article>
+        <article class="card"><h3>Reproducibility is evidence</h3><p>Commit, config, seed, hardware, commands, raw results, and known limitations turn a demo into reviewable engineering.</p></article>
+      </div>
+    </section>
+
+    <div class="quiz-toolbar-shell">
+      <div class="quiz-toolbar">
+        <label>
+          <span>Search questions</span>
+          <input id="question-search" type="search" placeholder="Search friction, TF, inertia, CI..." autocomplete="off">
+        </label>
+        <label>
+          <span>Filter by category</span>
+          <select id="question-category">
+            <option value="all">All categories</option>
+          </select>
+        </label>
+        <button id="expand-visible" class="text-button" type="button">Expand shown</button>
+        <button id="collapse-all" class="text-button" type="button">Collapse all</button>
+      </div>
+    </div>
+
+    <section id="questions" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Interview bank</p>
+        <h2>50 engineering questions</h2>
+        <p class="section-note">Correct choices are revealed only after you check an answer. Changing a selected choice clears that question’s saved result until it is checked again.</p>
+      </div>
+      <div class="quiz-stats">
+        <span id="quiz-stats" aria-live="polite">Loading questions…</span>
+        <button id="reset-answers" class="text-button" type="button">Reset saved answers</button>
+      </div>
+      <noscript><p class="callout"><strong>JavaScript is required</strong> to render and score the question bank. The course and all static drills remain readable.</p></noscript>
+      <div id="questions-root"></div>
+    </section>
+
+    <section id="scenarios" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Failure diagnosis</p>
+        <h2>Six senior-level debugging walkthroughs</h2>
+        <p class="section-note">A strong answer orders hypotheses by likelihood and information gain, then names the evidence that would change the decision.</p>
+      </div>
+
+      <details class="scenario">
+        <summary><span>1. An imported robot explodes on the first physics step.</span><span class="question-tag">Model bring-up</span></summary>
+        <div class="scenario-body">
+          <h4>First isolate</h4>
+          <ol>
+            <li>Disable controllers, gravity, and self-collision independently; start from a known pose.</li>
+            <li>Check length/mass units, NaN or zero masses, inertia validity, joint axes, and impossible limits.</li>
+            <li>Visualize collision shapes and find initial overlaps or detailed dynamic triangle meshes.</li>
+            <li>Advance one step at a time and record the first body, constraint, or contact that diverges.</li>
+          </ol>
+          <h4>Do not start with</h4>
+          <p>Blindly raising solver iterations or damping. Those changes can mask symptoms without repairing an invalid model.</p>
+          <h4>Decision evidence</h4>
+          <p>A minimal body/joint/contact reproducer, model-validator output, first-step forces/impulses, and before/after finite-state test.</p>
+        </div>
+      </details>
+
+      <details class="scenario">
+        <summary><span>2. A gripper holds visually, but the object slowly slips or chatters.</span><span class="question-tag">Contact</span></summary>
+        <div class="scenario-body">
+          <h4>Ranked hypotheses</h4>
+          <ol>
+            <li>Normal force or actuator effort is insufficient or saturating.</li>
+            <li>Friction combine mode, anisotropy, contact patch, or material assignment differs from expectation.</li>
+            <li>Timestep/contact stiffness/damping creates penetration and unstable impulses.</li>
+            <li>Collision proxies leave a smaller or tilted contact area than the visual meshes suggest.</li>
+          </ol>
+          <h4>Experiment</h4>
+          <p>Log normal/tangential contact forces, slip velocity, commanded/applied effort, and penetration while sweeping one parameter family at a time. Compare against a simple friction-cone bound.</p>
+        </div>
+      </details>
+
+      <details class="scenario">
+        <summary><span>3. Camera and LiDAR data arrive, but localization jumps and TF reports extrapolation.</span><span class="question-tag">ROS 2 time</span></summary>
+        <div class="scenario-body">
+          <h4>Trace the clock</h4>
+          <ol>
+            <li>Confirm every node uses simulation time and receives the same <code>/clock</code>.</li>
+            <li>Compare acquisition stamps, publication stamps, TF buffer coverage, and rosbag playback clock.</li>
+            <li>Check static versus dynamic transform publishers and optical-frame axes.</li>
+            <li>Measure sensor rate and intentional latency; do not rewrite stamps to “now” to hide the fault.</li>
+          </ol>
+          <h4>Evidence</h4>
+          <p>A time-aligned trace showing sensor stamp, transform availability interval, lookup time, queue delay, and corrected residual.</p>
+        </div>
+      </details>
+
+      <details class="scenario">
+        <summary><span>4. The same seed is stable locally but occasionally fails in headless CI.</span><span class="question-tag">Reproducibility</span></summary>
+        <div class="scenario-body">
+          <h4>Separate causes</h4>
+          <ol>
+            <li>Pin asset/dependency versions and compare hardware, driver, thread count, and solver backend.</li>
+            <li>Capture the first divergent state, not only the final success/failure flag.</li>
+            <li>Look for unordered iteration, async startup, wall-time dependencies, parallel reductions, and stale reset state.</li>
+            <li>Decide whether bitwise determinism is required; otherwise test bounded invariants or distributions.</li>
+          </ol>
+          <h4>CI response</h4>
+          <p>Retain the seed, config, first-difference trace, logs, and replay command as failure artifacts. Use tolerances justified by the observable, not by what makes CI green.</p>
+        </div>
+      </details>
+
+      <details class="scenario">
+        <summary><span>5. GPU throughput scales well to 256 environments, then plateaus.</span><span class="question-tag">Performance</span></summary>
+        <div class="scenario-body">
+          <h4>Measure by workload slice</h4>
+          <ol>
+            <li>Benchmark physics-only, then add contacts, sensors, rendering, policy inference, logging, and resets.</li>
+            <li>Warm up and synchronize timing boundaries; record GPU memory and utilization.</li>
+            <li>Profile Python loops, tensor allocation, host-device copies, readback, and per-environment scene mutations.</li>
+            <li>Compare step cost and amortized reset cost across environment counts.</li>
+          </ol>
+          <h4>Good conclusion</h4>
+          <p>Name the bottleneck and its evidence. “GPU simulation does not scale” is not a diagnosis.</p>
+        </div>
+      </details>
+
+      <details class="scenario">
+        <summary><span>6. Calibrated friction fits one trajectory but worsens another.</span><span class="question-tag">Identification</span></summary>
+        <div class="scenario-body">
+          <h4>Likely issues</h4>
+          <ol>
+            <li>The calibration motion did not excite friction separately from damping, delay, or actuator gain.</li>
+            <li>A single coefficient cannot represent direction, speed, load, contact patch, or surface changes.</li>
+            <li>Time alignment, sensor bias, or preprocessing contaminates the objective.</li>
+            <li>The optimizer overfit one trace or found a non-unique parameter combination.</li>
+          </ol>
+          <h4>Next experiment</h4>
+          <p>Design multiple excitation regimes, split calibration from validation, run sensitivity/identifiability checks, and report parameter uncertainty alongside held-out residuals.</p>
+        </div>
+      </details>
+    </section>
+
+    <section id="coding" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Implementation practice</p>
+        <h2>Six coding and configuration drills</h2>
+        <p class="section-note">Solve with tests first. A short correct validator or benchmark harness is more persuasive than a large unmeasured simulator demo.</p>
+      </div>
+
+      <details class="coding-drill">
+        <summary><span>1. Validate a rigid body’s mass and inertia tensor.</span><span class="question-tag">Python · NumPy</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Implement <code>validate_inertia(mass, inertia, tol)</code>. Return structured errors for shape, finiteness, symmetry, mass positivity, eigenvalue positivity, and principal-moment triangle inequalities.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li>Valid box and sphere tensors pass.</li><li>Negative mass, asymmetric tensor, negative eigenvalue, and impossible principal moments fail with distinct messages.</li><li>Near-boundary values use an explicit scale-aware tolerance.</li></ul>
+          <h4>Follow-up</h4>
+          <p>Extend it with the parallel-axis theorem and verify the shifted tensor by moving the center of mass.</p>
+        </div>
+      </details>
+
+      <details class="coding-drill">
+        <summary><span>2. Parse a URDF joint graph and detect structural errors.</span><span class="question-tag">Python · XML</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Read link and joint elements, build parent-to-child adjacency, find roots, detect duplicate parents, missing references, disconnected links, and cycles, then output a topological traversal.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li>A valid chain and branched tree pass.</li><li>A cycle, two roots, orphan link, and unknown child fail.</li><li>Fixed and movable joints remain distinguishable.</li></ul>
+          <h4>Interview extension</h4>
+          <p>Explain how you would represent a physical loop when the source format requires a tree.</p>
+        </div>
+      </details>
+
+      <details class="coding-drill">
+        <summary><span>3. Compose transforms without mixing quaternion conventions.</span><span class="question-tag">Geometry</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Implement pose composition and inversion with a documented quaternion ordering. Normalize at API boundaries and reject zero-norm quaternions.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li><code>T * inverse(T)</code> returns identity within tolerance.</li><li>Known 90-degree rotations compose in the correct order.</li><li>A ROS-style <code>(x,y,z,w)</code> adapter round-trips to the chosen internal ordering.</li></ul>
+        </div>
+      </details>
+
+      <details class="coding-drill">
+        <summary><span>4. Design a friction calibration sweep.</span><span class="question-tag">Experiment</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Given reference displacement and velocity traces, sweep static/kinetic friction and damping, align timestamps, compute weighted residuals, and retain the full result surface—not only the winner.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li>Calibration and held-out traces are separate.</li><li>Units and bounds are validated.</li><li>The report includes sensitivity and multiple near-optimal solutions.</li></ul>
+        </div>
+      </details>
+
+      <details class="coding-drill">
+        <summary><span>5. Write a reset and determinism regression test.</span><span class="question-tag">pytest</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Run several episodes with fixed seeds, reset between them, and assert finite states, joint/workspace bounds, object count, clean timestamps, and an explicitly chosen equality/tolerance policy.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li>A leaked object or stale controller state fails.</li><li>A NaN reports the first step and entity.</li><li>Failure artifacts include seed, config hash, and short state trace.</li></ul>
+        </div>
+      </details>
+
+      <details class="coding-drill">
+        <summary><span>6. Build a fair parallel-simulation benchmark harness.</span><span class="question-tag">Performance</span></summary>
+        <div class="coding-body">
+          <h4>Task</h4>
+          <p>Benchmark multiple environment counts with warmup and repeated timed windows. Separate initialization, reset, physics-only, sensor-enabled, and rendered modes.</p>
+          <h4>Acceptance tests</h4>
+          <ul><li>GPU timing boundaries synchronize correctly.</li><li>Median and dispersion are reported, not the fastest sample.</li><li>Output records hardware, software, workload, memory, and exact config.</li></ul>
+        </div>
+      </details>
+    </section>
+
+    <section id="glossary" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Fast reference</p>
+        <h2>Glossary</h2>
+      </div>
+      <dl class="glossary">
+        <div><dt>Articulation</dt><dd>A connected multibody system whose joint structure can be solved as a unit.</dd></div>
+        <div><dt>Broadphase</dt><dd>The fast collision stage that rejects pairs that cannot overlap before detailed tests.</dd></div>
+        <div><dt>Collision proxy</dt><dd>Simplified geometry used for stable, efficient contact instead of detailed visual geometry.</dd></div>
+        <div><dt>Domain randomization</dt><dd>Sampling model or observation parameters during training/evaluation to represent uncertainty.</dd></div>
+        <div><dt>Identifiability</dt><dd>Whether available data can uniquely or usefully constrain a model parameter.</dd></div>
+        <div><dt>MJCF</dt><dd>MuJoCo’s XML modeling format for bodies, joints, actuators, constraints, sensors, and defaults.</dd></div>
+        <div><dt>Principal moments</dt><dd>Eigenvalues of the inertia tensor along principal axes through the center of mass.</dd></div>
+        <div><dt>Real-time factor</dt><dd>Simulated elapsed time divided by wall-clock elapsed time.</dd></div>
+        <div><dt>SDF</dt><dd>Simulation Description Format used for robot models, environments, sensors, physics, and plugins.</dd></div>
+        <div><dt>Specific force</dt><dd>Non-gravitational force per unit mass measured by an ideal accelerometer.</dd></div>
+        <div><dt>TF</dt><dd>ROS transform system for time-indexed relationships among named coordinate frames.</dd></div>
+        <div><dt>URDF</dt><dd>ROS-oriented XML format for a robot’s links, joints, geometry, inertial properties, and extensions.</dd></div>
+      </dl>
+    </section>
+
+    <section id="sources" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Primary references</p>
+        <h2>Check answers against official documentation</h2>
+      </div>
+      <div class="source-grid">
+        <article class="source-card"><h3>Isaac Sim</h3><p>Robot import, physics, ROS 2 bridge, sensors, synthetic data, and APIs.</p><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/">Official docs</a></article>
+        <article class="source-card"><h3>MuJoCo</h3><p>Modeling, computation, contact, actuators, Python, rollouts, and MJX.</p><a href="https://mujoco.readthedocs.io/en/stable/">Official docs</a></article>
+        <article class="source-card"><h3>ROS 2</h3><p>Nodes, QoS, TF, URDF, simulation time, launch, testing, and rosbag.</p><a href="https://docs.ros.org/en/jazzy/Tutorials.html">Official tutorials</a></article>
+        <article class="source-card"><h3>ros2_control</h3><p>Controller manager, hardware interfaces, joint limits, and simulator integration.</p><a href="https://control.ros.org/jazzy/">Official docs</a></article>
+        <article class="source-card"><h3>Gazebo</h3><p>SDF worlds, sensors, ROS 2 integration, simulation interfaces, and headless workflows.</p><a href="https://gazebosim.org/docs/harmonic/getstarted/">Official docs</a></article>
+        <article class="source-card"><h3>Course</h3><p>Return to the evidence gates, capstone, formulas, repository blueprint, and job map.</p><a href="index.html">Robotics Simulation Engineering</a></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Original practice material for robotics simulation engineering.</p>
+    <div class="footer-links">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="../index.html">Portfolio</a>
+      <a href="#main">Back to top</a>
+    </div>
+  </footer>
+
+  <script src="practice-data.js"></script>
+  <script src="practice.js"></script>
+</body>
+</html>

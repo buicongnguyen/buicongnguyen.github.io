@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An annotated deep-reading route for the Robotics Simulation Engineering fast track: official Isaac Sim, Isaac Lab, ROS 2, MuJoCo, Gazebo, OpenUSD, dynamics, contact, validation, and performance resources.">
+  <meta name="theme-color" content="#087968">
+  <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/resources.html">
+  <title>Deep Resource Route | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to resource route</a>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Robotics Simulation Engineering course home">
+      <img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="">
+      <span>Robotics Simulation Engineering</span>
+    </a>
+    <nav aria-label="Resource navigation">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="index.html#fast-track">14-day track</a>
+      <a href="index.html#definitions">Definitions</a>
+      <a href="#route">Resource route</a>
+      <a href="#theory">Theory</a>
+      <a href="practice.html">Practice</a>
+      <a href="../index.html">Portfolio</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="resource-title">
+      <div>
+        <p class="eyebrow">Read less · extract more · build immediately</p>
+        <h1 id="resource-title">Deep Resource Route</h1>
+        <p class="lede">
+          A task-indexed path through official documentation and rigorous university material. Each item
+          says what to extract, what to build, and when to stop reading. Use it just in time with the 14-day sprint,
+          not as a prerequisite library.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#stage-0">Start Stage 0</a>
+          <a class="button secondary" href="architecture.html">See system &amp; debug map</a>
+          <a class="button secondary" href="index.html#fast-track">Open the 14-day sprint</a>
+          <a class="button secondary" href="#theory">Open theory track</a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="Resource study rule">
+        <p class="eyebrow">The 45-minute rule</p>
+        <ol>
+          <li>Open only the resource named by today’s task.</li>
+          <li>Write the requested definitions or decisions in your own words.</li>
+          <li>Stop after 45 minutes and implement the smallest experiment.</li>
+          <li>Return only when a measured failure creates a specific question.</li>
+        </ol>
+        <p class="section-note">Documentation is input. A command, artifact, metric, and engineering note are evidence.</p>
+      </aside>
+    </section>
+
+    <section id="platform-pin" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Version gate · reviewed 12 July 2026</p>
+        <h2>Pin the platform before copying examples</h2>
+        <p class="section-note">The installed runtime and current stable documentation are close, but not identical. Record the exact version used by every result.</p>
+      </div>
+      <div class="machine-grid">
+        <article class="card">
+          <span class="status-badge">Local runtime</span>
+          <h3>Isaac Sim 6.0 RC</h3>
+          <p><code>C:\isaacsim</code> contains <code>6.0.0-rc.59</code>, Kit 110.1.1, and bundled Python 3.12.13. Run its <code>python.bat</code>, not Miniconda or <code>py</code>.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge gap">Stable reference</span>
+          <h3>Isaac Sim 6.0.1</h3>
+          <p>The current stable release is 6.0.1. Use its docs for discovery, but verify each API/example against the installed RC before adopting it.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge gap">Pin if added</span>
+          <h3>Isaac Lab beta 2</h3>
+          <p>For stable Sim 6.0.1, NVIDIA pins Isaac Lab <code>release/3.0.0-beta2</code>, Python 3.12, and its documented PyTorch/CUDA stack. Check RC compatibility first.</p>
+        </article>
+        <article class="card">
+          <span class="status-badge gap">Install by Day 6</span>
+          <h3>ROS 2 Jazzy via Pixi</h3>
+          <p>On Windows 11, use NVIDIA’s current Pixi route. Isaac’s bundled bridge libraries are not a full CLI and workspace environment.</p>
+        </article>
+      </div>
+      <div class="card-actions">
+        <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/download.html">Isaac Sim versions</a>
+        <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html">System requirements</a>
+        <a class="button secondary" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Pinned Isaac Lab quickstart</a>
+        <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">Windows ROS 2 setup</a>
+      </div>
+      <pre class="local-command"><code># Known-good starting shell for this PC
+Set-Location C:\isaacsim
+.\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
+.\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py
+.\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1</code></pre>
+    </section>
+
+    <section id="route" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Build-indexed resource map</p>
+        <h2>Nine stages from first launch to application evidence</h2>
+        <p class="section-note">The course’s <a href="index.html#flow">learning flow</a> remains authoritative. This page groups references by first use; robot-model audit and canonical-physics experiments deliberately iterate across Days 2–5. Stages 0–5 are the application core, Stages 6–7 deepen the evidence, and Stage 8 is optional.</p>
+      </div>
+
+      <div class="resource-route">
+        <section id="stage-0" class="resource-stage">
+          <p class="eyebrow">Stage 0 · Days 1–2</p>
+          <h2>Environment, workflows, and version manifest</h2>
+          <p>First answer: which runtime, Python, physics backend, renderer, launch mode, units, and machine produced the result?</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Start here</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.nvidia.com/learning/physical-ai/getting-started-with-isaac-sim/latest/index.html">NVIDIA: Getting Started with Isaac Sim</a></h3>
+              <p><strong>Extract:</strong> stage/world setup, simulation loop, assets, and the difference between UI and scripted workflows.</p>
+              <p><strong>Build:</strong> complete only the minimum path needed to launch and inspect one scene.</p>
+              <p><strong>Stop when:</strong> you can explain where physics steps and rendering steps occur.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Official docs</span><span>20 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/workflows.html">Isaac Sim Workflows</a></h3>
+              <p><strong>Extract:</strong> GUI, extension, standalone Python, and headless tradeoffs.</p>
+              <p><strong>Build:</strong> choose standalone Python for the public experiment runner and document why.</p>
+              <p><strong>Stop when:</strong> one bounded headless command exits successfully twice.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Compatibility</span><span>15 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html">Isaac Sim Requirements</a></h3>
+              <p><strong>Extract:</strong> driver, GPU/VRAM, RAM, storage, and supported OS assumptions.</p>
+              <p><strong>Build:</strong> an <code>environment.md</code> with exact Sim/Kit/Python/driver/GPU/RAM values.</p>
+              <p><strong>Stop when:</strong> every benchmark can link to that manifest.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-1" class="resource-stage">
+          <p class="eyebrow">Stage 1 · Day 2</p>
+          <h2>Isaac Sim Python and OpenUSD foundations</h2>
+          <p>Learn only enough USD composition and Python lifecycle to create, inspect, step, save, and reopen a deterministic scene.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Hands-on</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/core_api_tutorials/tutorial_core_hello_world.html">Core API Hello World</a></h3>
+              <p><strong>Extract:</strong> <code>SimulationApp</code>, world lifecycle, reset, step, and shutdown ordering.</p>
+              <p><strong>Build:</strong> add a dynamic cube, log pose for 1,000 steps, reject NaN/Inf, and exit cleanly.</p>
+              <p><strong>Stop when:</strong> GUI and headless modes use the same scene-building function.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Concepts</span><span>25 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/python_scripting/python_scripting_concepts.html">Python Scripting Concepts</a></h3>
+              <p><strong>Extract:</strong> extension versus standalone execution, async behavior, and API lifecycle constraints.</p>
+              <p><strong>Build:</strong> a short design note naming which process owns initialization, stepping, logging, and teardown.</p>
+              <p><strong>Stop when:</strong> repeated runs do not leave a hung process.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Deep concept</span><span>40 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/omniverse_usd/open_usd.html">OpenUSD Fundamentals</a></h3>
+              <p><strong>Extract:</strong> stage, prim, layer, reference, payload, variant, schema, units, and up axis.</p>
+              <p><strong>Build:</strong> save the scene, reopen it, and inspect which layer authored mass, collision, and transform.</p>
+              <p><strong>Stop when:</strong> you can predict which authored opinion wins.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-2" class="resource-stage">
+          <p class="eyebrow">Stage 2 · Day 3</p>
+          <h2>Rigid-body dynamics, contact, and numerical validation</h2>
+          <p>Use canonical experiments to separate bad mass properties, integration, contact, and solver settings before adding robot control.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Core</span><span>40 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/physics/simulation_fundamentals.html">Physics Simulation Fundamentals</a></h3>
+              <p><strong>Extract:</strong> physics timestep, rendering interval, solver settings, materials, collision, and articulation behavior.</p>
+              <p><strong>Build:</strong> free-fall, pendulum, and inclined-plane tests with a timestep/substep sweep.</p>
+              <p><strong>Stop when:</strong> plots compare expected and observed values with units and tolerance.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>PhysX depth</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/guides/collision_guide.html">Omniverse Collision Behavior Guide</a></h3>
+              <p><strong>Extract:</strong> collider approximations, contact/rest offsets, penetration, continuous collision detection, and mass-ratio risks.</p>
+              <p><strong>Build:</strong> one deliberately bad collision case and the measured fix.</p>
+              <p><strong>Stop when:</strong> the fix changes one variable and explains the mechanism.</p>
+            </article>
+            <article class="resource-item" id="theory">
+              <div class="resource-meta"><span>University theory</span><span>As needed</span></div>
+              <h3><a href="https://underactuated.mit.edu/contact.html">MIT Underactuated Robotics: Contact</a></h3>
+              <p><strong>Extract:</strong> unilateral constraints, complementarity, friction cones, impacts, and why contact is numerically hard.</p>
+              <p><strong>Build:</strong> annotate one grasp failure with the contact constraints that should be active.</p>
+              <p><strong>Stop when:</strong> you can distinguish geometry, material, solver, and controller hypotheses.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Textbook</span><span>Reference</span></div>
+              <h3><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/">Modern Robotics</a></h3>
+              <p><strong>Extract:</strong> frames, rigid motions, Jacobians, dynamics, and computed-torque/control concepts relevant to the current failure.</p>
+              <p><strong>Build:</strong> derive or numerically check one FK/Jacobian/dynamics quantity from the robot model.</p>
+              <p><strong>Stop when:</strong> the result agrees with the simulator within a declared tolerance.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-3" class="resource-stage">
+          <p class="eyebrow">Stage 3 · Days 2–5</p>
+          <h2>Robot model audit, articulations, actuators, and gains</h2>
+          <p>Treat import as the beginning of validation—not proof that the robot model is correct.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Model source</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.ros.org/en/jazzy/Tutorials/Intermediate/URDF/Adding-Physical-and-Collision-Properties-to-a-URDF-Model.html">URDF Physical and Collision Properties</a></h3>
+              <p><strong>Extract:</strong> visual, collision, inertial origin, mass, inertia tensor, joints, and units.</p>
+              <p><strong>Build:</strong> a model-card table for every movable link and joint.</p>
+              <p><strong>Stop when:</strong> automated checks reject missing or impossible mass properties.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Import</span><span>35 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/import_urdf.html">Isaac Sim URDF Import Tutorial</a></h3>
+              <p><strong>Extract:</strong> base mode, articulation root, joint drives, collision, mimic joints, self-collision, and saved USD behavior.</p>
+              <p><strong>Build:</strong> import the built-in UR10 example and compare its generated USD against the source contract.</p>
+              <p><strong>Stop when:</strong> every imported difference is accepted, repaired, or documented.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Control lab</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup_tutorials/joint_tuning.html">Tuning Joint Drive Gains</a></h3>
+              <p><strong>Extract:</strong> drive types, stiffness, damping, step response, sinusoidal response, effort limits, and payload dependence.</p>
+              <p><strong>Build:</strong> scripted step/chirp tests with overshoot, settling time, RMSE, and peak effort.</p>
+              <p><strong>Stop when:</strong> the gain manifest passes the declared test for three payloads.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Actuator depth</span><span>25 minutes</span></div>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/core-concepts/actuators.html">Isaac Lab Actuator Concepts</a></h3>
+              <p><strong>Extract:</strong> implicit/explicit actuators, simulation versus motor limits, saturation, armature, friction, and delay.</p>
+              <p><strong>Build:</strong> add at least effort/velocity saturation and command delay to the scripted controller.</p>
+              <p><strong>Stop when:</strong> plots show when and why the actuator saturates.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-4" class="resource-stage">
+          <p class="eyebrow">Stage 4 · Days 6–7</p>
+          <h2>ROS 2, TF, simulation time, and sensor contracts</h2>
+          <p>The bridge is complete only when rates, timestamps, frames, QoS, schemas, and replay behavior are validated.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Install first</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">ROS 2 Installation on Other Platforms</a></h3>
+              <p><strong>Extract:</strong> current Windows Jazzy/Pixi workflow, environment activation, DDS, and bridge assumptions.</p>
+              <p><strong>Build:</strong> a clean setup/run script that exposes <code>ros2</code> and <code>colcon</code>.</p>
+              <p><strong>Stop when:</strong> CLI introspection works outside Isaac Sim and the bridge examples communicate.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Architecture</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/ros2_reference_architecture.html">Isaac Sim ROS 2 Reference Architecture</a></h3>
+              <p><strong>Extract:</strong> simulator, bridge, DDS, nodes, clock, TF, command, sensor, and logging boundaries.</p>
+              <p><strong>Build:</strong> one architecture diagram plus a topic/QoS/frame/rate contract table.</p>
+              <p><strong>Stop when:</strong> every arrow has message type, frame, clock, rate, and owner.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>ROS depth</span><span>45 minutes</span></div>
+              <h3><a href="https://docs.ros.org/en/jazzy/Tutorials.html">ROS 2 Jazzy Tutorials</a></h3>
+              <p><strong>Extract:</strong> topics, services, actions, parameters, launch, QoS, tf2, simulation time, and rosbag.</p>
+              <p><strong>Build:</strong> inspect and record <code>/clock</code>, <code>/tf</code>, <code>/tf_static</code>, and <code>/joint_states</code>.</p>
+              <p><strong>Stop when:</strong> TF is connected, timestamps are monotonic sim time, and recorded messages replay.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Sensors</span><span>40 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/sensors/index.html">Isaac Sim Sensor Index</a></h3>
+              <p><strong>Extract:</strong> camera, RTX LiDAR, IMU, contact/effort sensors, rates, frames, noise, and rendering cost.</p>
+              <p><strong>Build:</strong> validate RGB-D projection, contact sign, acquisition timestamp, and achieved rate.</p>
+              <p><strong>Stop when:</strong> a known target is correct in the declared sensor frame and timing contract.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-5" class="resource-stage">
+          <p class="eyebrow">Stage 5 · Days 5, 8, and 9</p>
+          <h2>Task pipeline, evaluation, manipulation, and calibration</h2>
+          <p>Turn a demo into a controlled experiment: config → reset → rollout → metrics → failure code → replay.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Task design</span><span>45 minutes</span></div>
+              <h3><a href="https://manipulation.csail.mit.edu/">MIT Robotic Manipulation</a></h3>
+              <p><strong>Extract:</strong> grasping, planning, perception, control, contact, and task-level evaluation concepts needed by pick-and-place.</p>
+              <p><strong>Build:</strong> define approach, grasp, lift, hold, place, success, and failure states before coding them.</p>
+              <p><strong>Stop when:</strong> each state has observable entry/exit conditions and a timeout.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Pipeline pattern</span><span>35 minutes</span></div>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_manager_rl_env.html">Manager-Based RL Environment Tutorial</a></h3>
+              <p><strong>Extract:</strong> scene, actions, observations, events, reset, rewards, terminations, and configuration boundaries.</p>
+              <p><strong>Build:</strong> mirror those boundaries in a lightweight scripted runner before optional RL.</p>
+              <p><strong>Stop when:</strong> one command produces config snapshot, per-episode rows, aggregate metrics, and failure artifacts.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Transfer method</span><span>40 minutes</span></div>
+              <h3><a href="https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/01-overview.html">NVIDIA Sim-to-Real Course</a></h3>
+              <p><strong>Extract:</strong> system identification, calibration data, held-out validation, randomization, deployment, and claim boundaries.</p>
+              <p><strong>Build:</strong> fit friction, damping, or delay on calibration traces and score separate held-out traces.</p>
+              <p><strong>Stop when:</strong> the report labels the evidence as real, HIL, cross-simulator, or synthetic.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-6" class="resource-stage">
+          <p class="eyebrow">Stage 6 · Day 10 and later</p>
+          <h2>Isaac Lab, vectorization, domain randomization, and optional RL</h2>
+          <p>Add this only after the scripted task and nominal metrics work. A trained policy is not required for the first application.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Version pin</span><span>30 minutes</span></div>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Isaac Lab 3.0 Beta 2 Quickstart</a></h3>
+              <p><strong>Extract:</strong> supported Isaac Sim/Python/PyTorch versions, Windows installation, project layout, and verification.</p>
+              <p><strong>Build:</strong> an external project pinned to a compatible runtime; never modify the installed package in place.</p>
+              <p><strong>Stop when:</strong> the provided test environment runs and the manifest captures the exact stack.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Vectorization</span><span>40 minutes</span></div>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html">Direct RL Environment Tutorial</a></h3>
+              <p><strong>Extract:</strong> environment cloning, <code>dt</code>, decimation, action/observation tensors, events, rewards, resets, and terminations.</p>
+              <p><strong>Build:</strong> make zero/random actions and seeded resets pass before training anything.</p>
+              <p><strong>Stop when:</strong> every tested environment count is finite and reproducible within tolerance; report the actual counts and workload.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Randomization</span><span>35 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/replicator_tutorials/tutorial_replicator_ur10_palletizing.html">UR10 Palletizing Randomization</a></h3>
+              <p><strong>Extract:</strong> perception/SDG randomization for lights, materials, textures, cameras, triggers, and output provenance.</p>
+              <p><strong>Build:</strong> use this for perception ranges; use the <a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html">Direct environment event route</a> or standalone Monte Carlo for mass, friction, gains, and delay. Report each family separately.</p>
+              <p><strong>Stop when:</strong> an ablation identifies which uncertainty actually changes performance.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-7" class="resource-stage">
+          <p class="eyebrow">Stage 7 · Days 11–14</p>
+          <h2>RTX 4080 SUPER profiling, reproducibility, tests, and CI</h2>
+          <p>Report the workload and hardware with every number. Hosted CI should not imply that Isaac Sim ran there unless it actually did.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>Performance</span><span>40 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/reference_material/sim_performance_optimization_handbook.html">Isaac Sim Performance Handbook</a></h3>
+              <p><strong>Extract:</strong> physics/render/sensor bottlenecks, CPU fallback, collision complexity, synchronization, and scaling controls.</p>
+              <p><strong>Build:</strong> profile the actual capstone, then label any <code>benchmark_core_world</code> or vectorized task separately. Compare only environment counts supported by that workload.</p>
+              <p><strong>Stop when:</strong> a controlled before/after experiment explains one measured optimization.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Profiler</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html">Profiling with Tracy</a></h3>
+              <p><strong>Extract:</strong> capture workflow, frame/zone interpretation, CPU/GPU timing, and evidence export.</p>
+              <p><strong>Build:</strong> save one baseline capture and one capture after the optimization.</p>
+              <p><strong>Stop when:</strong> the claimed bottleneck is visible in the trace.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>GPU tuning</span><span>35 minutes</span></div>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/how-to/simulation_performance.html">Isaac Lab Simulation Performance</a></h3>
+              <p><strong>Extract:</strong> headless execution, collision complexity, CPU/GPU pipeline choice, CPU fallback, and CPU governor effects.</p>
+              <p><strong>Build:</strong> log steps/s, RTF, reset latency, GPU utilization, VRAM, RAM, and configuration.</p>
+              <p><strong>Stop when:</strong> scaling stops at a measured resource/stability limit instead of a guessed maximum.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>CI</span><span>30 minutes</span></div>
+              <h3><a href="https://docs.github.com/en/actions/tutorials/build-and-test-code/python">GitHub Actions: Build and Test Python</a></h3>
+              <p><strong>Extract:</strong> environments, dependency caching, test commands, artifacts, and failure reporting.</p>
+              <p><strong>Build:</strong> public pure-Python validation CI plus a documented local Isaac GPU suite.</p>
+              <p><strong>Stop when:</strong> a deliberately bad inertia or NaN fails the intended gate and leaves a useful artifact.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stage-8" class="resource-stage">
+          <p class="eyebrow">Stage 8 · Optional after public v0.1</p>
+          <h2>Secondary simulator literacy</h2>
+          <p>Use one narrow parity experiment to show transferable reasoning. Do not restart the entire course in a second stack.</p>
+          <div class="resource-list">
+            <article class="resource-item">
+              <div class="resource-meta"><span>MuJoCo</span><span>Reference</span></div>
+              <h3><a href="https://mujoco.readthedocs.io/en/stable/computation/index.html">MuJoCo Computation and Contact Dynamics</a></h3>
+              <p><strong>Extract:</strong> MJCF semantics, dynamics pipeline, constraints, contact model, actuators, integration, and solver choices.</p>
+              <p><strong>Build:</strong> reproduce the drop/slide or a two-DOF controller and compare trajectories with Isaac Sim.</p>
+              <p><strong>Stop when:</strong> differences are attributed to explicit model/solver choices rather than brand names.</p>
+            </article>
+            <article class="resource-item">
+              <div class="resource-meta"><span>Gazebo</span><span>Reference</span></div>
+              <h3><a href="https://gazebosim.org/docs/harmonic/ros2_integration/">Gazebo Harmonic ROS 2 Integration</a></h3>
+              <p><strong>Extract:</strong> SDF/world model, transport bridge, simulation clock, sensors, TF, QoS, and ros2_control integration.</p>
+              <p><strong>Build:</strong> make one SDF model obey the same topic/frame/time contract as the Isaac version.</p>
+              <p><strong>Stop when:</strong> the parity test has one question, one metric, and one conclusion.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="resource-finish" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Reading completion test</p>
+        <h2>You are done when the repository answers these questions</h2>
+      </div>
+      <div class="check-grid">
+        <div class="check-item"><span>✓</span><span>Which exact runtime, machine, config, seed, and command produced this result?</span></div>
+        <div class="check-item"><span>✓</span><span>Which model, physics, controller, sensor, and interface assumptions are tested?</span></div>
+        <div class="check-item"><span>✓</span><span>What failed, how was the cause isolated, and what evidence changed the decision?</span></div>
+        <div class="check-item"><span>✓</span><span>Which result is nominal, held out, randomized, cross-simulator, or measured on hardware?</span></div>
+        <div class="check-item"><span>✓</span><span>Where are the raw traces, plots, parameter provenance, and automated gates?</span></div>
+        <div class="check-item"><span>✓</span><span>Can another engineer reproduce a bounded result without guessing hidden setup steps?</span></div>
+      </div>
+      <div class="card-actions">
+        <a class="button" href="index.html#fast-track">Execute the 14-day sprint</a>
+        <a class="button secondary" href="practice.html">Test interview knowledge</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Official and university resources annotated for practical robotics simulation engineering.</p>
+    <div class="footer-links">
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture &amp; debugging</a>
+      <a href="practice.html">Practice</a>
+      <a href="../index.html">Portfolio</a>
+      <a href="#main">Back to top</a>
+    </div>
+  </footer>
+</body>
+</html>

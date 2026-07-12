@@ -624,7 +624,7 @@ footer p {
 
 .directory-group li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto);
   gap: 6px;
   align-items: center;
   min-height: 26px;
@@ -800,7 +800,7 @@ footer p {
   }
 
   .directory-group li {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
     align-items: center;
   }
 
