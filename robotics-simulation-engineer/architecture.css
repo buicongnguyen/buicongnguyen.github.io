@@ -1,6 +1,12 @@
 .architecture-hero h1 {
   max-width: 900px;
-  font-size: clamp(42px, 6vw, 70px);
+  font-size: clamp(38px, 5.4vw, 64px);
+}
+
+@media (max-width: 580px) {
+  .architecture-hero h1 {
+    font-size: 36px;
+  }
 }
 
 .architecture-hero .hero-panel ol {

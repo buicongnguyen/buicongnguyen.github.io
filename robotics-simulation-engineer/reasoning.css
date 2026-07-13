@@ -1,6 +1,6 @@
 .reasoning-hero h1 {
   max-width: 980px;
-  font-size: clamp(42px, 6vw, 70px);
+  font-size: clamp(38px, 5.4vw, 64px);
 }
 
 .reasoning-hero .hero-panel ol {
@@ -893,6 +893,12 @@ table.transition-table {
     bottom: calc(100% + 4px);
     left: 18px;
     transform: none;
+  }
+}
+
+@media (max-width: 580px) {
+  .reasoning-hero h1 {
+    font-size: 36px;
   }
 }
 

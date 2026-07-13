@@ -4,7 +4,13 @@
 }
 
 .practice-hero h1 {
-  font-size: clamp(40px, 5.2vw, 64px);
+  font-size: clamp(38px, 5.2vw, 62px);
+}
+
+@media (max-width: 580px) {
+  .practice-hero h1 {
+    font-size: 36px;
+  }
 }
 
 .study-grid,
@@ -213,7 +219,7 @@
   border-radius: 7px;
   padding: 6px 11px;
   background: var(--accent);
-  color: #ffffff;
+  color: var(--accent-ink);
   cursor: pointer;
   font: inherit;
   font-weight: 800;
