@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Curated external robotics simulation courses mapped to the Robotics Simulation Engineering curriculum, with artifacts, placement guidance, and version notes.">
+  <meta name="theme-color" content="#087968">
+  <title>External Course Catalog | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css?v=20260716-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to course catalog</a>
+  <header class="site-header">
+    <a class="brand" href="dashboard.html"><span>Robotics Simulation Engineering</span></a>
+    <nav aria-label="External course catalog navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="course-catalog.html" aria-current="page">External courses</a>
+      <a href="resources.html">Resource route</a>
+      <a href="index.html">Course</a>
+      <a href="practice.html">Practice</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Verified 16 July 2026 · official and university sources</p>
+        <h1>External robotics simulation course catalog</h1>
+        <p class="lede">
+          Use these courses to fill a specific gap in the local curriculum. Do not complete every course in
+          sequence. Select the resource mapped to your current module, produce the named artifact, and return to
+          the local evidence gate.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#foundation">Start with foundations</a>
+          <a class="button secondary" href="#selection">Use the selection rules</a>
+          <a class="button secondary" href="dashboard.html#module-map">Return to module map</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <p class="eyebrow">Source policy</p>
+        <p>Primary documentation and university material are preferred. Pages marked <strong>current</strong> follow a maintained release or course landing page; learners must still record the exact simulator and library version used locally.</p>
+      </aside>
+    </section>
+
+    <section id="selection" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Avoid tutorial accumulation</p>
+        <h2>Selection rules</h2>
+      </div>
+      <div class="study-grid">
+        <article class="card"><span class="number">1 · Diagnose</span><h3>Name the missing capability</h3><p>Choose one gap: scene composition, robot asset validation, ROS contracts, task design, policy learning, transfer, or simulator parity.</p></article>
+        <article class="card"><span class="number">2 · Extract</span><h3>Read for one contract</h3><p>Record the API, invariant, workflow boundary, and version assumption needed by the current module.</p></article>
+        <article class="card"><span class="number">3 · Build</span><h3>Produce the mapped artifact</h3><p>Do not count videos or page completion. Retain code, configuration, traces, diagrams, tests, or a comparison report.</p></article>
+        <article class="card"><span class="number">4 · Return</span><h3>Pass the local evidence gate</h3><p>The external course supplements the dashboard; it does not replace the module lab, practice objective, or capstone gate.</p></article>
+      </div>
+    </section>
+
+    <section id="foundation" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Modules 0–3</p>
+        <h2>Foundations, Isaac Sim, robot assets, and OpenUSD</h2>
+      </div>
+      <div class="resource-list">
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA course finder</span><span>Current · broad catalog</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/index.html">NVIDIA Physical AI Learning</a></h3>
+          <p><strong>Best for:</strong> selecting a maintained path by task, product, or experience level across Isaac Sim, Isaac Lab, Isaac ROS, OpenUSD, digital twins, and sim-to-real.</p>
+          <p><strong>Use in:</strong> entry placement and optional specialization.</p>
+          <p><strong>Artifact:</strong> a one-page course-selection note naming the local objective, chosen lessons, expected artifact, and explicit exclusions.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA self-paced</span><span>Beginner · 2–3 hours</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/getting-started-with-isaac-sim/latest/index.html">Getting Started With Isaac Sim</a></h3>
+          <p><strong>Best for:</strong> interface orientation, building a simple robot, URDF ingestion, sensors, Replicator, SIL, ROS 2, and HIL vocabulary.</p>
+          <p><strong>Use in:</strong> Modules 0–3. Some lesson videos may target older Isaac Sim releases, so translate concepts into the pinned local runtime instead of copying UI steps blindly.</p>
+          <p><strong>Artifact:</strong> a simple robot scene plus a version-difference log that identifies which instructions changed locally.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA advanced path</span><span>Advanced · 4–5 hours</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/going-further-with-robotics/latest/index.html">Going Further With Robotics</a></h3>
+          <p><strong>Best for:</strong> robotics-focused OpenUSD asset structure, URDF-to-USD optimization, SIL with ROS, IK-controlled scenes, and scalable multi-robot workflows.</p>
+          <p><strong>Use in:</strong> Modules 2–6 after the basic asset validator works.</p>
+          <p><strong>Artifact:</strong> a source-to-USD asset audit, variant composition diagram, and one ROS-controlled SIL scene with a declared interface contract.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>OpenUSD official</span><span>Beginner to advanced</span></div>
+          <h3><a href="https://openusd.org/release/tut_usd_tutorials.html">OpenUSD Tutorials</a></h3>
+          <p><strong>Best for:</strong> stages, prims, authored properties, layers, references, variants, traversal, transforms, and end-to-end USD composition.</p>
+          <p><strong>Use in:</strong> Modules 2–4 when an edit target, layer stack, or winning property opinion is unclear.</p>
+          <p><strong>Artifact:</strong> a small layered stage with a referenced robot/tool asset, one variant set, and a script that reports the resolved property stack.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>ROS official</span><span>Beginner to intermediate</span></div>
+          <h3><a href="https://docs.ros.org/en/jazzy/p/urdf_tutorial/">Learning URDF Step by Step</a></h3>
+          <p><strong>Best for:</strong> visual models, movable joints, physical/collision properties, and Xacro organization.</p>
+          <p><strong>Use in:</strong> Module 2 before importing a custom robot.</p>
+          <p><strong>Artifact:</strong> a compact Xacro robot whose generated URDF passes the graph and inertia validators and renders correctly in RViz.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="integration" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Modules 4–7</p>
+        <h2>Control, ROS 2, sensors, and task pipelines</h2>
+      </div>
+      <div class="resource-list">
+        <article class="resource-item">
+          <div class="resource-meta"><span>ros2_control official</span><span>Jazzy · current</span></div>
+          <h3><a href="https://control.ros.org/jazzy/doc/getting_started/getting_started.html">ros2_control Getting Started</a></h3>
+          <p><strong>Best for:</strong> controller manager, state/command interfaces, URDF tags, controller configuration, launch, and lifecycle boundaries.</p>
+          <p><strong>Use in:</strong> Modules 4–6 when distinguishing simulator drives from ROS controller semantics.</p>
+          <p><strong>Artifact:</strong> a controller/interface table and a launchable two-joint example with measured command, state, update rate, saturation, and failure behavior.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>ROS 2 official</span><span>Jazzy · 15 minutes plus experiment</span></div>
+          <h3><a href="https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Recording-And-Playing-Back-Data/Recording-And-Playing-Back-Data.html">Recording and Playing Back Data</a></h3>
+          <p><strong>Best for:</strong> rosbag recording, metadata inspection, playback, and the boundary between message replay and simulator state replay.</p>
+          <p><strong>Use in:</strong> Module 5.</p>
+          <p><strong>Artifact:</strong> a bag containing clock, TF, joint state, commands, and one sensor topic, followed by a report of which conclusions can and cannot be reconstructed from it.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>MIT university course</span><span>Intermediate to advanced</span></div>
+          <h3><a href="https://manipulation.csail.mit.edu/">Robotic Manipulation</a></h3>
+          <p><strong>Best for:</strong> task and state-machine design, grasping, perception, planning, control, contact, and manipulation evaluation.</p>
+          <p><strong>Use in:</strong> Module 6 after model/control/sensor gates pass.</p>
+          <p><strong>Artifact:</strong> explicit approach, grasp, lift, hold, and place states with observable entry, exit, timeout, success, and failure conditions.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA SIL path</span><span>Intermediate</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/going-further-with-robotics/latest/index.html">Digital Twin Robotics and Multi-Robot Workflows</a></h3>
+          <p><strong>Best for:</strong> simulation clocks, joint-state/command graphs, IMU publication, teleoperation, Nav2, and simulator-standard interfaces.</p>
+          <p><strong>Use in:</strong> Modules 5–7 as a broader SIL example—not as a replacement for the local manipulation capstone.</p>
+          <p><strong>Artifact:</strong> compare its ROS graph with the capstone contract and document which boundaries remain simulator-specific.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="learning-transfer" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Modules 8–10</p>
+        <h2>Isaac Lab, policy learning, transfer, and performance</h2>
+      </div>
+      <div class="resource-list">
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA self-paced</span><span>Intermediate · 3–4 hours</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/getting-started-with-isaac-lab/latest/train-your-first-robot-with-isaac-lab/index.html">Train Your First Robot in Isaac Lab</a></h3>
+          <p><strong>Best for:</strong> understanding an RL task, vectorized environments, training, evaluation, and policy refinement through a complete cartpole workflow.</p>
+          <p><strong>Use in:</strong> Module 8 only after the scripted environment and reset tests pass.</p>
+          <p><strong>Artifact:</strong> a reproducible zero-action, random-action, train, and evaluation report with seeds, environment count, learning curves, and failure video.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>Isaac Lab official</span><span>Main branch · current</span></div>
+          <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html">Isaac Lab Quickstart Guide</a></h3>
+          <p><strong>Best for:</strong> choosing standalone, direct, or manager-based workflows and understanding AppLauncher, simulation context, task registration, and environment execution.</p>
+          <p><strong>Use in:</strong> Module 8. Pin a commit or release before implementing; the maintained <code>main</code> documentation can evolve.</p>
+          <p><strong>Artifact:</strong> a compatibility manifest plus one external project that runs a standard environment without modifying the installed package.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA sim-to-real</span><span>Intermediate · 6–10 hours</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/01-overview.html">Train an SO-101 Robot From Sim-to-Real</a></h3>
+          <p><strong>Best for:</strong> demonstrations, simulation evaluation, domain randomization, real-data co-training, dataset augmentation, actuation-gap measurement, and deployment.</p>
+          <p><strong>Use in:</strong> Modules 7–9 as a full transfer case study.</p>
+          <p><strong>Artifact:</strong> a transfer-evidence matrix separating synthetic, held-out simulation, real calibration, real evaluation, and unsupported claims.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>NVIDIA advanced</span><span>Intermediate · 4–12 hours</span></div>
+          <h3><a href="https://docs.nvidia.com/learning/physical-ai/gr00t-e2e-workflow/latest/index.html">End-to-End Physical AI With Unitree G1</a></h3>
+          <p><strong>Best for:</strong> understanding a larger reproducible workflow spanning simulation, teleoperation, data collection, policy training, Isaac ROS, and deployment.</p>
+          <p><strong>Use in:</strong> optional specialization after the local capstone reaches validated level.</p>
+          <p><strong>Artifact:</strong> an architecture and evidence comparison between the reference humanoid workflow and the local manipulation pipeline; do not reproduce the entire stack unless it matches the target role.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>Isaac Lab official</span><span>Main branch · current</span></div>
+          <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/how-to/simulation_performance.html">Simulation Performance and Tuning</a></h3>
+          <p><strong>Best for:</strong> headless execution, stage creation, collision complexity, rendering cost, CPU/GPU pipeline behavior, and scaling.</p>
+          <p><strong>Use in:</strong> Module 9.</p>
+          <p><strong>Artifact:</strong> one profiler-backed before/after optimization whose workload, environment count, render mode, sensors, hardware, and synchronization are frozen.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="secondary" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Optional simulator parity</p>
+        <h2>Gazebo and MuJoCo structured tutorials</h2>
+      </div>
+      <div class="resource-list">
+        <article class="resource-item">
+          <div class="resource-meta"><span>Gazebo official</span><span>Harmonic tutorials</span></div>
+          <h3><a href="https://gazebosim.org/docs/harmonic/tutorials/">Gazebo Simulation Tutorials</a></h3>
+          <p><strong>Best for:</strong> building a robot, moving it, adding IMU/contact/LiDAR sensors, SDF worlds, plugins, and ROS integration.</p>
+          <p><strong>Use in:</strong> optional parity after public v0.1.</p>
+          <p><strong>Artifact:</strong> reproduce one canonical physics or sensor contract and compare models, clocks, interfaces, and observed error with Isaac Sim.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>Gazebo + ROS official</span><span>Harmonic/Jazzy</span></div>
+          <h3><a href="https://gazebosim.org/docs/harmonic/ros2_integration/">Use ROS 2 to Interact With Gazebo</a></h3>
+          <p><strong>Best for:</strong> ros_gz_bridge, RViz, topic translation, and ROS 2 Simulation Interfaces.</p>
+          <p><strong>Use in:</strong> a simulator-agnostic ROS contract comparison.</p>
+          <p><strong>Artifact:</strong> the same command/state/TF/time table used for Isaac Sim, with simulator-specific differences highlighted.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>MuJoCo + ros2_control</span><span>Jazzy · current</span></div>
+          <h3><a href="https://control.ros.org/jazzy/doc/mujoco_ros2_control/mujoco_ros2_control_demos/doc/tutorials.html">MuJoCo ros2_control Demos and Tutorials</a></h3>
+          <p><strong>Best for:</strong> a two-link robot, URDF-to-MJCF conversion, PID control, transmissions, standard ROS commands, and headless execution.</p>
+          <p><strong>Use in:</strong> optional control/interface parity.</p>
+          <p><strong>Artifact:</strong> run the same position or effort response in Isaac Sim and MuJoCo, then attribute differences to explicit actuator, timestep, and model semantics.</p>
+        </article>
+        <article class="resource-item">
+          <div class="resource-meta"><span>MuJoCo official</span><span>Reference plus Python tutorial</span></div>
+          <h3><a href="https://mujoco.readthedocs.io/en/stable/overview.html">MuJoCo Overview and Modeling Pipeline</a></h3>
+          <p><strong>Best for:</strong> understanding MJCF/URDF loading, model compilation, runtime data, simulation stages, and the relationship between source model and compiled model.</p>
+          <p><strong>Use in:</strong> optional model/solver parity.</p>
+          <p><strong>Artifact:</strong> a small MJCF model, Python rollout, and source-to-compiled-property audit.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Completion check</p>
+        <h2>A course is useful only when it changes the evidence</h2>
+      </div>
+      <div class="check-grid">
+        <div class="check-item"><span>✓</span><span>The selected course addresses one named objective or failed diagnostic.</span></div>
+        <div class="check-item"><span>✓</span><span>The local runtime and external course version assumptions are recorded.</span></div>
+        <div class="check-item"><span>✓</span><span>A code, configuration, trace, diagram, test, or comparison artifact was produced.</span></div>
+        <div class="check-item"><span>✓</span><span>The artifact is linked to a local module gate and includes known limitations.</span></div>
+      </div>
+    </section>
+  </main>
+  <script src="../book-layout.js?v=20260728-1"></script>
+</body>
+</html>

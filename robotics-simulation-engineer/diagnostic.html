@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Observable entry diagnostic and placement guide for Robotics Simulation Engineering.">
+  <title>Entry Diagnostic | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css?v=20260713-3">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to diagnostic</a>
+  <header class="site-header">
+    <a class="brand" href="dashboard.html"><span>Robotics Simulation Engineering</span></a>
+    <nav><a href="dashboard.html">Dashboard</a><a href="diagnostic.html" aria-current="page">Entry diagnostic</a><a href="index.html">Course</a><a href="practice.html">Practice</a></nav>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div><p class="eyebrow">45–90 minute placement check</p><h1>Prove the prerequisites</h1><p class="lede">Do each task without copying a solution. Mark it passed only when the observable criterion succeeds and retain the named evidence. Your result recommends a route; it is not a credential.</p></div>
+      <aside class="hero-panel"><p class="eyebrow">Scoring</p><p><strong>Green:</strong> 7/7, sprint-ready. <strong>Amber:</strong> 5–6, start at the first weak domain. <strong>Foundation:</strong> 0–4, complete readiness labs before Module 1.</p></aside>
+    </section>
+    <section class="section" aria-labelledby="placement-flow-heading">
+      <div class="section-heading"><p class="eyebrow">Placement decision</p><h2 id="placement-flow-heading">Your evidence selects the starting route</h2></div>
+      <div class="placement-flow">
+        <div class="placement-source"><strong>Complete all 7 observable tasks</strong><span>Count only tasks that meet the stated pass criterion and retain their evidence.</span></div>
+        <div class="placement-branches" aria-label="Diagnostic score routes">
+          <article><strong>0–4 passed</strong><span>Foundation route</span><small>Begin Module 0 readiness.</small></article>
+          <article><strong>5–6 passed</strong><span>Experienced route</span><small>Begin at the first weak objective.</small></article>
+          <article><strong>7 passed</strong><span>Sprint-ready route</span><small>Begin Module 1 or the 14-day sprint.</small></article>
+        </div>
+      </div>
+    </section>
+    <section class="section diagnostic-shell">
+      <div class="section-heading"><p class="eyebrow">Observable tasks</p><h2>Entry diagnostic</h2></div>
+      <form id="diagnostic-form">
+        <div class="diagnostic-grid">
+          <article class="card diagnostic-task" data-domain="python"><label><input type="checkbox" name="python"> <strong>Python, NumPy, and pytest</strong></label><p>Implement a vectorized normalization function and three tests including a zero-vector failure.</p><p><strong>Pass:</strong> <code>pytest -q</code> exits 0; no Python loop processes vector elements.</p><p><strong>Evidence:</strong> test output and commit. <a href="../labs/readiness/README.md#python-numpy-and-pytest">Readiness lab</a></p></article>
+          <article class="card diagnostic-task" data-domain="git"><label><input type="checkbox" name="git"> <strong>Git and command line</strong></label><p>Create a branch, make two focused commits, inspect their diff, and restore one intentionally changed file without losing the other change.</p><p><strong>Pass:</strong> clean status, readable history, and correct final files.</p><p><strong>Evidence:</strong> command transcript. <a href="../labs/readiness/README.md#git-and-command-line">Readiness lab</a></p></article>
+          <article class="card diagnostic-task" data-domain="transforms"><label><input type="checkbox" name="transforms"> <strong>Linear algebra and transforms</strong></label><p>Compose <code>T_W_B @ T_B_C</code>, transform a point, and verify the inverse round trip.</p><p><strong>Pass:</strong> frame order is explained and round-trip error is below <code>1e-9</code>.</p><p><strong>Evidence:</strong> test and one frame diagram. <a href="../labs/readiness/transform_task.py">Starter</a></p></article>
+          <article class="card diagnostic-task" data-domain="dynamics"><label><input type="checkbox" name="dynamics"> <strong>Basic dynamics and control</strong></label><p>Calculate a box inertia, plot and interpret a step response, and predict how doubling mass changes critical damping for fixed stiffness.</p><p><strong>Pass:</strong> units, axes, formula, response metrics, and prediction are correct.</p><p><strong>Evidence:</strong> calculation sheet and response plot. <a href="../labs/index.html#readiness">Readiness lab</a></p></article>
+          <article class="card diagnostic-task" data-domain="ros"><label><input type="checkbox" name="ros"> <strong>ROS concepts</strong></label><p>Draw one publisher/subscriber path and explain a ROS topic, its message type and QoS, a TF transform and its direction, the acquisition timestamp, and the simulation clock at <code>/clock</code>.</p><p><strong>Pass:</strong> the diagram distinguishes message transport, frame transforms, and simulation time.</p><p id="ros-contract"><strong>Evidence:</strong> one-page contract table. <a href="../labs/index.html#readiness">Template</a></p></article>
+          <article class="card diagnostic-task" data-domain="statistics"><label><input type="checkbox" name="statistics"> <strong>Statistics and experiments</strong></label><p>Compare two noisy configurations using repeated trials, a confidence interval, and a held-out case.</p><p><strong>Pass:</strong> one-variable comparison, sample count, uncertainty, and claim boundary are stated.</p><p><strong>Evidence:</strong> plot and conclusion. <a href="../labs/readiness/README.md#experimental-design">Template</a></p></article>
+          <article class="card diagnostic-task" data-domain="models"><label><input type="checkbox" name="models"> <strong>Basic USD and robot-description familiarity</strong></label><p>Identify visual, collision, inertial, joint origin/axis/limits, articulation root, and authored layer in a supplied model.</p><p><strong>Pass:</strong> every property has owner, units, frame, and validation test.</p><p><strong>Evidence:</strong> model card. <a href="../labs/index.html#urdf">Model lab</a></p></article>
+        </div>
+        <div class="diagnostic-result" aria-live="polite"><button class="button" type="submit">Calculate placement</button><button class="button secondary" type="reset">Reset</button><div id="diagnostic-result"><p>Complete the tasks, then calculate your placement.</p></div></div>
+      </form>
+    </section>
+  </main>
+  <script src="diagnostic.js"></script>
+  <script src="../book-layout.js?v=20260728-1"></script>
+</body>
+</html>

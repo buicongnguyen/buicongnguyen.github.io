@@ -1,7 +1,18 @@
 param(
-    [string]$Source = (Join-Path $PSScriptRoot '..\..\cuda_kernel\docs\index.html'),
+    [string]$Source,
     [string]$Destination = (Join-Path $PSScriptRoot '..\cuda_kernel\index.html')
 )
+
+if (-not $Source) {
+    $candidates = @(
+        (Join-Path $PSScriptRoot '..\..\Mercor_cuda\docs\index.html'),
+        (Join-Path $PSScriptRoot '..\..\cuda_kernel\docs\index.html')
+    )
+    $Source = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $Source) {
+        throw "CUDA guide source was not found. Pass -Source explicitly or place the sibling checkout at '..\Mercor_cuda' (preferred) or '..\cuda_kernel'."
+    }
+}
 
 $sourcePath = Resolve-Path -LiteralPath $Source -ErrorAction Stop
 $destinationPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Destination)

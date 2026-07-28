@@ -8,6 +8,7 @@
   <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/resources.html">
   <title>Deep Resource Route | Robotics Simulation Engineering</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to resource route</a>
@@ -18,6 +19,8 @@
       <span>Robotics Simulation Engineering</span>
     </a>
     <nav aria-label="Resource navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="course-catalog.html">External courses</a>
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture</a>
       <a href="reasoning.html">Reasoning</a>
@@ -42,6 +45,7 @@
         </p>
         <div class="hero-actions">
           <a class="button" href="#stage-0">Start Stage 0</a>
+          <a class="button secondary" href="course-catalog.html">Browse structured courses</a>
           <a class="button secondary" href="architecture.html">See system &amp; debug map</a>
           <a class="button secondary" href="reasoning.html">Trace code &amp; data flows</a>
           <a class="button secondary" href="index.html#fast-track">Open the 14-day sprint</a>
@@ -62,7 +66,7 @@
 
     <section id="platform-pin" class="section">
       <div class="section-heading">
-        <p class="eyebrow">Version gate · reviewed 12 July 2026</p>
+        <p class="eyebrow">Version gate · reviewed 16 July 2026</p>
         <h2>Pin the platform before copying examples</h2>
         <p class="section-note">The installed runtime and current stable documentation are close, but not identical. Record the exact version used by every result.</p>
       </div>
@@ -79,8 +83,8 @@
         </article>
         <article class="card">
           <span class="status-badge gap">Pin if added</span>
-          <h3>Isaac Lab beta 2</h3>
-          <p>For stable Sim 6.0.1, NVIDIA pins Isaac Lab <code>release/3.0.0-beta2</code>, Python 3.12, and its documented PyTorch/CUDA stack. Check RC compatibility first.</p>
+          <h3>Isaac Lab: pin the chosen revision</h3>
+          <p>The maintained <code>main</code> documentation now covers Isaac Sim 6 workflows and Python 3.12. Select a compatible release or commit, record it in the manifest, and check the local RC before adding Lab to the core project.</p>
         </article>
         <article class="card">
           <span class="status-badge gap">Install by Day 6</span>
@@ -91,7 +95,7 @@
       <div class="card-actions">
         <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/download.html">Isaac Sim versions</a>
         <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html">System requirements</a>
-        <a class="button secondary" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Pinned Isaac Lab quickstart</a>
+        <a class="button secondary" href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html">Current Isaac Lab quickstart</a>
         <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">Windows ROS 2 setup</a>
       </div>
       <pre class="local-command"><code># Known-good starting shell for this PC
@@ -238,7 +242,7 @@ Set-Location C:\isaacsim
             </article>
             <article class="resource-item">
               <div class="resource-meta"><span>Actuator depth</span><span>25 minutes</span></div>
-              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/core-concepts/actuators.html">Isaac Lab Actuator Concepts</a></h3>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/overview/core-concepts/actuators.html">Isaac Lab Actuator Concepts</a></h3>
               <p><strong>Extract:</strong> implicit/explicit actuators, simulation versus motor limits, saturation, armature, friction, and delay.</p>
               <p><strong>Build:</strong> add at least effort/velocity saturation and command delay to the scripted controller.</p>
               <p><strong>Stop when:</strong> plots show when and why the actuator saturates.</p>
@@ -296,7 +300,7 @@ Set-Location C:\isaacsim
             </article>
             <article class="resource-item">
               <div class="resource-meta"><span>Pipeline pattern</span><span>35 minutes</span></div>
-              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_manager_rl_env.html">Manager-Based RL Environment Tutorial</a></h3>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_rl_env.html">Manager-Based RL Environment Tutorial</a></h3>
               <p><strong>Extract:</strong> scene, actions, observations, events, reset, rewards, terminations, and configuration boundaries.</p>
               <p><strong>Build:</strong> mirror those boundaries in a lightweight scripted runner before optional RL.</p>
               <p><strong>Stop when:</strong> one command produces config snapshot, per-episode rows, aggregate metrics, and failure artifacts.</p>
@@ -318,14 +322,14 @@ Set-Location C:\isaacsim
           <div class="resource-list">
             <article class="resource-item">
               <div class="resource-meta"><span>Version pin</span><span>30 minutes</span></div>
-              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Isaac Lab 3.0 Beta 2 Quickstart</a></h3>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html">Isaac Lab Quickstart</a></h3>
               <p><strong>Extract:</strong> supported Isaac Sim/Python/PyTorch versions, Windows installation, project layout, and verification.</p>
               <p><strong>Build:</strong> an external project pinned to a compatible runtime; never modify the installed package in place.</p>
               <p><strong>Stop when:</strong> the provided test environment runs and the manifest captures the exact stack.</p>
             </article>
             <article class="resource-item">
               <div class="resource-meta"><span>Vectorization</span><span>40 minutes</span></div>
-              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html">Direct RL Environment Tutorial</a></h3>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html">Direct RL Environment Tutorial</a></h3>
               <p><strong>Extract:</strong> environment cloning, <code>dt</code>, decimation, action/observation tensors, events, rewards, resets, and terminations.</p>
               <p><strong>Build:</strong> make zero/random actions and seeded resets pass before training anything.</p>
               <p><strong>Stop when:</strong> every tested environment count is finite and reproducible within tolerance; report the actual counts and workload.</p>
@@ -334,7 +338,7 @@ Set-Location C:\isaacsim
               <div class="resource-meta"><span>Randomization</span><span>35 minutes</span></div>
               <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/replicator_tutorials/tutorial_replicator_ur10_palletizing.html">UR10 Palletizing Randomization</a></h3>
               <p><strong>Extract:</strong> perception/SDG randomization for lights, materials, textures, cameras, triggers, and output provenance.</p>
-              <p><strong>Build:</strong> use this for perception ranges; use the <a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html">Direct environment event route</a> or standalone Monte Carlo for mass, friction, gains, and delay. Report each family separately.</p>
+              <p><strong>Build:</strong> use this for perception ranges; use the <a href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html">Direct environment event route</a> or standalone Monte Carlo for mass, friction, gains, and delay. Report each family separately.</p>
               <p><strong>Stop when:</strong> an ablation identifies which uncertainty actually changes performance.</p>
             </article>
           </div>
@@ -361,7 +365,7 @@ Set-Location C:\isaacsim
             </article>
             <article class="resource-item">
               <div class="resource-meta"><span>GPU tuning</span><span>35 minutes</span></div>
-              <h3><a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/how-to/simulation_performance.html">Isaac Lab Simulation Performance</a></h3>
+              <h3><a href="https://isaac-sim.github.io/IsaacLab/main/source/how-to/simulation_performance.html">Isaac Lab Simulation Performance</a></h3>
               <p><strong>Extract:</strong> headless execution, collision complexity, CPU/GPU pipeline choice, CPU fallback, and CPU governor effects.</p>
               <p><strong>Build:</strong> log steps/s, RTF, reset latency, GPU utilization, VRAM, RAM, and configuration.</p>
               <p><strong>Stop when:</strong> scaling stops at a measured resource/stability limit instead of a guessed maximum.</p>
@@ -431,5 +435,6 @@ Set-Location C:\isaacsim
       <a href="#main">Back to top</a>
     </div>
   </footer>
+  <script src="../book-layout.js?v=20260728-1"></script>
 </body>
 </html>

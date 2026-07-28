@@ -125,3 +125,128 @@ th, td { border: 1px solid var(--line); padding: 10px; vertical-align: top; }
 th { background: #102034; color: #cbe3ff; text-align: left; }
 tr:nth-child(even) td { background: #12171f; }
 .hidden { display: none; }
+
+.process-flow {
+  display: grid;
+  grid-template-columns: repeat(var(--flow-columns, 4), minmax(0, 1fr));
+  gap: 24px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: process-step;
+}
+
+.process-flow > li {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--panel);
+  counter-increment: process-step;
+}
+
+.process-flow > li::before {
+  content: counter(process-step);
+  display: inline-grid;
+  place-items: center;
+  inline-size: 26px;
+  block-size: 26px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #07111f;
+  font-weight: 800;
+}
+
+.process-flow > li:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  width: 12px;
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  transform: translateY(-50%);
+}
+
+.process-flow strong,
+.process-flow small {
+  display: block;
+}
+
+.process-flow small {
+  margin-top: 6px;
+  color: var(--ink-dim);
+  line-height: 1.4;
+}
+
+.branch-flow {
+  display: grid;
+  grid-template-columns: minmax(180px, .75fr) minmax(0, 2fr);
+  gap: 28px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.branch-source {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--warn);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--panel);
+}
+
+.branch-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.branch-options > div {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--panel2);
+}
+
+.branch-options > div::before {
+  content: "→";
+  position: absolute;
+  right: calc(100% + 5px);
+  top: 50%;
+  color: var(--accent);
+  font-size: 20px;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 760px) {
+  .process-flow,
+  .branch-flow,
+  .branch-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .process-flow {
+    gap: 24px;
+  }
+
+  .process-flow > li:not(:last-child)::after {
+    content: "↓";
+    left: 50%;
+    top: calc(100% + 2px);
+    transform: translateX(-50%);
+  }
+
+  .branch-options > div::before {
+    content: "↓";
+    right: auto;
+    left: 50%;
+    top: -26px;
+    transform: translateX(-50%);
+  }
+}

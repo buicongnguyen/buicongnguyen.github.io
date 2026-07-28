@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Compiler IR and Lowering</title><link rel="stylesheet" href="../practice-common.css"><link rel="stylesheet" href="../book-layout.css?v=20260728-1"></head>
+<body><header><p class="eyebrow">NPU course 2</p><h1>Compiler IR and lowering</h1><p>Follow one tensor program from framework-like graph to target-aware tiles, buffers, and runtime commands.</p><nav><a href="index.html">Course map</a><a href="#plan">Plan</a><a href="#artifact">Artifact</a><a href="../npu-practice.html#ir">Reference</a></nav></header><main>
+<section id="plan" class="section"><h2>Five-session plan</h2><div class="grid">
+<article class="card"><span class="tag">1</span><h3>Graph semantics</h3><p>Define shapes, dtypes, broadcasting, side effects, dynamic dimensions, and numerical tolerance.</p></article><article class="card"><span class="tag">2</span><h3>Canonicalization and fusion</h3><p>Apply shape inference, constant folding, dead-code elimination, and legal fusion with before/after checks.</p></article><article class="card"><span class="tag">3</span><h3>Target legalization</h3><p>Mark supported operations and lower unsupported graph structure without losing layout information too early.</p></article><article class="card"><span class="tag">4</span><h3>Bufferization and scheduling</h3><p>Make allocation, lifetime, tiling, DMA, synchronization, and core placement explicit.</p></article><article class="card"><span class="tag">5</span><h3>Verify the pipeline</h3><p>Run semantic checks after every pass and preserve a minimized failing IR case.</p></article>
+</div></section>
+<section class="section" aria-labelledby="lowering-heading"><h2 id="lowering-heading">Lowering pipeline and verification gates</h2>
+<ol class="process-flow" style="--flow-columns: 5" aria-label="Tensor compiler lowering flow">
+<li><strong>Framework graph</strong><small>Freeze shape, dtype, broadcasting, side effects, and reference outputs.</small></li>
+<li><strong>Canonical tensor IR</strong><small>Fold and fuse only when graph semantics remain equivalent.</small></li>
+<li><strong>Target-legal tiled IR</strong><small>Choose supported operations, layouts, tile shapes, and tail behavior.</small></li>
+<li><strong>Bufferized schedule</strong><small>Expose allocations, lifetimes, DMA, core placement, and synchronization.</small></li>
+<li><strong>Runtime commands</strong><small>Execute and compare normal, boundary, and unsupported cases with the reference.</small></li>
+</ol>
+</section>
+<section id="artifact" class="section"><h2>End-to-end artifact: miniature lowering pipeline</h2><p>Start with <code>relu(matmul(x, w) + bias)</code>. Publish four readable IR snapshots: graph, fused tensor IR, tiled/bufferized IR, and runtime command sequence. Each pass must state legality, preserved invariants, expected benefit, and a counterexample where it must not apply.</p><p><strong>Validated when:</strong> reference and lowered outputs agree within a declared tolerance for normal, boundary, and deliberately unsupported shapes.</p></section>
+</main><script src="../book-layout.js?v=20260728-1"></script></body></html>

@@ -9,6 +9,7 @@
   <title>Robotics Simulation Engineering Practice Lab</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
   <link rel="stylesheet" href="practice.css?v=20260713-2">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to practice content</a>
@@ -19,6 +20,9 @@
       <span>Robotics Simulation Engineering</span>
     </a>
     <nav aria-label="Practice navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="diagnostic.html">Entry diagnostic</a>
+      <a href="course-catalog.html">External courses</a>
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture</a>
       <a href="reasoning.html">Reasoning</a>
@@ -135,10 +139,29 @@
       </div>
       <div class="quiz-stats">
         <span id="quiz-stats" aria-live="polite">Loading questions…</span>
+        <span id="assessment-mode">Mode: practice</span>
+        <button id="start-pretest" class="text-button" type="button">Start pre-test</button>
+        <button id="start-posttest" class="text-button" type="button">Start post-test</button>
+        <button id="retry-weak" class="text-button" type="button">Retry weak objectives</button>
+        <button id="review-due" class="text-button" type="button">Review due</button>
         <button id="reset-answers" class="text-button" type="button">Reset saved answers</button>
       </div>
+      <div id="objective-scores" class="objective-scores" aria-live="polite"></div>
       <noscript><p class="callout"><strong>JavaScript is required</strong> to render and score the question bank. The course and all static drills remain readable.</p></noscript>
       <div id="questions-root"></div>
+    </section>
+
+    <section id="capstone-rubric" class="section">
+      <div class="section-heading"><p class="eyebrow">Performance assessment</p><h2>Capstone mastery rubric</h2><p class="section-note">A level is earned only when every criterion in that column is supported by a linked artifact.</p></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Level</th><th>System behavior</th><th>Evidence</th><th>Reproduction and limits</th></tr></thead>
+        <tbody>
+          <tr><th>Incomplete</th><td>Demo does not complete the declared task or fails nondeterministically.</td><td>Screenshots or aggregate claims without raw episode records.</td><td>Hidden setup, missing versions, or no documented limitations.</td></tr>
+          <tr><th>Functional</th><td>Nominal task completes under one declared configuration.</td><td>Runnable command, config, short trace, and explicit success definition.</td><td>Author can reproduce the result; known gaps are listed.</td></tr>
+          <tr><th>Validated</th><td>Canonical physics, model, control, sensor, and task gates pass across frozen cases.</td><td>Raw rows regenerate metrics; planted faults fail; held-out cases and confidence intervals are reported.</td><td>Fresh-clone audit reproduces a bounded result with versioned assets and environment.</td></tr>
+          <tr><th>Production-ready</th><td>Nominal, boundary, randomized, and failure behavior meet precommitted criteria.</td><td>Regression suite, profiling evidence, failure taxonomy, provenance, and release artifacts.</td><td>Independent reviewer reproduces the result; operational limits, owners, and rollback criteria are explicit.</td></tr>
+        </tbody>
+      </table></div>
     </section>
 
     <section id="scenarios" class="section">
@@ -363,5 +386,6 @@
 
   <script src="practice-data.js"></script>
   <script src="practice.js"></script>
+  <script src="../book-layout.js?v=20260728-1"></script>
 </body>
 </html>

@@ -96,14 +96,20 @@
   }
 
   function filterAll() {
-    const q = document.getElementById("search").value.trim().toLowerCase();
+    const search = document.getElementById("search");
+    const stats = document.getElementById("stats");
+    if (!search || !stats) return;
+    const q = search.value.trim().toLowerCase();
     let shown = 0;
     for (const el of document.querySelectorAll("[data-search]")) {
       const match = !q || el.dataset.search.includes(q);
       el.classList.toggle("hidden", !match);
       if (match && el.classList.contains("qa")) shown += 1;
     }
-    document.getElementById("stats").textContent = q
+    document.querySelectorAll(".qa-group").forEach((group) => {
+      group.classList.toggle("hidden", !group.querySelector(".qa:not(.hidden)"));
+    });
+    stats.textContent = q
       ? `${shown} matching questions`
       : `${totalQuestions()} questions across ${data.groups.length} categories`;
   }
@@ -112,6 +118,7 @@
   renderKnowledge();
   renderQuestions();
   renderResources();
-  document.getElementById("search").addEventListener("input", filterAll);
+  const search = document.getElementById("search");
+  if (search) search.addEventListener("input", filterAll);
   filterAll();
 }());

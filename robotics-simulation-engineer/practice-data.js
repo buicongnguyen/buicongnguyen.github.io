@@ -2,6 +2,9 @@ window.roboticsSimulationQuestionGroups = [
   {
     id: "models-frames",
     title: "Models and Frames",
+    objective: "Validate frame chains, units, mass properties, joint structure, and collision representations.",
+    moduleHref: "index.html#module-2",
+    labHref: "../labs/index.html#urdf",
     questions: [
       {
         q: "A link looks correct but rotates unrealistically about an unexpected point. What should you inspect first?",
@@ -68,6 +71,9 @@ window.roboticsSimulationQuestionGroups = [
   {
     id: "dynamics-contact-control",
     title: "Dynamics, Contact, and Control",
+    objective: "Predict and measure timestep, contact, energy, actuator, and closed-loop response behavior.",
+    moduleHref: "index.html#module-1",
+    labHref: "../labs/index.html#calibration",
     questions: [
       {
         q: "What is the usual effect of halving the physics timestep while simulating the same duration?",
@@ -134,6 +140,9 @@ window.roboticsSimulationQuestionGroups = [
   {
     id: "simulators-performance",
     title: "Simulators and Performance",
+    objective: "Design fair simulator experiments and isolate physics, rendering, reset, and host/device bottlenecks.",
+    moduleHref: "index.html#module-9",
+    labHref: "../labs/index.html#benchmark",
     questions: [
       {
         q: "What does a real-time factor of 2.0 mean?",
@@ -200,6 +209,9 @@ window.roboticsSimulationQuestionGroups = [
   {
     id: "ros2-sensors-pipelines",
     title: "ROS 2, Sensors, and Pipelines",
+    objective: "Specify and validate time, frame, QoS, sensor, watchdog, and replay contracts.",
+    moduleHref: "index.html#module-5",
+    labHref: "../labs/index.html#readiness",
     questions: [
       {
         q: "Sensor messages arrive, but TF lookup reports extrapolation errors. What is the most likely first issue to inspect?",
@@ -266,6 +278,9 @@ window.roboticsSimulationQuestionGroups = [
   {
     id: "sim-to-real-debugging-ci",
     title: "Sim-to-Real, Debugging, and CI",
+    objective: "Separate calibration, uncertainty, causal diagnosis, reproducibility, and production evidence.",
+    moduleHref: "index.html#module-7",
+    labHref: "../labs/index.html#determinism",
     questions: [
       {
         q: "Why should system-identification parameters be evaluated on held-out trajectories?",

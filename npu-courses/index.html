@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NPU Engineering Courses</title><link rel="stylesheet" href="../practice-common.css"><link rel="stylesheet" href="../book-layout.css?v=20260728-1"></head>
+<body><header><p class="eyebrow">Three focused routes</p><h1>NPU Engineering Courses</h1><p>Replace one cognitively dense survey with three artifact-driven courses. Complete them in order unless the entry checks already pass.</p><nav><a href="architecture.html">1 · Architecture</a><a href="compiler.html">2 · Compiler</a><a href="deployment.html">3 · Deployment</a><a href="../npu-practice.html">Full reference</a><a href="../index.html">Home</a></nav></header>
+<main><section class="section"><h2>Course map</h2><div class="grid">
+<article class="card"><span class="tag">Course 1 · 8–12 hours</span><h3>Accelerator architecture and memory movement</h3><p>Trace one tiled matrix multiplication from DRAM through local buffers and compute cores. Artifact: capacity-checked mapping report.</p><a href="architecture.html">Start course 1</a></article>
+<article class="card"><span class="tag">Course 2 · 10–14 hours</span><h3>Compiler IR and lowering</h3><p>Lower a small tensor graph through explicit IR stages while preserving shape, layout, memory, and numerical contracts. Artifact: pass pipeline with before/after IR.</p><a href="compiler.html">Start course 2</a></article>
+<article class="card"><span class="tag">Course 3 · 8–12 hours</span><h3>Quantization, runtime, and deployment</h3><p>Calibrate, partition, execute, and benchmark a small model with a CPU fallback path. Artifact: deployment report with parity and performance evidence.</p><a href="deployment.html">Start course 3</a></article>
+</div></section>
+<section class="section" aria-labelledby="dependency-heading"><h2 id="dependency-heading">How the three courses connect</h2>
+<ol class="process-flow" style="--flow-columns: 4" aria-label="NPU course dependency flow">
+<li><strong>Map the hardware</strong><small>Account for tiles, bytes, buffers, cores, and synchronization.</small></li>
+<li><strong>Lower the program</strong><small>Turn graph semantics into legal tiled and bufferized target work.</small></li>
+<li><strong>Deploy the model</strong><small>Quantize, partition, execute, and measure the compiled artifact.</small></li>
+<li><strong>Defend the evidence</strong><small>Connect accuracy and latency back to compiler and hardware constraints.</small></li>
+</ol>
+</section></main><script src="../book-layout.js?v=20260728-1"></script></body></html>

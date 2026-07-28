@@ -12,6 +12,7 @@
   <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/">
   <title>Robotics Simulation Engineering Course | Bui Cong Nguyen</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to course content</a>
@@ -22,6 +23,9 @@
       <span>Bui Cong Nguyen</span>
     </a>
     <nav aria-label="Course navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="diagnostic.html">Entry diagnostic</a>
+      <a href="course-catalog.html">External courses</a>
       <a href="#fast-track">14-day track</a>
       <a href="#flow">Flow</a>
       <a href="architecture.html">Architecture</a>
@@ -46,6 +50,9 @@
           evaluation, profiling, and public evidence. The ten-module route then develops the deeper theory.
         </p>
         <div class="hero-actions">
+          <a class="button" href="diagnostic.html">Check prerequisites</a>
+          <a class="button secondary" href="dashboard.html">Open learning dashboard</a>
+          <a class="button secondary" href="course-catalog.html">Browse external courses</a>
           <a class="button" href="#fast-track">Start the 14-day sprint</a>
           <a class="button secondary" href="architecture.html">See the system &amp; debug map</a>
           <a class="button secondary" href="reasoning.html">Open reasoning &amp; code flows</a>
@@ -251,7 +258,7 @@ Set-Location C:\isaacsim
               <th scope="row"><span class="day-title">Day 11 · RTX 4080 SUPER profiling</span>Profile the actual capstone and label <code>benchmark_core_world</code> separately. Compare headless/rendered and sensors off/on; try 1/16/64/256 only where the workload supports cloning.</th>
               <td>Hardware/version-stamped benchmark, RTF or steps/s, reset latency, VRAM/utilization chart, Tracy capture, before/after optimization.</td>
               <td>At least three controlled configurations, one variable per comparison, and one measured optimization. Claim only observed numbers.</td>
-              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html">Tracy</a><a class="day-link" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/how-to/simulation_performance.html">Isaac Lab tuning</a></td>
+              <td><a class="day-link" href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html">Tracy</a><a class="day-link" href="https://isaac-sim.github.io/IsaacLab/main/source/how-to/simulation_performance.html">Isaac Lab tuning</a></td>
             </tr>
             <tr>
               <td><input type="checkbox" value="day-12" data-sprint-check aria-label="Mark Day 12 complete"></td>
@@ -1063,7 +1070,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
                 <div class="module-reference-grid">
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup/ext_isaacsim_robot_setup_gain_tuner.html"><span class="ref-type">Official · before Lab 2</span><strong>Gain Tuner Reference</strong><small>Step, sinusoidal, and stress tests for articulation joint drives.</small></a>
                   <a class="module-reference" href="https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/guides/articulation_stability_guide.html"><span class="ref-type">Official · debug</span><strong>Articulation Stability Guide</strong><small>Timestep, mass ratio, drive, joint, and contact stability factors.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/core-concepts/actuators.html"><span class="ref-type">Official · actuator model</span><strong>Isaac Lab Actuator Concepts</strong><small>Implicit/explicit model groups, armature, transfer considerations, and abstraction boundaries.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/overview/core-concepts/actuators.html"><span class="ref-type">Official · actuator model</span><strong>Isaac Lab Actuator Concepts</strong><small>Implicit/explicit model groups, armature, transfer considerations, and abstraction boundaries.</small></a>
                   <a class="module-reference" href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/11-4-motion-control-with-torque-or-force-inputs-part-1-of-3/"><span class="ref-type">University · control depth</span><strong>Modern Robotics: Torque/Force Control</strong><small>Motion control assumptions and manipulator dynamics context.</small></a>
                 </div>
               </div>
@@ -1275,9 +1282,9 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
                 <h3>Just-in-time references</h3>
                 <div class="module-reference-grid">
                   <a class="module-reference" href="https://manipulation.csail.mit.edu/"><span class="ref-type">University · task design</span><strong>MIT Robotic Manipulation</strong><small>Grasping, contact, planning, perception, and task-observable reasoning.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_manager_rl_env.html"><span class="ref-type">Official · contract pattern</span><strong>Manager-Based RL Environment</strong><small>Observations, actions, events, rewards, commands, and terminations—even if no policy is trained.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/overview/simple_agents.html"><span class="ref-type">Official · baselines</span><strong>Simple Agents</strong><small>Zero, random, and state-machine baselines for environment validation.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/features/reproducibility.html"><span class="ref-type">Official · evaluation caveat</span><strong>Reproducibility and Determinism</strong><small>Seed configuration and GPU/RTX limitations for replay expectations.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_rl_env.html"><span class="ref-type">Official · contract pattern</span><strong>Manager-Based RL Environment</strong><small>Observations, actions, events, rewards, commands, and terminations—even if no policy is trained.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/overview/simple_agents.html"><span class="ref-type">Official · baselines</span><strong>Simple Agents</strong><small>Zero, random, and state-machine baselines for environment validation.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/features/reproducibility.html"><span class="ref-type">Official · evaluation caveat</span><strong>Reproducibility and Determinism</strong><small>Seed configuration and GPU/RTX limitations for replay expectations.</small></a>
                 </div>
               </div>
               <p class="interview-check"><strong>Interview checkpoint:</strong> Two systems report 90% success. What raw evidence, confidence interval, scenario coverage, safety failures, and replay artifacts do you need before deciding they are equivalent?</p>
@@ -1376,10 +1383,10 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
               <div class="module-references">
                 <h3>Just-in-time references</h3>
                 <div class="module-reference-grid">
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/tutorials/03_envs/create_direct_rl_env.html#domain-randomization"><span class="ref-type">Official · physics DR</span><strong>Direct-Workflow Domain Randomization</strong><small>Event-based physics randomization plus action and observation noise.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/policy_deployment/04_reach/reach_policy.html"><span class="ref-type">Official · applied example</span><strong>Reach Policy Deployment</strong><small>Concrete gain, friction, reset, and deployment randomization; adapt concepts, not claims.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/features/reproducibility.html"><span class="ref-type">Official · caveat</span><strong>Reproducibility and Determinism</strong><small>Seed and GPU/RTX limitations, including runtime material-update effects.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html"><span class="ref-type">Official · optional install</span><strong>Pinned Isaac Lab Quickstart</strong><small>Use a separate compatible installation; do not assume the local RC matches stable APIs.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html#domain-randomization"><span class="ref-type">Official · physics DR</span><strong>Direct-Workflow Domain Randomization</strong><small>Event-based physics randomization plus action and observation noise.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/policy_deployment/04_reach/reach_policy.html"><span class="ref-type">Official archive · applied example</span><strong>Reach Policy Deployment</strong><small>Historical concrete gain, friction, reset, and deployment randomization. Adapt the experiment pattern and verify all APIs against the pinned current revision.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/features/reproducibility.html"><span class="ref-type">Official · caveat</span><strong>Reproducibility and Determinism</strong><small>Seed and GPU/RTX limitations, including runtime material-update effects.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html"><span class="ref-type">Official · optional install</span><strong>Isaac Lab Quickstart</strong><small>Use a separate pinned installation; do not assume the local RC matches current APIs.</small></a>
                 </div>
               </div>
               <p class="interview-check"><strong>Interview checkpoint:</strong> With no robot data, how would you justify a friction or actuator-delay range, prevent it from hiding model bias, and design the held-out test?</p>
@@ -1588,7 +1595,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
                 <div class="module-reference-grid">
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/reference_material/sim_performance_optimization_handbook.html"><span class="ref-type">Official · before Lab 1</span><strong>Isaac Sim Performance Handbook</strong><small>Physics, scene, rendering, sensor, and memory bottleneck controls.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/utilities/debugging/profiling_performance.html"><span class="ref-type">Official · Lab 2</span><strong>Profiling with Tracy</strong><small>CPU/GPU zones, standalone capture, profiler overhead, and bottleneck interpretation.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/testing/benchmarks.html"><span class="ref-type">Official · benchmark design</span><strong>Isaac Lab Benchmark Framework</strong><small>Phases, measurements, system/version recorders, backends, and JSON results; beta APIs may change.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/testing/benchmarks.html"><span class="ref-type">Official archive · benchmark design</span><strong>Isaac Lab Benchmark Framework</strong><small>Historical phases, measurements, system/version recorders, backends, and JSON results. Reuse the measurement design, not unverified beta APIs.</small></a>
                   <a class="module-reference" href="https://docs.github.com/en/actions/tutorials/build-and-test-code/python"><span class="ref-type">Official · Lab 3</span><strong>GitHub Actions for Python</strong><small>Pytest, matrices, caching, and artifacts; hosted runners do not provide this Isaac RTX stack.</small></a>
                 </div>
               </div>
@@ -1851,7 +1858,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
         <article class="source-card">
           <h3>NVIDIA Isaac Lab</h3>
           <p>Manager/direct environments, vectorized robotics tasks, training workflows, and domain randomization. Pin the branch/commit and record resolved dependencies because beta guidance can change.</p>
-          <a href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/setup/quickstart.html">Isaac Lab 3.0 beta2 quickstart</a>
+          <a href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html">Current Isaac Lab quickstart</a>
         </article>
         <article class="source-card">
           <h3>MuJoCo and MJX</h3>
@@ -1902,5 +1909,6 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
   </footer>
 
   <script src="course.js"></script>
+  <script src="../book-layout.js?v=20260728-1"></script>
 </body>
 </html>

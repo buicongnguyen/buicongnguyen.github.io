@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Authoritative module dashboard for the Robotics Simulation Engineering course, connecting lessons, labs, diagnostics, practice, and evidence gates.">
+  <title>Learning Dashboard | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css?v=20260713-3">
+  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span>Robotics Simulation Engineering</span></a>
+    <nav aria-label="Dashboard navigation">
+      <a href="dashboard.html" aria-current="page">Dashboard</a>
+      <a href="diagnostic.html">Entry diagnostic</a>
+      <a href="course-catalog.html">External courses</a>
+      <a href="index.html">Course</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="reasoning.html">Reasoning</a>
+      <a href="resources.html">Resources</a>
+      <a href="practice.html">Practice</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">One authoritative route</p>
+        <h1>Learning dashboard</h1>
+        <p class="lede">Use this page as the course spine. Each row connects instruction, an applied lab, the relevant diagnostic model, targeted practice, and the evidence required to advance.</p>
+        <div class="hero-actions">
+          <a class="button" href="diagnostic.html">Take the entry diagnostic</a>
+          <a class="button secondary" href="#module-map">Open the module map</a>
+          <a class="button secondary" href="course-catalog.html">Find an external course</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <p class="eyebrow">Mastery rule</p>
+        <p>Do not mark a module complete from reading alone. Pass its lab tests, explain one failure using CIDER, score at least 80% on its objective questions, and retain the named evidence artifact.</p>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="spine-heading">
+      <div class="section-heading"><p class="eyebrow">Whole-course view</p><h2 id="spine-heading">From placement to production evidence</h2></div>
+      <ol class="course-spine" aria-label="Robotics simulation learning journey">
+        <li><strong>Entry diagnostic</strong><span>Prove prerequisites and identify the first weak objective.</span></li>
+        <li><strong>Assigned route</strong><span>Choose foundation, experienced, or 14-day sprint depth.</span></li>
+        <li><strong>Module mastery loop</strong><span>Learn, perform, diagnose, retrieve, and pass the evidence gate.</span></li>
+        <li><strong>Capstone evidence</strong><span>Integrate model, control, ROS, evaluation, robustness, and CI artifacts.</span></li>
+      </ol>
+    </section>
+
+    <section class="section" id="routes">
+      <div class="section-heading"><p class="eyebrow">Choose from evidence</p><h2>Three starting routes</h2></div>
+      <div class="study-grid">
+        <article class="card"><span class="number">Foundation · 10–14 weeks</span><h3>Start at Module 0</h3><p>For learners missing two or more prerequisite domains. Complete the readiness labs before simulator work.</p></article>
+        <article class="card"><span class="number">Experienced · 4–6 weeks</span><h3>Start at first weak objective</h3><p>For engineers who pass the toolchain, math, and testing tasks but need robotics-simulation depth.</p></article>
+        <article class="card"><span class="number">Sprint · 14 days</span><h3>Start at Module 1</h3><p>For engineers who pass every entry task and can sustain 6–8 focused hours per day.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="module-map">
+      <div class="section-heading">
+        <p class="eyebrow">Learn → perform → diagnose → retrieve → prove</p>
+        <h2>Authoritative module map</h2>
+        <p class="section-note">“Practice” links filter the question bank to the matching objective. Labs live under <code>labs/</code> and include starter files, tests, hints, and reference solutions.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="dashboard-table">
+          <thead><tr><th>Module</th><th>Learn</th><th>Applied lab</th><th>Diagnostic model</th><th>Practice</th><th>Gate</th></tr></thead>
+          <tbody>
+            <tr><th>0 · Readiness</th><td><a href="diagnostic.html">Prerequisite tasks</a></td><td><a href="../labs/index.html#readiness">Readiness lab</a></td><td>CIDER: contract and identity</td><td>Entry pre-test</td><td>All mandatory tasks pass or a foundation plan is recorded</td></tr>
+            <tr><th>1 · Baseline</th><td><a href="index.html#module-0">Reproducible baseline</a></td><td><a href="../labs/index.html#determinism">Determinism lab</a></td><td><a href="architecture.html#isolation">Environment/config boundary</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Reproducibility</a></td><td>Manifest plus repeatable headless smoke run</td></tr>
+            <tr><th>2 · Physics</th><td><a href="index.html#module-1">Dynamics and contact</a></td><td><a href="../labs/index.html#calibration">Canonical experiment lab</a></td><td><a href="architecture.html#playbooks">Contact playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Analytical comparison with declared tolerances</td></tr>
+            <tr><th>3 · Model audit</th><td><a href="index.html#module-2">URDF-to-USD engineering</a></td><td><a href="../labs/index.html#urdf">URDF graph lab</a></td><td><a href="architecture.html#architecture">Model/frame layer</a></td><td><a href="practice.html?objective=models-frames">Models/frames</a></td><td>Validator report with planted-fault proof</td></tr>
+            <tr><th>4 · Scene lifecycle</th><td><a href="index.html#module-3">Isaac/PhysX pipeline</a></td><td><a href="../labs/index.html#determinism">Reset regression lab</a></td><td><a href="reasoning.html#code-flow">Executable lifecycle</a></td><td><a href="practice.html?objective=simulators-performance">Simulation/performance</a></td><td>GUI/headless parity and 100 clean resets</td></tr>
+            <tr><th>5 · Control</th><td><a href="index.html#module-4">Measured response</a></td><td><a href="../labs/readiness/step_response.py">Step-response lab</a></td><td><a href="architecture.html#playbooks">Control playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Response report across payloads and rates</td></tr>
+            <tr><th>6 · ROS and sensors</th><td><a href="index.html#module-5">ROS 2 integration</a></td><td><a href="../labs/index.html#readiness">ROS contract task</a></td><td><a href="reasoning.html#runtime-sequence">Time/data sequence</a></td><td><a href="practice.html?objective=ros2-sensors-pipelines">ROS/sensors</a></td><td>Topic, QoS, TF, clock, rate, and replay contract</td></tr>
+            <tr><th>7 · Evaluation</th><td><a href="index.html#module-6">Task evaluation pipeline</a></td><td><a href="../labs/index.html#benchmark">Evaluation harness</a></td><td><a href="reasoning.html#state-machines">Episode state machine</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Debugging/CI</a></td><td>100 frozen scenarios regenerated from raw rows</td></tr>
+            <tr><th>8 · Calibration</th><td><a href="index.html#module-7">Identification and transfer</a></td><td><a href="../labs/index.html#calibration">Calibration sweep</a></td><td><a href="reasoning.html#decision-logic">Causal proof</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Held-out improvement beyond repeat variability</td></tr>
+            <tr><th>9 · Robustness</th><td><a href="index.html#module-8">Randomization and Lab</a></td><td><a href="../labs/index.html#benchmark">Ablation harness</a></td><td><a href="architecture.html#evidence">Evidence packet</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Range provenance and uncertainty ablation</td></tr>
+            <tr><th>10 · Performance/CI</th><td><a href="index.html#module-9">Delivery and scaling</a></td><td><a href="../labs/index.html#benchmark">Benchmark harness</a></td><td><a href="architecture.html#playbooks">Performance playbook</a></td><td><a href="practice.html?objective=simulators-performance">Performance</a></td><td>Controlled optimization plus injected CI failure</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading"><p class="eyebrow">Assessment loop</p><h2>How to complete a module</h2></div>
+      <div class="flow-grid">
+        <article class="flow-step"><span>1</span><h3>Pre-check</h3><p>Answer objective questions before reading; record confidence.</p></article>
+        <article class="flow-step"><span>2</span><h3>Learn</h3><p>Read only the linked section and just-in-time references.</p></article>
+        <article class="flow-step"><span>3</span><h3>Perform</h3><p>Complete the lab and make its tests pass.</p></article>
+        <article class="flow-step"><span>4</span><h3>Diagnose</h3><p>Explain one planted failure using CIDER.</p></article>
+        <article class="flow-step"><span>5</span><h3>Post-check</h3><p>Reach 80%; missed objectives enter the review queue.</p></article>
+        <article class="flow-step"><span>6</span><h3>Retain</h3><p>Review after 1, 3, and 7 days and preserve the gate artifact.</p></article>
+      </div>
+      <p class="flow-loop-note"><strong>Below 80% or gate failed:</strong> return to the exact weak objective and repeat Learn → Perform → Diagnose. <strong>Gate passed:</strong> schedule retention and advance.</p>
+    </section>
+  </main>
+  <script src="../book-layout.js?v=20260728-1"></script>
+</body>
+</html>

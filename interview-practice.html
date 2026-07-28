@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Deep learning, operating systems, and embedded systems interview practice questions.">
 <title>Deep Learning, OS, and Embedded Interview Practice</title>
+<link rel="stylesheet" href="book-layout.css?v=20260728-1">
 <style>
   :root { color-scheme: dark; --bg:#101418; --panel:#171d25; --panel2:#1f2732; --ink:#e8edf2; --muted:#a9b6c7; --line:#2b3644; --accent:#55b4ff; --green:#7ee787; --amber:#f2cc60; --code:#0b0f14; }
   * { box-sizing: border-box; }
@@ -42,8 +43,11 @@
   <p>This page is original study material generated from official documentation and durable course references. It is grouped for learning: fundamentals first, then debugging, deployment, and system-level tradeoffs.</p>
   <nav>
     <a href="deep-learning-practice.html">Deep Learning Detail</a>
+    <a href="labs/index.html#deep-learning">Deep Learning Lab</a>
     <a href="os-practice.html">OS Detail</a>
+    <a href="labs/index.html#os">OS Lab</a>
     <a href="embedded-practice.html">Embedded Detail</a>
+    <a href="labs/index.html#embedded">Embedded Lab</a>
     <a href="#deep-learning">Deep Learning</a>
     <a href="#os">Operating Systems</a>
     <a href="#embedded">Embedded Systems</a>
@@ -278,11 +282,18 @@ function filterCards() {
     card.classList.toggle("hidden", !match);
     if (match) shown += 1;
   }
+  document.querySelectorAll(".group").forEach((group) => {
+    group.classList.toggle("hidden", !group.querySelector(".qa-card:not(.hidden)"));
+  });
+  document.querySelectorAll("#qa-root > section").forEach((section) => {
+    section.classList.toggle("hidden", !section.querySelector(".qa-card:not(.hidden)"));
+  });
   document.getElementById("stats").textContent = q ? `${shown} matching questions` : "90 questions across 3 interview domains";
 }
 
 render();
 document.getElementById("search").addEventListener("input", filterCards);
 </script>
+<script src="book-layout.js?v=20260728-1"></script>
 </body>
 </html>

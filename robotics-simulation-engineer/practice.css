@@ -7,6 +7,16 @@
   font-size: clamp(38px, 5.2vw, 62px);
 }
 
+.objective-scores { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 14px 0 22px; }
+.objective-score { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.objective-score strong, .objective-score span { display: block; }
+.objective-score.is-mastered { border-color: var(--accent); }
+.feedback-structure { display: grid; gap: 7px; margin-top: 12px; }
+.feedback-structure p { margin: 0; }
+.feedback-structure a { font-weight: 700; }
+@media (max-width: 900px) { .objective-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .objective-scores { grid-template-columns: 1fr; } }
+
 @media (max-width: 580px) {
   .practice-hero h1 {
     font-size: 36px;

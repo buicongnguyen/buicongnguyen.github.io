@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Accelerator Architecture and Memory Movement</title><link rel="stylesheet" href="../practice-common.css"><link rel="stylesheet" href="../book-layout.css?v=20260728-1"></head>
+<body><header><p class="eyebrow">NPU course 1</p><h1>Accelerator architecture and memory movement</h1><p>Learn hardware through one question: how do tensor tiles move, fit, synchronize, and get reused?</p><nav><a href="index.html">Course map</a><a href="#plan">Plan</a><a href="#artifact">Artifact</a><a href="../npu-practice.html#memory">Reference</a></nav></header><main>
+<section id="plan" class="section"><h2>Four-session plan</h2><div class="grid">
+<article class="card"><span class="tag">1 · Contract</span><h3>Work and data</h3><p>Calculate shapes, MACs, bytes, arithmetic intensity, and layout for one GEMM. Gate: all dimensions and units are explicit.</p></article>
+<article class="card"><span class="tag">2 · Hierarchy</span><h3>Memory movement</h3><p>Map DRAM, interconnect, local SRAM, circular buffers, registers, and accumulators. Gate: every transfer names source, destination, bytes, and synchronization.</p></article>
+<article class="card"><span class="tag">3 · Mapping</span><h3>Tiling and core grid</h3><p>Select M/N/K tiles, shard them across a core grid, and check capacity plus tail behavior. Gate: no buffer exceeds its declared capacity.</p></article>
+<article class="card"><span class="tag">4 · Measure</span><h3>Bottleneck prediction</h3><p>Predict compute- or bandwidth-bound behavior, then compare with a measured or modeled result. Gate: discrepancy is explained rather than hidden.</p></article>
+</div></section>
+<section class="section" aria-labelledby="movement-heading"><h2 id="movement-heading">Tile movement and reuse</h2>
+<ol class="process-flow" style="--flow-columns: 5" aria-label="Tiled GEMM memory movement">
+<li><strong>DRAM tensors</strong><small>Select M×K and K×N tiles; count source bytes.</small></li>
+<li><strong>DMA and interconnect</strong><small>Move tiles to the owning core with an explicit synchronization event.</small></li>
+<li><strong>Local circular buffers</strong><small>Double-buffer tiles and prove the working set fits SRAM.</small></li>
+<li><strong>Matrix engine</strong><small>Reuse operands across MACs while partial sums remain local.</small></li>
+<li><strong>Writeback</strong><small>Store the output tile and compare measured behavior with the bottleneck prediction.</small></li>
+</ol>
+</section>
+<section id="artifact" class="section"><h2>End-to-end artifact: tiled GEMM mapping report</h2><ol><li>Choose a realistic M×K by K×N workload.</li><li>Produce a tensor/layout table and memory-capacity worksheet.</li><li>Draw the double-buffered dataflow over a core grid.</li><li>Estimate bytes, MACs, reuse, and limiting resource.</li><li>Change one tile dimension and explain the predicted tradeoff.</li></ol><p><strong>Validated when:</strong> a reviewer can reproduce every number and identify which hardware constraint selects the mapping.</p></section>
+</main><script src="../book-layout.js?v=20260728-1"></script></body></html>
