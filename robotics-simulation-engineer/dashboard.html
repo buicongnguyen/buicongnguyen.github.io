@@ -6,7 +6,7 @@
   <meta name="description" content="Authoritative module dashboard for the Robotics Simulation Engineering course, connecting lessons, labs, diagnostics, practice, and evidence gates.">
   <title>Learning Dashboard | Robotics Simulation Engineering</title>
   <link rel="stylesheet" href="course.css?v=20260713-3">
-  <link rel="stylesheet" href="../book-layout.css?v=20260728-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260730-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to dashboard</a>
@@ -54,9 +54,9 @@
     <section class="section" id="routes">
       <div class="section-heading"><p class="eyebrow">Choose from evidence</p><h2>Three starting routes</h2></div>
       <div class="study-grid">
-        <article class="card"><span class="number">Foundation · 10–14 weeks</span><h3>Start at Module 0</h3><p>For learners missing two or more prerequisite domains. Complete the readiness labs before simulator work.</p></article>
-        <article class="card"><span class="number">Experienced · 4–6 weeks</span><h3>Start at first weak objective</h3><p>For engineers who pass the toolchain, math, and testing tasks but need robotics-simulation depth.</p></article>
-        <article class="card"><span class="number">Sprint · 14 days</span><h3>Start at Module 1</h3><p>For engineers who pass every entry task and can sustain 6–8 focused hours per day.</p></article>
+        <article class="card"><span class="number">Foundation · 10–14 weeks</span><h3>Start at the entry gate</h3><p>For learners missing Python, Git/CLI, transforms, or dynamics/control—or passing four or fewer domains. Complete readiness labs before simulator work.</p></article>
+        <article class="card"><span class="number">Experienced · 4–6 weeks</span><h3>Start at first weak objective</h3><p>For engineers who pass all four core prerequisites and at least five domains, but still need robotics-simulation depth.</p></article>
+        <article class="card"><span class="number">Sprint · 14 days</span><h3>Start at Module 0</h3><p>For engineers who pass every entry task and can sustain 6–8 focused hours per day.</p></article>
       </div>
     </section>
 
@@ -68,19 +68,19 @@
       </div>
       <div class="table-wrap">
         <table class="dashboard-table">
-          <thead><tr><th>Module</th><th>Learn</th><th>Applied lab</th><th>Diagnostic model</th><th>Practice</th><th>Gate</th></tr></thead>
+          <thead><tr><th>Course stage</th><th>Learn</th><th>Applied lab</th><th>Diagnostic model</th><th>Practice</th><th>Gate</th></tr></thead>
           <tbody>
-            <tr><th>0 · Readiness</th><td><a href="diagnostic.html">Prerequisite tasks</a></td><td><a href="../labs/index.html#readiness">Readiness lab</a></td><td>CIDER: contract and identity</td><td>Entry pre-test</td><td>All mandatory tasks pass or a foundation plan is recorded</td></tr>
-            <tr><th>1 · Baseline</th><td><a href="index.html#module-0">Reproducible baseline</a></td><td><a href="../labs/index.html#determinism">Determinism lab</a></td><td><a href="architecture.html#isolation">Environment/config boundary</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Reproducibility</a></td><td>Manifest plus repeatable headless smoke run</td></tr>
-            <tr><th>2 · Physics</th><td><a href="index.html#module-1">Dynamics and contact</a></td><td><a href="../labs/index.html#calibration">Canonical experiment lab</a></td><td><a href="architecture.html#playbooks">Contact playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Analytical comparison with declared tolerances</td></tr>
-            <tr><th>3 · Model audit</th><td><a href="index.html#module-2">URDF-to-USD engineering</a></td><td><a href="../labs/index.html#urdf">URDF graph lab</a></td><td><a href="architecture.html#architecture">Model/frame layer</a></td><td><a href="practice.html?objective=models-frames">Models/frames</a></td><td>Validator report with planted-fault proof</td></tr>
-            <tr><th>4 · Scene lifecycle</th><td><a href="index.html#module-3">Isaac/PhysX pipeline</a></td><td><a href="../labs/index.html#determinism">Reset regression lab</a></td><td><a href="reasoning.html#code-flow">Executable lifecycle</a></td><td><a href="practice.html?objective=simulators-performance">Simulation/performance</a></td><td>GUI/headless parity and 100 clean resets</td></tr>
-            <tr><th>5 · Control</th><td><a href="index.html#module-4">Measured response</a></td><td><a href="../labs/readiness/step_response.py">Step-response lab</a></td><td><a href="architecture.html#playbooks">Control playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Response report across payloads and rates</td></tr>
-            <tr><th>6 · ROS and sensors</th><td><a href="index.html#module-5">ROS 2 integration</a></td><td><a href="../labs/index.html#readiness">ROS contract task</a></td><td><a href="reasoning.html#runtime-sequence">Time/data sequence</a></td><td><a href="practice.html?objective=ros2-sensors-pipelines">ROS/sensors</a></td><td>Topic, QoS, TF, clock, rate, and replay contract</td></tr>
-            <tr><th>7 · Evaluation</th><td><a href="index.html#module-6">Task evaluation pipeline</a></td><td><a href="../labs/index.html#benchmark">Evaluation harness</a></td><td><a href="reasoning.html#state-machines">Episode state machine</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Debugging/CI</a></td><td>100 frozen scenarios regenerated from raw rows</td></tr>
-            <tr><th>8 · Calibration</th><td><a href="index.html#module-7">Identification and transfer</a></td><td><a href="../labs/index.html#calibration">Calibration sweep</a></td><td><a href="reasoning.html#decision-logic">Causal proof</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Held-out improvement beyond repeat variability</td></tr>
-            <tr><th>9 · Robustness</th><td><a href="index.html#module-8">Randomization and Lab</a></td><td><a href="../labs/index.html#benchmark">Ablation harness</a></td><td><a href="architecture.html#evidence">Evidence packet</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Range provenance and uncertainty ablation</td></tr>
-            <tr><th>10 · Performance/CI</th><td><a href="index.html#module-9">Delivery and scaling</a></td><td><a href="../labs/index.html#benchmark">Benchmark harness</a></td><td><a href="architecture.html#playbooks">Performance playbook</a></td><td><a href="practice.html?objective=simulators-performance">Performance</a></td><td>Controlled optimization plus injected CI failure</td></tr>
+            <tr><th>Entry gate · Readiness</th><td><a href="diagnostic.html">Prerequisite tasks</a></td><td><a href="../labs/index.html#readiness">Readiness lab</a></td><td>CIDER: contract and identity</td><td>Entry pre-test</td><td>All mandatory tasks pass or a foundation plan is recorded</td></tr>
+            <tr><th>0 · Baseline</th><td><a href="index.html#module-0">Reproducible baseline</a></td><td><a href="../labs/index.html#determinism">Determinism lab</a></td><td><a href="architecture.html#isolation">Environment/config boundary</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Reproducibility</a></td><td>Manifest plus repeatable headless smoke run</td></tr>
+            <tr><th>1 · Physics</th><td><a href="index.html#module-1">Dynamics and contact</a></td><td><a href="../labs/index.html#calibration">Canonical experiment lab</a></td><td><a href="architecture.html#playbooks">Contact playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Analytical comparison with declared tolerances</td></tr>
+            <tr><th>2 · Model audit</th><td><a href="index.html#module-2">URDF-to-USD engineering</a></td><td><a href="../labs/index.html#urdf">URDF graph lab</a></td><td><a href="architecture.html#architecture">Model/frame layer</a></td><td><a href="practice.html?objective=models-frames">Models/frames</a></td><td>Validator report with planted-fault proof</td></tr>
+            <tr><th>3 · Scene lifecycle</th><td><a href="index.html#module-3">Isaac/PhysX pipeline</a></td><td><a href="../labs/index.html#determinism">Reset regression lab</a></td><td><a href="reasoning.html#code-flow">Executable lifecycle</a></td><td><a href="practice.html?objective=simulators-performance">Simulation/performance</a></td><td>GUI/headless parity and 100 clean resets</td></tr>
+            <tr><th>4 · Control</th><td><a href="index.html#module-4">Measured response</a></td><td><a href="../labs/readiness/step_response.py">Step-response lab</a></td><td><a href="architecture.html#playbooks">Control playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Response report across payloads and rates</td></tr>
+            <tr><th>5 · ROS and sensors</th><td><a href="index.html#module-5">ROS 2 integration</a></td><td><a href="../labs/index.html#readiness">ROS contract task</a></td><td><a href="reasoning.html#runtime-sequence">Time/data sequence</a></td><td><a href="practice.html?objective=ros2-sensors-pipelines">ROS/sensors</a></td><td>Topic, QoS, TF, clock, rate, and replay contract</td></tr>
+            <tr><th>6 · Evaluation</th><td><a href="index.html#module-6">Task evaluation pipeline</a></td><td><a href="../labs/index.html#benchmark">Evaluation harness</a></td><td><a href="reasoning.html#state-machines">Episode state machine</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Debugging/CI</a></td><td>100 frozen scenarios regenerated from raw rows</td></tr>
+            <tr><th>7 · Calibration</th><td><a href="index.html#module-7">Identification and transfer</a></td><td><a href="../labs/index.html#calibration">Calibration sweep</a></td><td><a href="reasoning.html#decision-logic">Causal proof</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Held-out improvement beyond repeat variability</td></tr>
+            <tr><th>8 · Robustness</th><td><a href="index.html#module-8">Randomization and Lab</a></td><td><a href="../labs/index.html#benchmark">Ablation harness</a></td><td><a href="architecture.html#evidence">Evidence packet</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Range provenance and uncertainty ablation</td></tr>
+            <tr><th>9 · Performance/CI</th><td><a href="index.html#module-9">Delivery and scaling</a></td><td><a href="../labs/index.html#benchmark">Benchmark harness</a></td><td><a href="architecture.html#playbooks">Performance playbook</a></td><td><a href="practice.html?objective=simulators-performance">Performance</a></td><td>Controlled optimization plus injected CI failure</td></tr>
           </tbody>
         </table>
       </div>
@@ -99,6 +99,6 @@
       <p class="flow-loop-note"><strong>Below 80% or gate failed:</strong> return to the exact weak objective and repeat Learn → Perform → Diagnose. <strong>Gate passed:</strong> schedule retention and advance.</p>
     </section>
   </main>
-  <script src="../book-layout.js?v=20260728-1"></script>
+  <script src="../book-layout.js?v=20260730-1"></script>
 </body>
 </html>

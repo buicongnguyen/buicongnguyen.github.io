@@ -4,15 +4,16 @@
   const output = document.getElementById("diagnostic-result");
   if (!form || !output) return;
   const key = "robotics-simulation-entry-diagnostic-v1";
-  const moduleByDomain = {
-    python: "Module 0 readiness: Python/NumPy/pytest",
-    git: "Module 0 readiness: Git and CLI",
-    transforms: "Module 3: robot models and frames",
-    dynamics: "Module 2: dynamics, then Module 5 control",
-    ros: "Module 6: ROS 2 and sensors",
-    statistics: "Module 7 evaluation, then Module 8 calibration",
-    models: "Module 3: URDF-to-USD model engineering"
+  const remediationByDomain = {
+    python: { order: 0, label: "Entry gate: Python, NumPy, and pytest", href: "../labs/index.html#readiness" },
+    git: { order: 0, label: "Entry gate: Git and command line", href: "../labs/index.html#readiness" },
+    transforms: { order: 0, label: "Entry gate: linear algebra and transform composition", href: "../labs/index.html#readiness" },
+    dynamics: { order: 0, label: "Entry gate: inertia and step-response fundamentals", href: "../labs/index.html#readiness" },
+    models: { order: 2, label: "Module 2: URDF-to-USD model engineering", href: "index.html#module-2" },
+    ros: { order: 5, label: "Module 5: ROS 2 and sensors", href: "index.html#module-5" },
+    statistics: { order: 6, label: "Module 6 evaluation, then Module 7 calibration", href: "index.html#module-6" }
   };
+  const coreDomains = ["python", "git", "transforms", "dynamics"];
 
   function save() {
     const state = {};
@@ -36,20 +37,34 @@
     event.preventDefault();
     const boxes = Array.from(form.querySelectorAll('input[type="checkbox"]'));
     const passed = boxes.filter((box) => box.checked);
-    const weak = boxes.filter((box) => !box.checked).map((box) => moduleByDomain[box.name]);
+    const weakDomains = boxes.filter((box) => !box.checked).map((box) => box.name);
+    const weak = weakDomains
+      .map((domain) => remediationByDomain[domain])
+      .sort((left, right) => left.order - right.order);
+    const corePassed = coreDomains.every((domain) => form.elements[domain].checked);
     let route = "Foundation route (10–14 weeks)";
-    if (passed.length === 7) route = "14-day portfolio sprint or 4–6 week experienced route";
-    else if (passed.length >= 5) route = "Experienced route (4–6 weeks), beginning at the first weak domain";
+    let reason = corePassed
+      ? "Build the remaining prerequisites before simulator work."
+      : "A core prerequisite is missing, so complete the entry gate before simulator work.";
+    if (passed.length === 7) {
+      route = "14-day portfolio sprint or 4–6 week experienced route";
+      reason = "Every prerequisite has observable evidence.";
+    } else if (passed.length >= 5 && corePassed) {
+      route = "Experienced route (4–6 weeks), beginning at the first weak domain";
+      reason = "The core gate is complete; remediate the remaining domain in sequence.";
+    }
     output.innerHTML = "";
     const heading = document.createElement("h3");
     heading.textContent = passed.length + " / 7 passed · " + route;
     output.appendChild(heading);
     const text = document.createElement("p");
-    text.textContent = weak.length ? "Recommended starting work: " + weak.join("; ") + "." : "All prerequisites are demonstrated. Begin Module 1 and retain the diagnostic evidence.";
+    text.textContent = weak.length
+      ? reason + " Recommended work: " + weak.map((item) => item.label).join("; ") + "."
+      : "All prerequisites are demonstrated. Begin Module 0 and retain the diagnostic evidence.";
     output.appendChild(text);
     const link = document.createElement("a");
-    link.href = "dashboard.html#module-map";
-    link.textContent = "Open your module map";
+    link.href = weak.length ? weak[0].href : "index.html#module-0";
+    link.textContent = weak.length ? "Start the first remediation" : "Begin Module 0";
     output.appendChild(link);
     save();
   });
