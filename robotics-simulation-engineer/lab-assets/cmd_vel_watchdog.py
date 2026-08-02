@@ -5,6 +5,8 @@ import time
 
 import rclpy
 from geometry_msgs.msg import Twist
+from lab_contracts import is_stale
+from rclpy.clock import Clock, ClockType
 from rclpy.node import Node
 
 
@@ -17,7 +19,10 @@ class TwistWatchdog(Node):
         self.stale = True
         self.publisher = self.create_publisher(Twist, output_topic, 10)
         self.subscription = self.create_subscription(Twist, input_topic, self.on_command, 10)
-        self.timer = self.create_timer(1.0 / rate, self.on_timer)
+        # The safety timeout must keep running even if a caller later enables
+        # use_sim_time and the Isaac Sim timeline is paused.
+        self.steady_clock = Clock(clock_type=ClockType.STEADY_TIME)
+        self.timer = self.create_timer(1.0 / rate, self.on_timer, clock=self.steady_clock)
         self.get_logger().info(
             f"Forwarding {input_topic} -> {output_topic}; timeout={timeout:.3f}s; rate={rate:.1f}Hz"
         )
@@ -30,8 +35,9 @@ class TwistWatchdog(Node):
         self.stale = False
 
     def on_timer(self) -> None:
-        age = None if self.last_receipt is None else time.monotonic() - self.last_receipt
-        now_stale = age is None or age > self.timeout
+        now = time.monotonic()
+        age = None if self.last_receipt is None else now - self.last_receipt
+        now_stale = is_stale(self.last_receipt, now, self.timeout)
         if now_stale:
             self.publisher.publish(Twist())
             if not self.stale:

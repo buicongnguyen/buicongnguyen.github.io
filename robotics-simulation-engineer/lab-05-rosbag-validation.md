@@ -67,6 +67,8 @@ required_behaviors:
 
 Do not use `ros2 bag record -a` for the primary artifact. An explicit topic list prevents accidental collection of irrelevant or sensitive topics and makes the contract reviewable.
 
+Create `lab-assets/rosbag_qos_overrides.yaml` and use it for bandwidth-heavy sensor topics and transient-local static transforms. QoS overrides are part of the experiment contract, not an afterthought.
+
 ## Step 2 — prepare a bounded output directory
 
 ```powershell
@@ -87,7 +89,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 In a dedicated terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
 
 While recording:
@@ -136,7 +138,7 @@ The publisher count should be zero before replay. This prevents recorded and liv
 Replay terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag play $Bag --topics /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag play $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" --topics /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
 
 Observer terminal:
@@ -150,7 +152,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/
 Camera contract probe during replay:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --timeout 15
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15
 ```
 
 Replay may finish before a late observer starts. Start observers first and use rosbag play options such as looping or a delayed start only after reading `ros2 bag play --help` for the installed version.
@@ -202,4 +204,4 @@ Keep large bag data out of Git unless deliberately managed with an appropriate a
 
 ## Final gate
 
-The five-lab path passes when another engineer can launch the documented Windows environment, reproduce the clock/state/control/camera contracts, inspect the bag metadata, replay the selected topics with Isaac Sim stopped, and obtain the same schema/frame/timestamp conclusions.
+Lab 05 passes when another engineer can launch the documented Windows environment, reproduce the clock/state/control/camera contracts, inspect the bag metadata, replay the selected topics with Isaac Sim stopped, and obtain the same schema/frame/timestamp conclusions. Continue to [Lab 06](lab-06-urdf-model-audit.md) to audit the robot model before physics tuning.

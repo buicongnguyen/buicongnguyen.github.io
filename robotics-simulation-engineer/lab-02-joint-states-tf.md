@@ -21,6 +21,7 @@ flowchart LR
     Art --> Compute["Isaac Compute Transform Tree"]
     Compute --> PubTF["ROS 2 Publish Transform Tree"] --> TF["/tf + /tf_static"]
     Art --> Odom["Isaac Compute Odometry"] --> PubO["ROS 2 Publish Odometry"] --> OT["/odom"]
+    Odom --> RawTF["ROS 2 Publish Raw Transform Tree"] --> OTF["odom → base_link"]
     Clock["simulation timestamp"] --> Joint
     Clock --> PubTF
     Clock --> PubO
@@ -58,7 +59,10 @@ Isaac Sim 6.0 separates data acquisition from ROS publication. Older tutorials m
 |---|---|---|
 | Isaac Read Joint State | ROS2 Publish Joint State | `execOut`, names, positions, velocities, efforts, DOF types, scale, sensor time |
 | Isaac Compute Transform Tree | ROS2 Publish Transform Tree | execution, parent/child frames, translations, orientations |
-| Isaac Compute Odometry | ROS2 Publish Odometry | pose and full 3D linear/angular velocity |
+| Isaac Compute Odometry | ROS2 Publish Odometry | pose and full 3D linear/angular velocity; set `odomFrameId=odom` and `chassisFrameId=base_link` |
+| Isaac Compute Odometry | ROS2 Publish Raw Transform Tree | translation/orientation for the dynamic `odom → base_link` transform |
+
+Feed Isaac Read Simulation Time into every publisher timestamp. The odometry message does not create the corresponding TF edge by itself; the Raw Transform Tree publisher owns that edge.
 
 Robot-wide state graphs belong at the robot root. For the shipped processed TurtleBot, NVIDIA documents the main robot prim as `/World/tb3_burger_processed` and the articulation root under `Geometry/base_footprint/base_link`. Verify the actual stage before copying a path.
 
@@ -68,7 +72,7 @@ Robot-wide state graphs belong at the robot root. For the shipped processed Turt
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /joint_states --once
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf --once
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf_static --once
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf_static --once  # only when a static publisher is configured
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /odom --once
 ```
 
@@ -102,7 +106,7 @@ each child has one parent
 no cycles
 frame names are stable
 odom → base_link is dynamic
-sensor mounting transforms are static when their geometry is fixed
+sensor mounting transforms have one declared owner; use /tf_static when deliberately configured as static
 ```
 
 Optional if `tf2_tools` is present:
@@ -151,4 +155,4 @@ flowchart TD
 
 ## Gate
 
-Continue to Lab 03 only when `/clock`, `/joint_states`, `/tf`, `/tf_static`, and `/odom` are observable; joint arrays satisfy the invariants; TF is connected/acyclic; and odometry declares `odom` and `base_link` consistently.
+Continue to Lab 03 only when `/clock`, `/joint_states`, `/tf`, and `/odom` are observable; joint arrays satisfy the invariants; TF is connected/acyclic; and both `/odom` and the dynamic `odom → base_link` edge use consistent frames. Require `/tf_static` only if this stage deliberately contains a static TF publisher.

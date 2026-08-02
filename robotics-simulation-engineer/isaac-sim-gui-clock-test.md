@@ -157,6 +157,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /clock
 
 Collect at least 20 messages, press `Ctrl+C`, and record average, min, max, standard deviation, and sample count. Do not assume ROS publication rate equals physics frequency; graph ticks, rendering, workload, and real-time factor affect wall-clock arrival.
 
+`On Playback Tick` follows application/render updates. If a later experiment needs messages aligned to the physics-step rate, NVIDIA recommends `On Physics Step`; make that trigger change deliberately and record it rather than assuming the two rates are equal.
+
 ## Step 5 — prove lifecycle behavior
 
 ```mermaid

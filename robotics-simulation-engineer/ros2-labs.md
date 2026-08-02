@@ -1,6 +1,6 @@
-# Isaac Sim + ROS 2 Practical Labs 01–05
+# Isaac Sim + ROS 2 Practical Labs 01–10
 
-Follow these labs in order on this workstation. They use one native-Windows contract:
+This fast track turns one native-Windows Isaac Sim pipeline into a reviewable simulation-engineering portfolio. Use the labs in order; each gate removes a class of ambiguity before the next lab adds complexity.
 
 ```yaml
 simulator: C:\isaacsim-6.0.1
@@ -8,94 +8,88 @@ ros: Jazzy
 workspace: C:\IsaacSim-ros_workspaces\jazzy_ws
 middleware: rmw_zenoh_cpp
 domain: 0
+gpu: RTX 4080 SUPER
 launcher: robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
-wsl: not used
+wsl: not used for this path
 ```
 
-## Official NVIDIA configuration route
+## Official baseline
 
-Use the version-pinned page while reproducing these Isaac Sim 6.0.1 labs. Use the latest page only to check what NVIDIA changed after this course was written.
+- [Isaac Sim 6.0.1 ROS 2 installation on Windows](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [Isaac Sim 6.0.1 ROS 2 tutorials](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html)
+- [NVIDIA Isaac Sim ROS workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
+- [Current Isaac Sim release downloads](https://docs.isaacsim.omniverse.nvidia.com/latest/installation/download.html)
 
-- [NVIDIA Isaac Sim 6.0.1 — ROS 2 Installation (Other Platforms)](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html): the authoritative Windows 11 + Jazzy + Pixi workflow, workspace build, launch order, and Zenoh configuration.
-- [NVIDIA current ROS 2 Installation (Other Platforms)](https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html): compare current support before upgrading Isaac Sim or the workspace.
-- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces): the upstream Pixi workspace, ROS packages, launch tasks, and custom interfaces used by these labs.
-- [NVIDIA Isaac Sim 6.0.1 ROS 2 tutorial index](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html): the official route to Clock, TF, TurtleBot, camera, and other ROS 2 exercises.
+Use the pinned pages to reproduce this course and the current page only to review upgrade changes.
 
-The pinned NVIDIA setup states that native Windows Pixi supports ROS 2 Jazzy, all Isaac Sim ROS 2 tutorials, and preconfigures `rmw_zenoh_cpp`. That is why this course uses the Windows launcher instead of WSL.
+## Ten-lab dependency path
 
-## Learning path
+| Lab | Question answered | Gate |
+|---|---|---|
+| [01 Clock](isaac-sim-gui-clock-test.md) | When does the simulation execute? | `/clock` has the right type, owner, and lifecycle |
+| [02 State + TF](lab-02-joint-states-tf.md) | What moved, and in which frame? | joint arrays, odometry, and dynamic TF are consistent |
+| [03 Control](lab-03-cmd-vel-watchdog.md) | How does a request become bounded motion? | command chain works and stale input reaches zero |
+| [04 Camera](lab-04-camera-depth.md) | What was observed? | multi-sample image schema, frame, stamps, and cadence pass |
+| [05 Replay](lab-05-rosbag-validation.md) | Can interface analysis be repeated? | metadata and offline validators reproduce conclusions |
+| [06 Model audit](lab-06-urdf-model-audit.md) | Is the robot model structurally credible? | URDF graph, joints, mass, inertia, and collision audit pass |
+| [07 Physics ID](lab-07-physics-identification.md) | Which parameters explain nominal behavior? | declared sweep and held-out validation select a model |
+| [08 Regression CI](lab-08-regression-ci.md) | Will a change break a known contract? | deterministic unit and evidence gates run in CI |
+| [09 Profiling](lab-09-performance-profiling.md) | Where is the actual bottleneck? | repeated benchmark plus trace supports one optimization |
+| [10 Robustness](lab-10-domain-randomization.md) | Does performance survive plausible uncertainty? | seeded held-out scenarios meet the declared pass-rate gate |
 
-| Lab | Build | Primary proof | Page |
-|---|---|---|---|
-| 01 | Simulation clock | `/clock` increases only during Play | [Clock](isaac-sim-gui-clock-test.md) |
-| 02 | Robot state | joint names/arrays agree and TF is a connected tree | [Joint states + TF](lab-02-joint-states-tf.md) |
-| 03 | Motion command + watchdog | robot moves from fresh Twist and stops after timeout | [Command + watchdog](lab-03-cmd-vel-watchdog.md) |
-| 04 | RGB/depth perception | valid image schema, frame, timestamp, rate, and payload | [Camera + depth](lab-04-camera-depth.md) |
-| 05 | Record/replay validation | bag reproduces message contracts without Isaac publishers | [Rosbag validation](lab-05-rosbag-validation.md) |
+The design and logic review for Labs 06–10 is recorded in [Labs 06–10 plan and dependency review](labs-06-10-plan.md).
 
-## The system you will build
+## Big-picture architecture
 
 ```mermaid
 flowchart LR
-    Timeline["Isaac timeline + physics"] --> Clock["/clock"]
-    Robot["TurtleBot articulation"] --> State["/joint_states + /odom"]
-    Robot --> TF["/tf + /tf_static"]
-    Raw["/cmd_vel_raw"] --> WD["steady-clock watchdog"] --> Cmd["/cmd_vel"] --> Robot
-    Camera["RGB/depth sensor"] --> Images["Image + CameraInfo"]
-    Clock --> Bag["rosbag2 / MCAP"]
+  subgraph Runtime["Runtime contracts · Labs 01–05"]
+    Time["timeline + /clock"] --> State["joint state + odom + TF"]
+    Command["raw Twist"] --> Guard["steady-clock watchdog"] --> State
+    Sensor["RGB/depth"] --> Bag["rosbag + reports"]
     State --> Bag
-    TF --> Bag
-    Cmd --> Bag
-    Images --> Bag
+  end
+  subgraph Engineering["Engineering contracts · Labs 06–10"]
+    Model["URDF/model audit"] --> Physics["parameter identification"] --> CI["regression CI"]
+    CI --> Profile["benchmark + trace"] --> Robust["seeded uncertainty tests"]
+  end
+  Bag --> Model
 ```
 
-## Progress rule
+## Debugging rule
 
-Do not continue because a topic merely exists. Continue only after the current lab’s gate passes and its evidence is saved. If a later lab fails, return to the earliest violated contract:
+When a test fails, move left until the first invariant fails:
 
-```text
-environment → discovery → simulator lifecycle → graph → schema → frame/time → rate → behavior
+```mermaid
+flowchart TD
+  Fail["Observed failure"] --> Env{"Same version, RMW, domain, seed?"}
+  Env -- no --> FixEnv["repair environment identity"]
+  Env -- yes --> Life{"timeline and execution active?"}
+  Life -- no --> FixLife["repair lifecycle/graph trigger"]
+  Life -- yes --> Data{"schema, frame, time, rate valid?"}
+  Data -- no --> FixData["repair interface contract"]
+  Data -- yes --> Model{"URDF and physics credible?"}
+  Model -- no --> FixModel["repair model/parameters"]
+  Model -- yes --> Perf{"correct but slow or fragile?"}
+  Perf -- slow --> Trace["profile before optimizing"]
+  Perf -- fragile --> Bounds["review uncertainty bounds and controller"]
 ```
 
-## Shared three-terminal startup
+## Shared startup
 
 ```powershell
 $Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+# Terminal 1
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh
+# Terminal 2
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim
+# Terminal 3+
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 ```
 
-1. Terminal 1: `pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh`
-2. Terminal 2: `pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim`
-3. Terminal 3: use `... -File $Launcher ros2 ...` for CLI commands.
+Keep WSL closed while using this native-Windows contract. Labs 02–05 can use NVIDIA's shipped `Samples → ROS2 → Scenario → turtlebot_tutorial.usd`; inspect its graph rather than treating it as a black box.
 
-Run `... -File $Launcher verify` before each lab session. Keep WSL closed.
+## Completion evidence
 
-## Reference scenario
-
-Labs 02–05 use NVIDIA's shipped TurtleBot scenario when available:
-
-```text
-Isaac Sim Content Browser
-→ Isaac Sim
-→ Samples
-→ ROS2
-→ Scenario
-→ turtlebot_tutorial.usd
-```
-
-This is the fast-track baseline. Inspect its Action Graphs instead of treating the sample as magic. The labs explain each boundary and ask you to measure it.
-
-## Completion artifact
-
-When all five gates pass, create one portfolio folder containing:
-
-- saved USD stages;
-- graph screenshots;
-- version and environment manifest;
-- topic/type/QoS contract;
-- TF tree and joint-state checks;
-- watchdog log and stop-time result;
-- camera probe JSON and rate/bandwidth results;
-- rosbag metadata and replay validation;
-- a short failure-and-fix note from each lab.
-
-This is simulation-only evidence. It demonstrates simulator/ROS integration and validation discipline without claiming physical sim-to-real results.
+Save the version manifest, USD/URDF, graph screenshots, contract reports, bag metadata, parameter-sweep score, CI output, benchmark/trace, robustness matrix, and one failure→isolation→fix note per lab. This is strong simulation-engineering evidence. Without a physical robot, describe Lab 10 as simulation robustness and sim-to-real preparation—not measured sim-to-real transfer.

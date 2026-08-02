@@ -1,4 +1,4 @@
-"""Receive one sensor_msgs/Image and emit a bounded JSON contract report."""
+"""Receive multiple sensor_msgs/Image messages and emit a bounded contract report."""
 
 import argparse
 import json
@@ -6,53 +6,69 @@ import sys
 import time
 
 import rclpy
+from lab_contracts import build_image_report
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 
 
 class ImageProbe(Node):
-    def __init__(self, topic: str):
+    def __init__(self, topic: str, target_samples: int):
         super().__init__("camera_contract_probe")
-        self.message = None
+        self.target_samples = target_samples
+        self.messages = []
         self.subscription = self.create_subscription(
             Image, topic, self.on_image, qos_profile_sensor_data
         )
 
     def on_image(self, message: Image) -> None:
-        self.message = message
+        if len(self.messages) < self.target_samples:
+            self.messages.append(message)
+
+
+def normalize(message: Image) -> dict:
+    return {
+        "stamp_ns": int(message.header.stamp.sec) * 1_000_000_000 + int(message.header.stamp.nanosec),
+        "width": int(message.width),
+        "height": int(message.height),
+        "step": int(message.step),
+        "encoding": message.encoding,
+        "frame_id": message.header.frame_id,
+        "payload_bytes": len(message.data),
+    }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--topic", required=True)
     parser.add_argument("--timeout", type=float, default=10.0)
+    parser.add_argument("--samples", type=int, default=5)
     args = parser.parse_args()
+    if args.timeout <= 0.0 or args.samples < 2:
+        parser.error("--timeout must be positive and --samples must be at least 2")
 
     rclpy.init()
-    node = ImageProbe(args.topic)
+    node = ImageProbe(args.topic, args.samples)
     deadline = time.monotonic() + args.timeout
     try:
-        while node.message is None and time.monotonic() < deadline:
+        while len(node.messages) < args.samples and time.monotonic() < deadline:
             rclpy.spin_once(node, timeout_sec=0.2)
-        if node.message is None:
-            print(json.dumps({"ok": False, "topic": args.topic, "error": "timeout"}, indent=2))
+        if len(node.messages) < args.samples:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "topic": args.topic,
+                        "error": "timeout",
+                        "received": len(node.messages),
+                        "required": args.samples,
+                    },
+                    indent=2,
+                )
+            )
             sys.exit(2)
 
-        msg = node.message
-        expected_bytes = int(msg.step) * int(msg.height)
-        report = {
-            "ok": bool(msg.width and msg.height and msg.step and len(msg.data) >= expected_bytes),
-            "topic": args.topic,
-            "frame_id": msg.header.frame_id,
-            "stamp": {"sec": msg.header.stamp.sec, "nanosec": msg.header.stamp.nanosec},
-            "width": msg.width,
-            "height": msg.height,
-            "encoding": msg.encoding,
-            "step": msg.step,
-            "payload_bytes": len(msg.data),
-            "minimum_expected_bytes": expected_bytes,
-        }
+        report = build_image_report(args.topic, [normalize(message) for message in node.messages])
         print(json.dumps(report, indent=2))
         if not report["ok"]:
             sys.exit(3)

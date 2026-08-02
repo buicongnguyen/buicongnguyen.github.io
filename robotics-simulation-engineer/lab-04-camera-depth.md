@@ -37,7 +37,7 @@ Open the same shipped scene:
 Isaac Sim > Samples > ROS2 > Scenario > turtlebot_tutorial.usd
 ```
 
-NVIDIA documents this scene as an example with multiple camera ROS topics. Inspect the camera prim, render product, and each Camera Helper rather than adding duplicate publishers.
+NVIDIA documents this scene as an example with multiple camera ROS topics. Its `/World/Camera_1` and `/World/Camera_2` cameras are stationary world cameras; a robot-mounted camera is a different frame-tree exercise. Inspect the camera prim, render product, and each Camera Helper rather than adding duplicate publishers.
 
 If building manually, add a camera to the robot, then use the ROS 2 camera publishing shortcut/helper. Each Camera Helper publishes one data type, so RGB, depth, point cloud, and CameraInfo may require separate helper nodes.
 
@@ -63,7 +63,7 @@ Expected uncompressed image type: `sensor_msgs/msg/Image`.
 ## Step 3 — run a bounded payload probe
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --timeout 15
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15
 ```
 
 The JSON report must show:
@@ -76,7 +76,7 @@ step > 0
 payload_bytes >= step * height
 non-empty encoding
 non-empty optical frame_id
-timestamp advances with /clock
+five timestamps strictly increase in simulation time
 ```
 
 Run it again for a depth Image topic after discovering the real name. Record the depth encoding and units from the official annotator/reference; do not infer metric units from the numeric range alone.
@@ -96,7 +96,7 @@ Check:
 1. Image and associated CameraInfo use the same `frame_id`.
 2. Image width/height match CameraInfo width/height.
 3. CameraInfo intrinsic matrix corresponds to the current resolution.
-4. TF contains the camera optical frame under the intended robot link.
+4. TF places a stationary camera under the world frame, or a robot-mounted camera under the intended robot link; record which mounting contract you chose.
 5. A known object moved right/left in the scene moves consistently in the image.
 6. A known-distance target produces plausible depth before noise is added.
 

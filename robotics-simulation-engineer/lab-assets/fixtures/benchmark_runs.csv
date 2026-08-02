@@ -1,0 +1,6 @@
+run,sim_seconds,wall_seconds,frames,gpu_memory_mb,notes
+b01,30,25.0,1500,7200,baseline
+b02,30,24.6,1500,7210,baseline
+b03,30,24.8,1500,7190,baseline
+b04,30,24.7,1500,7205,baseline
+b05,30,24.9,1500,7195,baseline

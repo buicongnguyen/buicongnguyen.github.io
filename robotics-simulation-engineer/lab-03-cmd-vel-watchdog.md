@@ -43,9 +43,11 @@ The functional chain should contain:
 1. On Playback Tick or equivalent execution owner.
 2. ROS2 Context using domain 0 from the environment.
 3. ROS2 Subscribe Twist with topic `/cmd_vel`.
-4. Differential Controller converting linear/angular body velocity to left/right wheel velocities.
-5. Make Array with token values `wheel_left_joint` and `wheel_right_joint`.
-6. Articulation Controller targeting the TurtleBot articulation.
+4. Scale To/From Stage Unit converting linear speed into stage units.
+5. Break 3-Vector extracting linear X and angular Z.
+6. Differential Controller converting body velocity to left/right wheel velocities.
+7. Make Array with token values `wheel_left_joint` and `wheel_right_joint`.
+8. Articulation Controller targeting the TurtleBot articulation.
 
 Record the actual wheel joint names from `/joint_states`; never assume names when importing a different robot.
 
@@ -57,6 +59,8 @@ Use a bounded one-shot forward command:
 $Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
 ```
+
+The simulator-side controller is ticked every playback frame and retains the subscriber’s last Twist. Therefore “one-shot” limits network publication, not robot motion duration. Send the explicit zero below immediately after observing a short movement.
 
 Then stop explicitly:
 
@@ -120,7 +124,7 @@ t_wheel_target_changes
 t_joint_velocity_near_zero
 ```
 
-The watchdog gate concerns `t_publish_safe - t_last_receive`. The robot’s stopping distance additionally depends on actuator dynamics, friction, controller gains, and physics timestep.
+The watchdog uses an explicit steady-clock timer and monotonic receipt timestamps, so its timeout does not depend on `/clock`. The watchdog gate concerns `t_publish_safe - t_last_receive`. The robot’s stopping distance additionally depends on actuator dynamics, friction, controller gains, and physics timestep. This is an educational application-level guard, not a certified emergency stop.
 
 ## Debugging decisions
 
