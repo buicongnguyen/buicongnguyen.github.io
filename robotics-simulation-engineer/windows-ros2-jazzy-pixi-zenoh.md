@@ -3,6 +3,7 @@
 This is the reproducible native-Windows setup for this workstation. It keeps ROS 2 Jazzy, its build tools, NVIDIA interfaces, and Zenoh inside a Pixi environment instead of mixing them with Conda, WSL, or a global ROS installation.
 
 - Public architecture and switching guide: <https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-dual-mode.html>
+- Practical Lab 01–05 learning path: <https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-labs.html>
 - Detailed GUI Clock reproduction lab: <https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html>
 - GUI Clock lab Markdown: <https://github.com/buicongnguyen/buicongnguyen.github.io/blob/main/robotics-simulation-engineer/isaac-sim-gui-clock-test.md>
 - NVIDIA platform instructions: <https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html>

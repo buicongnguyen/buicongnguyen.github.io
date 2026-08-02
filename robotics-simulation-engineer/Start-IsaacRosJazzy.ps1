@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet("verify", "build", "check", "zenoh", "sim", "headless", "ros2", "shell")]
+    [ValidateSet("verify", "build", "check", "zenoh", "sim", "headless", "ros2", "python", "shell")]
     [string]$Action = "verify",
 
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -53,6 +53,7 @@ switch ($Action) {
         Write-Host "PASS: Jazzy, Zenoh, and NVIDIA custom interfaces load in a clean process." -ForegroundColor Green
     }
     "ros2" { Invoke-Pixi run ros2 @ActionArguments }
+    "python" { Invoke-Pixi run python @ActionArguments }
     "shell" { Invoke-Pixi shell }
     default { Invoke-Pixi run $Action @ActionArguments }
 }

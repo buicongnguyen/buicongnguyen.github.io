@@ -16,7 +16,7 @@
         ["04", "Architecture and debugging", "robotics-simulation-engineer/architecture.html"],
         ["05", "Reasoning and code flow", "robotics-simulation-engineer/reasoning.html"],
         ["06", "ROS 2 dual-mode setup", "robotics-simulation-engineer/ros2-dual-mode.html"],
-        ["07", "GUI clock reproduction", "robotics-simulation-engineer/isaac-sim-gui-clock-test.html"],
+        ["07", "ROS 2 practical labs 01–05", "robotics-simulation-engineer/ros2-labs.html"],
         ["08", "Deep resource route", "robotics-simulation-engineer/resources.html"],
         ["09", "Assessment and mastery", "robotics-simulation-engineer/practice.html"],
         ["10", "External course catalog", "robotics-simulation-engineer/course-catalog.html"],

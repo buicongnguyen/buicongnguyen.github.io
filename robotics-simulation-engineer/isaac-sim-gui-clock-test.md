@@ -10,6 +10,8 @@ Isaac Sim timeline → OmniGraph tick → simulation-time reader
 It does **not** use WSL 2. Keep WSL closed so a second ROS graph cannot confuse the result.
 
 - Live illustrated lab: <https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html>
+- Five-lab learning path: <https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-labs.html>
+- Next after this gate: [Lab 02 — Joint States, TF, and Odometry](lab-02-joint-states-tf.md)
 - [NVIDIA ROS 2 Clock tutorial](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_clock.html)
 - [NVIDIA Windows/Pixi setup](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
 - [ROS 2 topic inspection](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
@@ -245,3 +247,7 @@ clock:
 ```
 
 That proves the runtime and bridge. The GUI lab adds the saved Action Graph, lifecycle observations, screenshot, and rate evidence needed for a portfolio-quality reproduction.
+
+## Next lesson
+
+After this lab’s gate passes, continue to [Lab 02 — TurtleBot Joint States, TF, and Odometry](lab-02-joint-states-tf.md). Do not skip the Clock gate: every later state, command, image, and bag depends on explicit simulation-time ownership.
