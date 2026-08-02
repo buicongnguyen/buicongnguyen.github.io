@@ -14,6 +14,8 @@ It does **not** use WSL 2. Keep WSL closed so a second ROS graph cannot confuse 
 - Next after this gate: [Lab 02 — Joint States, TF, and Odometry](lab-02-joint-states-tf.md)
 - [NVIDIA ROS 2 Clock tutorial](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_clock.html)
 - [NVIDIA Windows/Pixi setup](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
+- [NVIDIA Isaac Sim 6.0.1 ROS 2 tutorial index](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html)
 - [ROS 2 topic inspection](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
 
 ## What this test proves

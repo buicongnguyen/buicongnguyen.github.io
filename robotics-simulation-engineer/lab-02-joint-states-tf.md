@@ -5,6 +5,8 @@
 - **Pass:** joint arrays are structurally valid, TF is connected and acyclic, timestamps advance in simulation time, and odometry uses the declared `odom → base_link` relationship.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-02-joint-states-tf.html>
+- [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
 - [NVIDIA TF and odometry tutorial](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_tf.html)
 - [Isaac Sim 6.0 OmniGraph migration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/migration_guides/isaac_sim_6_0/ros2_omnigraph_migration.html)
 

@@ -5,6 +5,8 @@
 - **Pass:** fresh commands move the robot in the expected direction and stopping `/cmd_vel_raw` produces zero `/cmd_vel` within the declared timeout plus one publish period.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-03-cmd-vel-watchdog.html>
+- [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
 - [NVIDIA Driving TurtleBot with ROS 2](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_drive_turtlebot.html)
 - Downloadable watchdog: [lab-assets/cmd_vel_watchdog.py](lab-assets/cmd_vel_watchdog.py)
 

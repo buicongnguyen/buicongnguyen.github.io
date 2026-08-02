@@ -5,6 +5,8 @@
 - **Pass:** rosbag metadata contains the declared topics/types and replay reproduces observable message/schema/frame/timestamp analysis with Isaac Sim stopped.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-05-rosbag-validation.html>
+- [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
 - [ROS 2 Jazzy command-line tools](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Command-Line-Tools.html)
 - [ROS 2 replay testing](https://docs.ros.org/en/jazzy/p/replay_testing/)
 

@@ -5,6 +5,8 @@
 - **Pass:** at least one RGB or depth Image message passes the supplied probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-04-camera-depth.html>
+- [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
+- [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
 - [NVIDIA ROS 2 Cameras](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera.html)
 - [NVIDIA Publishing Camera Data](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera_publishing.html)
 - Downloadable probe: [lab-assets/camera_probe.py](lab-assets/camera_probe.py)
