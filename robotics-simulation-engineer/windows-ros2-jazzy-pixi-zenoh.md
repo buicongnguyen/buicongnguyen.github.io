@@ -3,6 +3,8 @@
 This is the reproducible native-Windows setup for this workstation. It keeps ROS 2 Jazzy, its build tools, NVIDIA interfaces, and Zenoh inside a Pixi environment instead of mixing them with Conda, WSL, or a global ROS installation.
 
 - Public architecture and switching guide: <https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-dual-mode.html>
+- Detailed GUI Clock reproduction lab: <https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html>
+- GUI Clock lab Markdown: <https://github.com/buicongnguyen/buicongnguyen.github.io/blob/main/robotics-simulation-engineer/isaac-sim-gui-clock-test.md>
 - NVIDIA platform instructions: <https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html>
 - NVIDIA ROS workspaces: <https://github.com/isaac-sim/IsaacSim-ros_workspaces>
 - ROS 2 Jazzy tutorials: <https://docs.ros.org/en/jazzy/Tutorials.html>
@@ -20,7 +22,7 @@ This is the reproducible native-Windows setup for this workstation. It keeps ROS
 | Custom interfaces | `isaac_ros2_messages` resolves from the built `install` tree |
 | Discovery | `rmw_zenohd.exe` launched; a ROS CLI process connected successfully |
 | Disk used by workspace | approximately 28.6 GB; total free-space reduction was approximately 31 GB including caches |
-| Remaining manual gate | accept NVIDIA's Omniverse EULA when `check` or `sim` first prompts |
+| EULA gate | accepted by the user; compatibility and simulator launches now proceed |
 
 The upstream manifest emits a deprecation warning for `[system-requirements]`, and some packages emit CMake/setuptools warnings. They did not fail the installation or build.
 
@@ -104,6 +106,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher check
 Read NVIDIA's Omniverse license prompt and type `Yes` only if you accept it. The automated installation deliberately stopped at this legal-acceptance boundary.
 
 ## Normal three-terminal workflow
+
+For the complete GUI procedure—including graph architecture, exact acceptance checks, lifecycle testing, evidence, and boundary-by-boundary debugging—use [Reproduce the Isaac Sim GUI → ROS 2 Clock Test on Windows](isaac-sim-gui-clock-test.md).
 
 Define the launcher separately in each fresh PowerShell terminal.
 

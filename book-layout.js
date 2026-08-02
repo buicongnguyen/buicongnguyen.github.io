@@ -16,29 +16,30 @@
         ["04", "Architecture and debugging", "robotics-simulation-engineer/architecture.html"],
         ["05", "Reasoning and code flow", "robotics-simulation-engineer/reasoning.html"],
         ["06", "ROS 2 dual-mode setup", "robotics-simulation-engineer/ros2-dual-mode.html"],
-        ["07", "Deep resource route", "robotics-simulation-engineer/resources.html"],
-        ["08", "Assessment and mastery", "robotics-simulation-engineer/practice.html"],
-        ["09", "External course catalog", "robotics-simulation-engineer/course-catalog.html"],
-        ["10", "Executable labs", "labs/index.html"]
+        ["07", "GUI clock reproduction", "robotics-simulation-engineer/isaac-sim-gui-clock-test.html"],
+        ["08", "Deep resource route", "robotics-simulation-engineer/resources.html"],
+        ["09", "Assessment and mastery", "robotics-simulation-engineer/practice.html"],
+        ["10", "External course catalog", "robotics-simulation-engineer/course-catalog.html"],
+        ["11", "Executable labs", "labs/index.html"]
       ]
     },
     {
       title: "NPU engineering",
       items: [
-        ["11", "Three-course map", "npu-courses/index.html"],
-        ["12", "Architecture and memory", "npu-courses/architecture.html"],
-        ["13", "Compiler IR and lowering", "npu-courses/compiler.html"],
-        ["14", "Quantization and runtime", "npu-courses/deployment.html"],
-        ["15", "NPU reference and practice", "npu-practice.html"]
+        ["12", "Three-course map", "npu-courses/index.html"],
+        ["13", "Architecture and memory", "npu-courses/architecture.html"],
+        ["14", "Compiler IR and lowering", "npu-courses/compiler.html"],
+        ["15", "Quantization and runtime", "npu-courses/deployment.html"],
+        ["16", "NPU reference and practice", "npu-practice.html"]
       ]
     },
     {
       title: "Core systems practice",
       items: [
-        ["16", "Practice library", "interview-practice.html"],
-        ["17", "Deep learning", "deep-learning-practice.html"],
-        ["18", "Operating systems", "os-practice.html"],
-        ["19", "Embedded systems", "embedded-practice.html"]
+        ["17", "Practice library", "interview-practice.html"],
+        ["18", "Deep learning", "deep-learning-practice.html"],
+        ["19", "Operating systems", "os-practice.html"],
+        ["20", "Embedded systems", "embedded-practice.html"]
       ]
     }
   ];

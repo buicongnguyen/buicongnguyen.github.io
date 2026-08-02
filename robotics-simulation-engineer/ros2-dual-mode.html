@@ -91,8 +91,8 @@
         <article class="run-step"><span>5</span><div><h3>Resolve and build</h3><p>Let Pixi own ROS, compilers, CMake, colcon, packages, and activation.</p></div></article>
         <article class="run-step"><span>6</span><div><h3>Start three terminals</h3><p>Router first, simulator second, CLI/test node third.</p></div></article>
       </div>
-      <div class="callout"><strong>Installed and tested · 3 August 2026:</strong> NVIDIA workspace commit <code>dd3eeede7912755996a18f4884285d9f50843f79</code>; environment installed; 16 packages built; Jazzy, Zenoh, and <code>isaac_ros2_messages</code> verified; Zenoh router and ROS CLI smoke test passed. The final Isaac compatibility run is waiting for the user to accept NVIDIA’s EULA.</div>
-      <div class="hero-actions"><a class="button" href="https://github.com/buicongnguyen/buicongnguyen.github.io/blob/main/robotics-simulation-engineer/windows-ros2-jazzy-pixi-zenoh.md">Open the Markdown runbook</a><a class="button secondary" href="Start-IsaacRosJazzy.ps1">Download the clean launcher</a></div>
+      <div class="callout"><strong>Installed and tested · 3 August 2026:</strong> NVIDIA workspace commit <code>dd3eeede7912755996a18f4884285d9f50843f79</code>; environment installed; 16 packages built; EULA accepted; Jazzy, Zenoh, and <code>isaac_ros2_messages</code> verified; Isaac Sim 6.0.1 launched; Zenoh discovery passed; and the bounded Clock bridge test delivered simulation time to a separate Windows ROS CLI.</div>
+      <div class="hero-actions"><a class="button" href="isaac-sim-gui-clock-test.html">Run the GUI Clock lab</a><a class="button secondary" href="https://github.com/buicongnguyen/buicongnguyen.github.io/blob/main/robotics-simulation-engineer/windows-ros2-jazzy-pixi-zenoh.md">Open setup Markdown</a><a class="button secondary" href="Start-IsaacRosJazzy.ps1">Download the clean launcher</a></div>
       <h3>Installation commands</h3>
       <pre class="local-command"><code># PowerShell — run once
 winget install prefix-dev.pixi
@@ -117,6 +117,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 # First interactive GPU/runtime check: read and accept NVIDIA's EULA yourself
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher check</code></pre>
       <h3>Normal launch sequence</h3>
+      <p class="section-note">For exact GUI clicks, graph-node reasoning, lifecycle checks, expected output, and portfolio evidence, follow the <a href="isaac-sim-gui-clock-test.html"><strong>illustrated GUI Clock lab</strong></a>.</p>
       <div class="terminal-sequence" role="group" aria-label="Three terminal Windows launch sequence">
         <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh</code></pre><small>Keep running.</small></article>
