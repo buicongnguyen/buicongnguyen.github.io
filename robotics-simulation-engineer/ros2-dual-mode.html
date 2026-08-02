@@ -84,13 +84,15 @@
     <section id="windows-mode" class="section">
       <div class="section-heading"><p class="eyebrow">Mode B · primary</p><h2>Native Windows ROS 2 Jazzy with Pixi and Zenoh</h2><p class="section-note">Use a clean Command Prompt or PowerShell with no manually sourced ROS installation. Keep the workspace path short.</p></div>
       <div class="step-grid">
-        <article class="run-step"><span>1</span><div><h3>Verify prerequisites</h3><p>This PC has Git and Visual Studio 2022 Desktop C++ tools. Pixi was not installed at the last audit.</p></div></article>
-        <article class="run-step"><span>2</span><div><h3>Install Pixi</h3><p>Install once, then open a new terminal so <code>pixi</code> is on <code>PATH</code>.</p></div></article>
+        <article class="run-step"><span>1</span><div><h3>Verify prerequisites</h3><p>This PC has Git, Visual Studio 2022 Desktop C++ tools, Isaac Sim 6.0.1, and enough disk space.</p></div></article>
+        <article class="run-step"><span>2</span><div><h3>Install Pixi</h3><p>Pixi 0.75.0 is installed. Use the clean launcher below so vendor DLLs cannot contaminate ROS.</p></div></article>
         <article class="run-step"><span>3</span><div><h3>Clone with submodules</h3><p>Use NVIDIA’s short recommended root to avoid Windows path-length failures.</p></div></article>
         <article class="run-step"><span>4</span><div><h3>Pin the local simulator</h3><p>Change only <code>isaac_sim_package_path</code> under <code>[target.win.activation]</code>.</p></div></article>
         <article class="run-step"><span>5</span><div><h3>Resolve and build</h3><p>Let Pixi own ROS, compilers, CMake, colcon, packages, and activation.</p></div></article>
         <article class="run-step"><span>6</span><div><h3>Start three terminals</h3><p>Router first, simulator second, CLI/test node third.</p></div></article>
       </div>
+      <div class="callout"><strong>Installed and tested · 3 August 2026:</strong> NVIDIA workspace commit <code>dd3eeede7912755996a18f4884285d9f50843f79</code>; environment installed; 16 packages built; Jazzy, Zenoh, and <code>isaac_ros2_messages</code> verified; Zenoh router and ROS CLI smoke test passed. The final Isaac compatibility run is waiting for the user to accept NVIDIA’s EULA.</div>
+      <div class="hero-actions"><a class="button" href="https://github.com/buicongnguyen/buicongnguyen.github.io/blob/main/robotics-simulation-engineer/windows-ros2-jazzy-pixi-zenoh.md">Open the Markdown runbook</a><a class="button secondary" href="Start-IsaacRosJazzy.ps1">Download the clean launcher</a></div>
       <h3>Installation commands</h3>
       <pre class="local-command"><code># PowerShell — run once
 winget install prefix-dev.pixi
@@ -107,19 +109,26 @@ env = { isaac_sim_package_path = "C:\\isaacsim-6.0.1", PATH = "%isaac_sim_packag
 git submodule update --init --recursive
 pixi install
 pixi run build</code></pre>
+      <h3>This PC: start through the clean launcher</h3>
+      <p>The inherited Miniconda and Cognex VisionPro DLL directories break <code>rclpy</code>. The launcher removes them only for its child process; it does not uninstall or globally modify either product.</p>
+      <pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+
+# First interactive GPU/runtime check: read and accept NVIDIA's EULA yourself
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher check</code></pre>
       <h3>Normal launch sequence</h3>
       <div class="terminal-sequence" role="group" aria-label="Three terminal Windows launch sequence">
-        <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
-pixi run zenoh</code></pre><small>Keep running.</small></article>
-        <article><span>Terminal 2</span><strong>Simulator</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
-pixi run sim</code></pre><small>Add the ROS clock graph and press Play.</small></article>
-        <article><span>Terminal 3</span><strong>Proof</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
-pixi run ros2 topic list
-pixi run ros2 topic echo /clock</code></pre><small>Expect <code>/clock</code>, <code>/parameter_events</code>, and <code>/rosout</code>.</small></article>
+        <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh</code></pre><small>Keep running.</small></article>
+        <article><span>Terminal 2</span><strong>Simulator</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim</code></pre><small>Add the ROS clock graph and press Play.</small></article>
+        <article><span>Terminal 3</span><strong>Proof</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /clock</code></pre><small>Expect <code>/clock</code>, <code>/parameter_events</code>, and <code>/rosout</code>.</small></article>
       </div>
       <h3>Identity check</h3>
-      <pre class="local-command"><code>pixi run python -c "import os; print({k: os.getenv(k) for k in ['ROS_DISTRO','RMW_IMPLEMENTATION','ROS_DOMAIN_ID','isaac_sim_package_path']})"
-pixi run ros2 doctor --report</code></pre>
+      <pre class="local-command"><code>pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 doctor --report</code></pre>
       <div class="gate"><strong>Mode B gate:</strong> identity reports Jazzy + <code>rmw_zenoh_cpp</code> + the intended domain; the router is alive; <code>/clock</code> advances; a bounded publisher/subscriber test exits successfully.</div>
     </section>
 
