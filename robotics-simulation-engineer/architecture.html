@@ -28,6 +28,7 @@
       <a href="course-catalog.html">External courses</a>
       <a href="index.html">Course</a>
       <a href="reasoning.html">Reasoning</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="#architecture">Big picture</a>
       <a href="#focus">Focus</a>
       <a href="#flow">Data flow</a>
@@ -403,11 +404,11 @@
             <div><strong>Ranked hypotheses</strong><span>Wrong interpreter; API/version mix; extension/config mismatch; first asset fetch; driver/memory; stale global state.</span></div>
             <div><strong>Regression artifact</strong><span>Environment probe plus a bounded headless smoke test with identity JSON and exit code.</span></div>
           </div>
-          <pre class="local-command"><code>Set-Location C:\isaacsim
+          <pre class="local-command"><code>Set-Location C:\isaacsim-6.0.1
 Get-Content .\VERSION
 .\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
 .\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py --no-window</code></pre>
-          <p class="playbook-note"><strong>One-variable experiment:</strong> run the same minimal script with <code>C:\isaacsim\python.bat</code> and the failing interpreter. Do not compare a project script with hello-world and call the interpreter causal.</p>
+          <p class="playbook-note"><strong>One-variable experiment:</strong> run the same minimal script with <code>C:\isaacsim-6.0.1\python.bat</code> and the failing interpreter. Do not compare a project script with hello-world and call the interpreter causal.</p>
         </details>
 
         <details class="playbook">
@@ -455,7 +456,7 @@ Get-Content .\VERSION
             <div><strong>Ranked hypotheses</strong><span>Sensor model; coordinate convention; timestamp; bridge environment; QoS; TF direction; publish rate; consumer; timeout.</span></div>
             <div><strong>Regression artifact</strong><span>Reference scene, raw sample/message pair, TF snapshot, QoS graph, latency distribution, watchdog test.</span></div>
           </div>
-          <pre class="local-command"><code>Set-Location C:\isaacsim
+          <pre class="local-command"><code>Set-Location C:\isaacsim-6.0.1
 cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples\api\isaacsim.ros2.bridge\clock.py"</code></pre>
           <p class="playbook-note"><strong>One-variable sequence:</strong> first change only the consumer to simulation time; then restore it and change only the extrinsic. Confirm the actual local topics—this example’s names are not proof of a standard <code>/clock</code> contract.</p>
         </details>
@@ -469,7 +470,7 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
             <div><strong>Ranked hypotheses</strong><span>Rendering/sensors; sync/readback; Python loop; reset/allocation; collision complexity; CPU bottleneck; memory pressure; logging.</span></div>
             <div><strong>Regression artifact</strong><span>RTF and step-latency percentiles, scaling curve, VRAM/RAM, profiler capture, and correctness comparison.</span></div>
           </div>
-          <pre class="local-command"><code>Set-Location C:\isaacsim
+          <pre class="local-command"><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1 --backend-type JSONFileMetrics
 .\python.bat .\standalone_examples\benchmarks\benchmark_camera.py --num-cameras 1 --resolution 640 480 --num-frames 120 --backend-type JSONFileMetrics
 nvidia-smi</code></pre>
@@ -547,6 +548,7 @@ Known limits:</code></pre>
       <div class="reference-map">
         <a href="index.html#curriculum">Detailed course modules<span>Definitions, prerequisites, labs, failure modes, evidence gates, and direct references.</span></a>
         <a href="reasoning.html">Reasoning &amp; code flow atlas<span>Thinking flow, execution order, data lineage, sequences, state machines, and causal decisions.</span></a>
+        <a href="ros2-dual-mode.html">ROS 2 dual-mode runbook<span>Windows Jazzy/Zenoh and WSL Humble/Fast DDS setup, switching, verification, and isolation.</span></a>
         <a href="resources.html">Deep resource route<span>Official documentation and university material annotated with what to extract and build.</span></a>
         <a href="practice.html#scenarios">Diagnostic practice<span>Failure scenarios that exercise ranked hypotheses and discriminating experiments.</span></a>
         <a href="index.html#capstone">Capstone architecture<span>Apply the complete loop to a contact-calibrated manipulation validation pipeline.</span></a>
@@ -567,6 +569,7 @@ Known limits:</code></pre>
     <div class="footer-links">
       <a href="index.html">Course</a>
       <a href="reasoning.html">Reasoning &amp; code flows</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="resources.html">Deep resources</a>
       <a href="practice.html">Practice</a>
       <a href="../index.html">Portfolio</a>
@@ -574,6 +577,6 @@ Known limits:</code></pre>
       <a href="#main">Back to top</a>
     </div>
   </footer>
-  <script src="../book-layout.js?v=20260730-1"></script>
+  <script src="../book-layout.js?v=20260802-1"></script>
 </body>
 </html>

@@ -19,6 +19,7 @@
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture</a>
       <a href="reasoning.html">Reasoning</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="resources.html">Resources</a>
       <a href="practice.html">Practice</a>
     </nav>
@@ -76,7 +77,7 @@
             <tr><th>2 · Model audit</th><td><a href="index.html#module-2">URDF-to-USD engineering</a></td><td><a href="../labs/index.html#urdf">URDF graph lab</a></td><td><a href="architecture.html#architecture">Model/frame layer</a></td><td><a href="practice.html?objective=models-frames">Models/frames</a></td><td>Validator report with planted-fault proof</td></tr>
             <tr><th>3 · Scene lifecycle</th><td><a href="index.html#module-3">Isaac/PhysX pipeline</a></td><td><a href="../labs/index.html#determinism">Reset regression lab</a></td><td><a href="reasoning.html#code-flow">Executable lifecycle</a></td><td><a href="practice.html?objective=simulators-performance">Simulation/performance</a></td><td>GUI/headless parity and 100 clean resets</td></tr>
             <tr><th>4 · Control</th><td><a href="index.html#module-4">Measured response</a></td><td><a href="../labs/readiness/step_response.py">Step-response lab</a></td><td><a href="architecture.html#playbooks">Control playbook</a></td><td><a href="practice.html?objective=dynamics-contact-control">Dynamics/control</a></td><td>Response report across payloads and rates</td></tr>
-            <tr><th>5 · ROS and sensors</th><td><a href="index.html#module-5">ROS 2 integration</a></td><td><a href="../labs/index.html#readiness">ROS contract task</a></td><td><a href="reasoning.html#runtime-sequence">Time/data sequence</a></td><td><a href="practice.html?objective=ros2-sensors-pipelines">ROS/sensors</a></td><td>Topic, QoS, TF, clock, rate, and replay contract</td></tr>
+            <tr><th>5 · ROS and sensors</th><td><a href="index.html#module-5">ROS 2 integration</a></td><td><a href="ros2-dual-mode.html">Dual-mode setup and switch</a></td><td><a href="reasoning.html#runtime-sequence">Time/data sequence</a></td><td><a href="practice.html?objective=ros2-sensors-pipelines">ROS/sensors</a></td><td>Mode identity, topic, QoS, TF, clock, rate, and replay contract</td></tr>
             <tr><th>6 · Evaluation</th><td><a href="index.html#module-6">Task evaluation pipeline</a></td><td><a href="../labs/index.html#benchmark">Evaluation harness</a></td><td><a href="reasoning.html#state-machines">Episode state machine</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Debugging/CI</a></td><td>100 frozen scenarios regenerated from raw rows</td></tr>
             <tr><th>7 · Calibration</th><td><a href="index.html#module-7">Identification and transfer</a></td><td><a href="../labs/index.html#calibration">Calibration sweep</a></td><td><a href="reasoning.html#decision-logic">Causal proof</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Held-out improvement beyond repeat variability</td></tr>
             <tr><th>8 · Robustness</th><td><a href="index.html#module-8">Randomization and Lab</a></td><td><a href="../labs/index.html#benchmark">Ablation harness</a></td><td><a href="architecture.html#evidence">Evidence packet</a></td><td><a href="practice.html?objective=sim-to-real-debugging-ci">Transfer/CI</a></td><td>Range provenance and uncertainty ablation</td></tr>
@@ -99,6 +100,6 @@
       <p class="flow-loop-note"><strong>Below 80% or gate failed:</strong> return to the exact weak objective and repeat Learn → Perform → Diagnose. <strong>Gate passed:</strong> schedule retention and advance.</p>
     </section>
   </main>
-  <script src="../book-layout.js?v=20260730-1"></script>
+  <script src="../book-layout.js?v=20260802-1"></script>
 </body>
 </html>

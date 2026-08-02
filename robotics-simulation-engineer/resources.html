@@ -24,6 +24,7 @@
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture</a>
       <a href="reasoning.html">Reasoning</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="index.html#fast-track">14-day track</a>
       <a href="index.html#definitions">Definitions</a>
       <a href="#route">Resource route</a>
@@ -66,20 +67,20 @@
 
     <section id="platform-pin" class="section">
       <div class="section-heading">
-        <p class="eyebrow">Version gate · reviewed 16 July 2026</p>
+        <p class="eyebrow">Version gate · reviewed 2 August 2026</p>
         <h2>Pin the platform before copying examples</h2>
         <p class="section-note">The installed runtime and current stable documentation are close, but not identical. Record the exact version used by every result.</p>
       </div>
       <div class="machine-grid">
         <article class="card">
-          <span class="status-badge">Local runtime</span>
-          <h3>Isaac Sim 6.0 RC</h3>
-          <p><code>C:\isaacsim</code> contains <code>6.0.0-rc.59</code>, Kit 110.1.1, and bundled Python 3.12.13. Run its <code>python.bat</code>, not Miniconda or <code>py</code>.</p>
+          <span class="status-badge">Local runtime · verified</span>
+          <h3>Isaac Sim 6.0.1</h3>
+          <p><code>C:\isaacsim-6.0.1</code> contains <code>6.0.1-rc.7+release.42383.32955d8d.gl</code>. Its headless Vulkan, CUDA/Warp, PhysX, sensor, and shutdown smoke test passed.</p>
         </article>
         <article class="card">
-          <span class="status-badge gap">Stable reference</span>
-          <h3>Isaac Sim 6.0.1</h3>
-          <p>The current stable release is 6.0.1. Use its docs for discovery, but verify each API/example against the installed RC before adopting it.</p>
+          <span class="status-badge">Runtime rule</span>
+          <h3>Use the bundled Python</h3>
+          <p>Run <code>C:\isaacsim-6.0.1\python.bat</code>, not Miniconda or <code>py</code>. Pin the simulator, ROS mode, middleware, and workspace commit in every result.</p>
         </article>
         <article class="card">
           <span class="status-badge gap">Pin if added</span>
@@ -97,9 +98,10 @@
         <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/requirements.html">System requirements</a>
         <a class="button secondary" href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html">Current Isaac Lab quickstart</a>
         <a class="button secondary" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">Windows ROS 2 setup</a>
+        <a class="button" href="ros2-dual-mode.html">Local dual-mode runbook</a>
       </div>
       <pre class="local-command"><code># Known-good starting shell for this PC
-Set-Location C:\isaacsim
+Set-Location C:\isaacsim-6.0.1
 .\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
 .\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py
 .\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1</code></pre>
@@ -430,11 +432,12 @@ Set-Location C:\isaacsim
       <a href="index.html">Course</a>
       <a href="architecture.html">Architecture &amp; debugging</a>
       <a href="reasoning.html">Reasoning &amp; code flows</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="practice.html">Practice</a>
       <a href="../index.html">Portfolio</a>
       <a href="#main">Back to top</a>
     </div>
   </footer>
-  <script src="../book-layout.js?v=20260730-1"></script>
+  <script src="../book-layout.js?v=20260802-1"></script>
 </body>
 </html>

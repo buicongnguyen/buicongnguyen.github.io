@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Detailed setup, switching, verification, and debugging for Isaac Sim 6.0.1 with native Windows ROS 2 Jazzy/Pixi/Zenoh and WSL2 ROS 2 Humble/Fast DDS.">
+  <meta name="theme-color" content="#087968">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Isaac Sim Dual ROS 2 Mode Guide">
+  <meta property="og:description" content="Operate native Windows Jazzy and WSL2 Humble safely on one Isaac Sim workstation.">
+  <meta property="og:url" content="https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-dual-mode.html">
+  <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-dual-mode.html">
+  <title>Isaac Sim Dual ROS 2 Mode Guide | Robotics Simulation Engineering</title>
+  <link rel="stylesheet" href="course.css?v=20260713-2">
+  <link rel="stylesheet" href="ros2-dual-mode.css?v=20260802-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260730-1">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dual-mode guide</a>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Robotics Simulation Engineering course home">
+      <img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt="">
+      <span>Robotics Simulation Engineering</span>
+    </a>
+    <nav aria-label="Dual ROS mode navigation">
+      <a href="dashboard.html">Dashboard</a><a href="index.html">Course</a><a href="architecture.html">Architecture</a>
+      <a href="#decision">Choose</a><a href="#windows-mode">Windows mode</a><a href="#wsl-mode">WSL mode</a>
+      <a href="#switch">Switch</a><a href="#debug">Debug</a><a href="#references">References</a><a href="../index.html">Portfolio</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero dual-hero" aria-labelledby="guide-title">
+      <div>
+        <p class="eyebrow">One simulator · two isolated ROS environments · one explicit switch</p>
+        <h1 id="guide-title">Isaac Sim + ROS 2 on Windows and WSL2</h1>
+        <p class="lede">Use native Windows Jazzy/Pixi/Zenoh for the supported portfolio pipeline. Keep WSL2 Humble/Fast DDS as a compatibility and Linux-learning lane. Never blend environment variables, middleware, workspaces, or live graphs. Stop, clear, select, launch, and prove one mode at a time.</p>
+        <div class="hero-actions">
+          <a class="button" href="#windows-mode">Set up recommended mode</a>
+          <a class="button secondary" href="#switch">Open switch runbook</a>
+          <a class="button secondary" href="#debug">Open debug ladder</a>
+          <a class="button secondary" href="index.html#module-5">Return to Module 5</a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="Known machine baseline">
+        <p class="eyebrow">This PC · verified 2 August 2026</p>
+        <dl>
+          <div><dt>Isaac Sim</dt><dd>6.0.1</dd></div><div><dt>Install</dt><dd><code>C:\isaacsim-6.0.1</code></dd></div>
+          <div><dt>GPU</dt><dd>RTX 4080 SUPER</dd></div><div><dt>Driver</dt><dd>591.86</dd></div>
+          <div><dt>Primary ROS</dt><dd>Jazzy / Windows</dd></div><div><dt>Secondary ROS</dt><dd>Humble / WSL2</dd></div>
+        </dl>
+        <p class="section-note">The headless 6.0.1 startup test initialized Vulkan, CUDA/Warp, PhysX, sensors, and shut down cleanly.</p>
+      </aside>
+    </section>
+
+    <section id="mental-model" class="section">
+      <div class="section-heading"><p class="eyebrow">Mental model</p><h2>ROS 2 is a launch-time dependency graph, not a global toggle</h2><p class="section-note">Isaac Sim loads a ROS backend and middleware into its process. The launching terminal determines which libraries and variables it inherits. A fresh process is the isolation boundary.</p></div>
+      <div class="dual-architecture" role="img" aria-label="Two separate ROS modes connect to Isaac Sim in separate sessions">
+        <article class="mode-lane recommended"><span class="mode-label">Mode B · recommended</span><h3>Native Windows</h3><div class="flow-node">Pixi environment</div><span class="flow-arrow">↓ activates</span><div class="flow-node">ROS 2 Jazzy + Zenoh</div><span class="flow-arrow">↕ one ROS graph</span><div class="flow-node strong">Isaac Sim 6.0.1</div><p>Supported Windows tutorials, custom interfaces, short paths, no WSL DDS forwarding.</p></article>
+        <div class="mode-divider" aria-hidden="true"><span>OR</span><strong>Never merge sessions</strong></div>
+        <article class="mode-lane compatibility"><span class="mode-label">Mode A · compatibility</span><h3>Windows + WSL2</h3><div class="flow-node">WSL Ubuntu 22.04</div><span class="flow-arrow">↓ sources</span><div class="flow-node">ROS 2 Humble + Fast DDS</div><span class="flow-arrow">↕ Windows/WSL network</span><div class="flow-node strong">Isaac Sim Humble bridge</div><p>Good for Linux ROS learning and common interfaces; Windows-to-WSL workflow is deprecated.</p></article>
+      </div>
+      <div class="callout"><strong>No inherent Humble/Jazzy conflict:</strong> they live in different OS environments. Conflict appears only when a process inherits the wrong distribution, RMW, library path, workspace overlay, domain ID, or a second graph remains active.</div>
+    </section>
+
+    <section id="decision" class="section">
+      <div class="section-heading"><p class="eyebrow">Decision logic</p><h2>Choose the mode from the evidence you need</h2></div>
+      <div class="decision-tree" role="group" aria-label="Decision tree for choosing a ROS mode">
+        <div class="decision-question"><strong>What must this session prove?</strong></div>
+        <div class="decision-branches">
+          <article><span>Portfolio, custom messages, least network friction</span><strong>Windows Jazzy + Pixi + Zenoh</strong><a href="#windows-mode">Use Mode B</a></article>
+          <article><span>Linux ROS CLI, Humble compatibility, WSL practice</span><strong>WSL2 Humble + Fast DDS</strong><a href="#wsl-mode">Use Mode A</a></article>
+          <article><span>Both behaviours must be compared</span><strong>Two sessions and two manifests</strong><a href="#switch">Use the switch protocol</a></article>
+        </div>
+      </div>
+      <div class="table-wrap"><table><caption>Mode contract</caption><thead><tr><th>Boundary</th><th>Mode B · Windows native</th><th>Mode A · WSL2</th></tr></thead><tbody>
+        <tr><th scope="row">ROS distribution</th><td>Jazzy</td><td>Humble</td></tr><tr><th scope="row">Middleware</th><td><code>rmw_zenoh_cpp</code></td><td><code>rmw_fastrtps_cpp</code></td></tr>
+        <tr><th scope="row">Workspace</th><td><code>C:\IsaacSim-ros_workspaces\jazzy_ws</code></td><td><code>~/IsaacSim-ros_workspaces/humble_ws</code></td></tr>
+        <tr><th scope="row">Simulator launcher</th><td><code>pixi run sim</code></td><td>Configured <code>isaac-sim.bat</code></td></tr><tr><th scope="row">Discovery</th><td>Explicit Zenoh router</td><td>Fast DDS across Windows/WSL</td></tr>
+        <tr><th scope="row">Custom interfaces</th><td>Supported</td><td>Unsupported in deprecated WSL route</td></tr><tr><th scope="row">Primary use</th><td>Capstone, CI, portfolio</td><td>Linux learning and compatibility</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="windows-mode" class="section">
+      <div class="section-heading"><p class="eyebrow">Mode B · primary</p><h2>Native Windows ROS 2 Jazzy with Pixi and Zenoh</h2><p class="section-note">Use a clean Command Prompt or PowerShell with no manually sourced ROS installation. Keep the workspace path short.</p></div>
+      <div class="step-grid">
+        <article class="run-step"><span>1</span><div><h3>Verify prerequisites</h3><p>This PC has Git and Visual Studio 2022 Desktop C++ tools. Pixi was not installed at the last audit.</p></div></article>
+        <article class="run-step"><span>2</span><div><h3>Install Pixi</h3><p>Install once, then open a new terminal so <code>pixi</code> is on <code>PATH</code>.</p></div></article>
+        <article class="run-step"><span>3</span><div><h3>Clone with submodules</h3><p>Use NVIDIA’s short recommended root to avoid Windows path-length failures.</p></div></article>
+        <article class="run-step"><span>4</span><div><h3>Pin the local simulator</h3><p>Change only <code>isaac_sim_package_path</code> under <code>[target.win.activation]</code>.</p></div></article>
+        <article class="run-step"><span>5</span><div><h3>Resolve and build</h3><p>Let Pixi own ROS, compilers, CMake, colcon, packages, and activation.</p></div></article>
+        <article class="run-step"><span>6</span><div><h3>Start three terminals</h3><p>Router first, simulator second, CLI/test node third.</p></div></article>
+      </div>
+      <h3>Installation commands</h3>
+      <pre class="local-command"><code># PowerShell — run once
+winget install prefix-dev.pixi
+
+# Open a NEW terminal
+git clone --recurse-submodules https://github.com/isaac-sim/IsaacSim-ros_workspaces.git C:\IsaacSim-ros_workspaces
+Set-Location C:\IsaacSim-ros_workspaces\jazzy_ws</code></pre>
+      <h3>Point Pixi at the verified local simulator</h3>
+      <p>Open <code>C:\IsaacSim-ros_workspaces\jazzy_ws\pixi.toml</code>. Preserve the existing <code>PATH</code> entry and set:</p>
+      <pre class="local-command"><code>[target.win.activation]
+scripts = ["install\\setup.bat"]
+env = { isaac_sim_package_path = "C:\\isaacsim-6.0.1", PATH = "%isaac_sim_package_path%\\kit\\python\\lib;%PATH%" }</code></pre>
+      <pre class="local-command"><code>Set-Location C:\IsaacSim-ros_workspaces\jazzy_ws
+git submodule update --init --recursive
+pixi install
+pixi run build</code></pre>
+      <h3>Normal launch sequence</h3>
+      <div class="terminal-sequence" role="group" aria-label="Three terminal Windows launch sequence">
+        <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
+pixi run zenoh</code></pre><small>Keep running.</small></article>
+        <article><span>Terminal 2</span><strong>Simulator</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
+pixi run sim</code></pre><small>Add the ROS clock graph and press Play.</small></article>
+        <article><span>Terminal 3</span><strong>Proof</strong><pre><code>cd C:\IsaacSim-ros_workspaces\jazzy_ws
+pixi run ros2 topic list
+pixi run ros2 topic echo /clock</code></pre><small>Expect <code>/clock</code>, <code>/parameter_events</code>, and <code>/rosout</code>.</small></article>
+      </div>
+      <h3>Identity check</h3>
+      <pre class="local-command"><code>pixi run python -c "import os; print({k: os.getenv(k) for k in ['ROS_DISTRO','RMW_IMPLEMENTATION','ROS_DOMAIN_ID','isaac_sim_package_path']})"
+pixi run ros2 doctor --report</code></pre>
+      <div class="gate"><strong>Mode B gate:</strong> identity reports Jazzy + <code>rmw_zenoh_cpp</code> + the intended domain; the router is alive; <code>/clock</code> advances; a bounded publisher/subscriber test exits successfully.</div>
+    </section>
+
+    <section id="wsl-mode" class="section">
+      <div class="section-heading"><p class="eyebrow">Mode A · secondary</p><h2>Windows Isaac Sim with WSL2 ROS 2 Humble and Fast DDS</h2><p class="section-note">Use this lane for Linux ROS and common-interface compatibility. Treat Windows↔WSL networking as an explicit boundary.</p></div>
+      <h3>Install and verify Humble in Ubuntu 22.04</h3>
+      <pre class="local-command"><code># Follow the official Humble deb-package guide first, then:
+sudo apt update
+sudo apt full-upgrade -y
+sudo apt install -y ros-humble-desktop ros-dev-tools \
+  python3-rosdep python3-colcon-common-extensions build-essential git
+
+source /opt/ros/humble/setup.bash
+ros2 doctor --report
+
+cd ~
+git clone --recurse-submodules https://github.com/isaac-sim/IsaacSim-ros_workspaces.git
+cd ~/IsaacSim-ros_workspaces/humble_ws
+rosdep install -i --from-path src --rosdistro humble -y
+colcon build --symlink-install</code></pre>
+      <h3>Launch Windows Isaac Sim with its bundled Humble backend</h3>
+      <p>Use a fresh <strong>Command Prompt</strong>, not a Pixi shell. Set every value because the local 6.0.1 script otherwise defaults to Jazzy.</p>
+      <pre class="local-command"><code>set ROS_DISTRO=humble
+set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+set ROS_DOMAIN_ID=22
+set PATH=C:\isaacsim-6.0.1\exts\isaacsim.ros2.core\humble\lib;%PATH%
+
+C:\isaacsim-6.0.1\isaac-sim.bat</code></pre>
+      <h3>Start the matching WSL graph</h3>
+      <pre class="local-command"><code>source /opt/ros/humble/setup.bash
+source ~/IsaacSim-ros_workspaces/humble_ws/install/local_setup.bash
+export ROS_DISTRO=humble
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_DOMAIN_ID=22
+
+printenv | grep -E '^(ROS_DISTRO|RMW_IMPLEMENTATION|ROS_DOMAIN_ID)='
+ros2 daemon stop
+ros2 daemon start
+ros2 topic list
+ros2 topic echo /clock</code></pre>
+      <h3>Network only after identity passes</h3>
+      <ol class="ordered-checks"><li>Confirm <code>/clock</code> exists inside Isaac Sim and the timeline is playing.</li><li>Confirm both sides use Humble, Fast DDS, and domain 22.</li><li>Record WSL IP with <code>hostname -I</code> and Windows IPv4 with <code>ipconfig /all</code>.</li><li>If discovery fails, apply NVIDIA’s administrator port-forwarding rules for 7400, 7410, and 9387.</li><li>Recheck after WSL receives a new address.</li></ol>
+      <pre class="local-command"><code># Administrator PowerShell — only if discovery fails
+$Windows_IP = "&lt;WINDOWS_IPV4&gt;"
+$WSL2_IP = "&lt;WSL2_IPV4&gt;"
+netsh interface portproxy add v4tov4 listenport=7400 listenaddress=$Windows_IP connectport=7400 connectaddress=$WSL2_IP
+netsh interface portproxy add v4tov4 listenport=7410 listenaddress=$Windows_IP connectport=7410 connectaddress=$WSL2_IP
+netsh interface portproxy add v4tov4 listenport=9387 listenaddress=$Windows_IP connectport=9387 connectaddress=$WSL2_IP</code></pre>
+      <div class="gate"><strong>Mode A gate:</strong> Isaac loads Humble/Fast DDS, WSL reports the same domain and RMW, <code>/clock</code> advances, and a WSL subscriber receives a known-rate stream without stale timestamps.</div>
+    </section>
+
+    <section id="switch" class="section">
+      <div class="section-heading"><p class="eyebrow">Switch protocol</p><h2>Stop → clear → select → launch → prove</h2><p class="section-note">A switch completes only after the old processes are gone and the new identity bundle is recorded.</p></div>
+      <div class="state-machine" role="img" aria-label="State machine for safely switching ROS modes">
+        <div class="state active"><span>S0</span><strong>One mode active</strong><small>Experiment running</small></div><div class="transition"><strong>Stop</strong><span>Save → close Isaac → stop nodes/router</span></div>
+        <div class="state neutral"><span>S1</span><strong>Quiescent</strong><small>No Isaac, Kit, ROS, or router process</small></div><div class="transition"><strong>Clear</strong><span>Close terminals → fresh shell</span></div>
+        <div class="state choice"><span>S2</span><strong>Select one contract</strong><small>Jazzy/Zenoh or Humble/Fast DDS</small></div><div class="transition"><strong>Launch</strong><span>Discovery → simulator → nodes → Play</span></div>
+        <div class="state verify"><span>S3</span><strong>Prove identity and data</strong><small>Environment → graph → clock → payload</small></div>
+      </div>
+      <div class="switch-grid">
+        <article class="card"><h3>Windows Jazzy → WSL Humble</h3><ol><li>Save manifest, rosbag, and logs.</li><li>Close Isaac, Pixi shells, and Zenoh.</li><li>Confirm no intended Kit/ROS/router process remains.</li><li>Use a fresh CMD with the Humble launcher block.</li><li>Source only Humble in Ubuntu 22.04.</li><li>Prove identity and <code>/clock</code>.</li></ol></article>
+        <article class="card"><h3>WSL Humble → Windows Jazzy</h3><ol><li>Stop WSL nodes and close Isaac.</li><li>Optionally use <code>wsl --shutdown</code> after saving work.</li><li>Close the Humble CMD.</li><li>Open three fresh Pixi terminals.</li><li>Start Zenoh, simulator, then CLI.</li><li>Prove identity and <code>/clock</code>.</li></ol></article>
+      </div>
+      <div class="callout warning"><strong>Domain IDs are defense in depth, not the primary switch.</strong> They reduce accidental discovery but cannot remove inherited library paths or workspace overlays. Fresh terminals and one simulator remain mandatory.</div>
+    </section>
+
+    <section id="data-flow" class="section">
+      <div class="section-heading"><p class="eyebrow">Data reasoning</p><h2>Debug from source truth toward the consumer</h2></div>
+      <div class="data-pipeline" role="img" aria-label="ROS data flow from Isaac truth to application decision">
+        <div><span>1</span><strong>Physics state</strong><small>Pose, joint, force</small></div><b>→</b><div><span>2</span><strong>Sensor sample</strong><small>Time and frame</small></div><b>→</b><div><span>3</span><strong>ROS bridge</strong><small>Type, topic, QoS</small></div><b>→</b><div><span>4</span><strong>Transport</strong><small>Zenoh or Fast DDS</small></div><b>→</b><div><span>5</span><strong>Consumer</strong><small>TF, callback, queue</small></div><b>→</b><div><span>6</span><strong>Decision</strong><small>Control, plan, metric</small></div>
+      </div>
+      <p class="section-note">Inspect the same sample at each boundary. Stop at the first point where value, type, time, frame, rate, or ownership becomes invalid.</p>
+    </section>
+
+    <section id="debug" class="section">
+      <div class="section-heading"><p class="eyebrow">Isolation ladder</p><h2>Diagnose the first broken contract—not the loudest symptom</h2></div>
+      <div class="debug-ladder">
+        <details open><summary>1 · Wrong identity or mixed environment</summary><p>Print distribution, RMW, domain, executable, simulator, and workspace paths. If wrong, close the terminal and relaunch; do not repair a contaminated shell variable-by-variable.</p></details>
+        <details><summary>2 · Simulator bridge not loaded</summary><p>Confirm the ROS 2 Bridge extension, backend log, clock graph, and timeline. Fix backend loading before transport.</p></details>
+        <details><summary>3 · Discovery process or transport missing</summary><p>Windows: prove Zenoh started first. WSL: prove Fast DDS and the same domain on both sides, then inspect reachability.</p></details>
+        <details><summary>4 · Topic exists but no messages arrive</summary><p>Check Play state, publisher/subscriber counts, QoS compatibility, and whether the graph executes on the intended tick.</p></details>
+        <details><summary>5 · Data arrives but is stale or wrong</summary><p>Compare simulation time, header time, wall arrival, frame ID, TF, rate, ordering, and payload with internal sensor truth.</p></details>
+        <details><summary>6 · Commands arrive but the robot does not move</summary><p>Check type, freshness, controller ownership, joint ordering, units, limits, saturation, drive mode, and actuator input.</p></details>
+      </div>
+      <div class="table-wrap"><table><caption>Fast symptom-to-layer map</caption><thead><tr><th>Symptom</th><th>First layer</th><th>First measurement</th></tr></thead><tbody>
+        <tr><td><code>ros2</code> missing</td><td>Activation</td><td><code>pixi run ros2 --help</code> or <code>which ros2</code></td></tr><tr><td>No topics</td><td>Bridge/discovery</td><td>Bridge log, router, distro/RMW/domain</td></tr>
+        <tr><td>Frozen <code>/clock</code></td><td>Lifecycle</td><td>Timeline Play and graph tick</td></tr><tr><td>Invisible only in WSL</td><td>Network</td><td>IPs, rules, firewall, Fast DDS identity</td></tr>
+        <tr><td>TF extrapolation</td><td>Time/frame</td><td>Clock, header time, buffer, frame tree</td></tr><tr><td>Jazzy package missing</td><td>Workspace</td><td>Submodules, install, build, activation</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="evidence" class="section">
+      <div class="section-heading"><p class="eyebrow">Reproducibility</p><h2>Save a mode manifest with every result</h2></div>
+      <pre class="local-command"><code>session:
+  mode: windows_jazzy_zenoh   # or wsl_humble_fastdds
+  isaac_sim_path: C:\isaacsim-6.0.1
+  isaac_sim_version: 6.0.1-rc.7+release.42383.32955d8d.gl
+  ros_distro: jazzy
+  rmw_implementation: rmw_zenoh_cpp
+  ros_domain_id: 0
+  workspace: C:\IsaacSim-ros_workspaces\jazzy_ws
+  launch_command: pixi run sim
+  discovery_command: pixi run zenoh
+  required_topics: [/clock, /joint_states, /tf, /tf_static]
+  clock_advances: true
+  notes: "Record warnings, firewall changes, commits, and measured rates."</code></pre>
+      <div class="gate"><strong>Portfolio rule:</strong> a topic list is not enough. Show advancing simulation time, schema and frames, achieved rate, command response, clean shutdown, and a repeatable launch command.</div>
+    </section>
+
+    <section id="references" class="section">
+      <div class="section-heading"><p class="eyebrow">Primary sources · reviewed 2 August 2026</p><h2>Verify upstream before changing the pin</h2></div>
+      <div class="reference-grid">
+        <article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html">ROS 2: Other Platforms</a></h3><p>Windows Pixi/Jazzy, deprecated WSL routes, workspace builds, middleware, custom-interface limits, and networking.</p></article>
+        <article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros.html">ROS 2: Default</a></h3><p>Supported distributions, internal libraries, Ubuntu 24.04/Jazzy defaults, and prerequisites.</p></article>
+        <article class="card"><span class="status-badge">Repository</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">IsaacSim ROS Workspaces</a></h3><p>Humble/Jazzy workspaces, Pixi manifest, submodules, packages, and tasks.</p></article>
+        <article class="card"><span class="status-badge">ROS</span><h3><a href="https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html">Humble on Ubuntu 22.04</a></h3><p>Official deb-package setup for the WSL lane.</p></article>
+        <article class="card"><span class="status-badge">ROS</span><h3><a href="https://docs.ros.org/en/jazzy/Tutorials.html">ROS 2 Jazzy Tutorials</a></h3><p>Nodes, topics, services, actions, QoS, TF, rosbag, and debugging.</p></article>
+        <article class="card"><span class="status-badge">NVIDIA tutorial</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_clock.html">Isaac Sim ROS 2 Clock</a></h3><p>The smallest bridge proof and foundation for simulation-time correctness.</p></article>
+      </div>
+    </section>
+  </main>
+  <footer><p>One ROS contract per process. Identity first, transport second, data third.</p><div class="footer-links"><a href="index.html">Course</a><a href="architecture.html">Architecture</a><a href="reasoning.html">Reasoning</a><a href="resources.html">Resources</a><a href="#main">Back to top</a></div></footer>
+  <script src="../book-layout.js?v=20260802-1"></script>
+</body>
+</html>

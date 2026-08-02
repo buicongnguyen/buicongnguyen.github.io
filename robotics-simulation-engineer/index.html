@@ -30,6 +30,7 @@
       <a href="#flow">Flow</a>
       <a href="architecture.html">Architecture</a>
       <a href="reasoning.html">Reasoning</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="#definitions">Definitions</a>
       <a href="#curriculum">Modules</a>
       <a href="#capstone">Capstone</a>
@@ -121,8 +122,8 @@
         </article>
         <article class="card">
           <span class="status-badge">Pin this build</span>
-          <h3>Isaac Sim 6.0 RC</h3>
-          <p><code>C:\isaacsim</code>, build <code>6.0.0-rc.59</code>, Kit 110.1.1, bundled Python 3.12.13. Record the full VERSION string in every experiment.</p>
+          <h3>Isaac Sim 6.0.1</h3>
+          <p><code>C:\isaacsim-6.0.1</code>, build <code>6.0.1-rc.7+release.42383.32955d8d.gl</code>. The RTX 4080 SUPER headless startup test passed. Record the full VERSION string in every experiment.</p>
         </article>
         <article class="card">
           <span class="status-badge gap">First gap</span>
@@ -137,7 +138,7 @@
       </div>
 
       <pre class="local-command"><code># Run Isaac labs with the bundled Python—not Miniconda Python 3.13 or py 3.14
-Set-Location C:\isaacsim
+Set-Location C:\isaacsim-6.0.1
 .\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
 .\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py
 .\python.bat .\standalone_examples\api\isaacsim.asset.importer.urdf\urdf_import.py --test
@@ -549,8 +550,8 @@ Set-Location C:\isaacsim
 
       <div class="callout">
         <strong>Version contract:</strong> local commands below were verified to exist in
-        <code>C:\isaacsim</code> build <code>6.0.0-rc.59</code>. Linked documentation follows the current stable
-        6.0.x/Isaac Lab beta route, so record any API difference instead of assuming parity. Paths containing
+        <code>C:\isaacsim-6.0.1</code> build <code>6.0.1-rc.7+release.42383.32955d8d.gl</code>. Linked documentation follows the current stable
+        6.0.x/Isaac Lab route, so record any API difference instead of assuming parity. Paths containing
         <code>experimental</code> are non-deprecated in this installation but API-unstable; NVIDIA assets may require
         network access on first use.
       </div>
@@ -606,7 +607,7 @@ Set-Location C:\isaacsim
                 <section class="module-panel">
                   <h3>Failure diagnosis</h3>
                   <ul class="diagnostic-list">
-                    <li><strong>Import/startup error:</strong> confirm <code>C:\isaacsim\python.bat</code> and create <code>SimulationApp</code> before Omniverse imports.</li>
+                    <li><strong>Import/startup error:</strong> confirm <code>C:\isaacsim-6.0.1\python.bat</code> and create <code>SimulationApp</code> before Omniverse imports.</li>
                     <li><strong>100× scale error:</strong> inspect <code>metersPerUnit</code>, mesh scale, meters versus centimeters, and radians versus degrees.</li>
                     <li><strong>Same seed differs:</strong> compare manifests, RNG ownership, async order, assets, and runtime before blaming PhysX.</li>
                     <li><strong>Process hangs:</strong> reduce to initialize → bounded update/step → close; then inspect callbacks and background work.</li>
@@ -636,7 +637,7 @@ Set-Location C:\isaacsim
 
               <div class="module-command">
                 <h3>Use the installed runtime first</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 Get-Content .\VERSION
 .\isaac-sim.compatibility_check.bat --no-window --/app/quitAfter=10
 .\python.bat .\standalone_examples\api\isaacsim.simulation_app\hello_world.py --no-window
@@ -741,12 +742,12 @@ Get-Content .\VERSION
               <div class="module-command">
                 <h3>Installed examples and capstone commands</h3>
                 <pre><code># Installed local procedural reference (GUI, about 300 steps)
-C:\isaacsim\python.bat C:\isaacsim\standalone_examples\tutorials\getting_started\getting_started.py
+C:\isaacsim-6.0.1\python.bat C:\isaacsim-6.0.1\standalone_examples\tutorials\getting_started\getting_started.py
 
 # Commands you implement in the capstone repository
-C:\isaacsim\python.bat .\labs\physics\free_fall.py --dt 0.0166667 0.0083333 0.0041667
-C:\isaacsim\python.bat .\labs\physics\friction.py --mode incline-and-slide
-C:\isaacsim\python.bat .\labs\physics\pendulum.py --resolution-sweep</code></pre>
+C:\isaacsim-6.0.1\python.bat .\labs\physics\free_fall.py --dt 0.0166667 0.0083333 0.0041667
+C:\isaacsim-6.0.1\python.bat .\labs\physics\friction.py --mode incline-and-slide
+C:\isaacsim-6.0.1\python.bat .\labs\physics\pendulum.py --resolution-sweep</code></pre>
                 <p>No installed non-deprecated example performs the required analytical comparisons or exports the evidence; those scripts are core portfolio work.</p>
               </div>
 
@@ -852,7 +853,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
 
               <div class="module-command">
                 <h3>Verified offline importer exercises</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\api\isaacsim.asset.importer.urdf\urdf_import.py --test
 .\python.bat .\standalone_examples\api\isaacsim.asset.importer.mjcf\mjcf_import.py --test
 .\python.bat .\standalone_examples\api\isaacsim.asset.transformer\run_asset_transformer.py --test</code></pre>
@@ -955,7 +956,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
 
               <div class="module-command">
                 <h3>Installed scene-pipeline exercises</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\tutorials\getting_started\getting_started.py
 .\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\add_cubes.py --test
 .\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\simulation_callbacks.py --test</code></pre>
@@ -1058,7 +1059,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
 
               <div class="module-command">
                 <h3>Installed control references</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\api\isaacsim.core.experimental.api\control_frankas.py --test --device cuda
 .\python.bat .\standalone_examples\api\isaacsim.core.experimental.actuators\newton_actuators_python_example.py
 .\python.bat .\standalone_examples\api\isaacsim.core.experimental.actuators\newton_actuators_python_example.py --non-ideal</code></pre>
@@ -1166,7 +1167,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
 
               <div class="module-command">
                 <h3>Verified local bridge and sensor exercises</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples\api\isaacsim.ros2.bridge\clock.py"
 .\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\imu_sensor.py --test
 .\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\contact_sensor.py --test</code></pre>
@@ -1177,6 +1178,7 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
                 <h3>Just-in-time references</h3>
                 <div class="module-reference-grid">
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/install_ros_other_platforms.html"><span class="ref-type">Official · install first</span><strong>ROS 2 on Windows</strong><small>Current native Jazzy/Pixi environment route for Isaac Sim integration.</small></a>
+                  <a class="module-reference" href="ros2-dual-mode.html"><span class="ref-type">Local · execute</span><strong>Windows/WSL dual-mode runbook</strong><small>Exact Jazzy/Zenoh and Humble/Fast DDS setup, switching, verification, and debugging for this PC.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/ros2_reference_architecture.html"><span class="ref-type">Official · architecture</span><strong>ROS 2 Reference Architecture</strong><small>Asset, sensor, bridge/OmniGraph, command, and software-stack boundaries.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_clock.html"><span class="ref-type">Official · Lab 1</span><strong>ROS 2 Clock</strong><small><code>/clock</code>, <code>use_sim_time</code>, and simulation-time behavior.</small></a>
                   <a class="module-reference" href="https://docs.isaacsim.omniverse.nvidia.com/latest/ros2_tutorials/tutorial_ros2_publish_rate.html"><span class="ref-type">Official · timing</span><strong>ROS 2 Publish Rates</strong><small>Physics, timeline, run-loop, sensor tick, and achieved wall-rate relationships in Isaac Sim 6.0.</small></a>
@@ -1272,7 +1274,7 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
 
               <div class="module-command">
                 <h3>Installed task and recorder references</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\api\isaacsim.robot.experimental.manipulators\franka\pick_place.py --test --device cuda
 .\python.bat .\standalone_examples\api\isaacsim.replicator.episode_recorder\episode_record_replay.py --output_dir "$env:TEMP\isaac_episode" --record_steps 120 --replay --test</code></pre>
                 <p><code>pick_place.py</code> uses the experimental manipulator API; <code>episode_record_replay.py</code> is a non-deprecated packaged RC reference but imports deprecated core utilities. Run it as shipped—do not copy those imports into portfolio code. Both hard-code GUI mode and may fetch Franka assets.</p>
@@ -1375,7 +1377,7 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
 
               <div class="module-command">
                 <h3>Installed standalone randomization exercise</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\api\isaacsim.replicator.experimental.domain_randomization\randomization_demo.py --num-envs 4 --reset-interval 50 --max-frames 200</code></pre>
                 <p>This bounded experimental example hard-codes GUI mode, randomizes gravity, forces, joint state, and poses across clones, and may fetch Franka assets. It does not supply uncertainty provenance, friction/mass/latency ablations, split isolation, or evaluation statistics.</p>
               </div>
@@ -1479,9 +1481,9 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
                 <h3>Implementation boundary on this installation</h3>
                 <pre><code># No supported standalone calibration example is installed.
 # Build and run your project scripts with Isaac's Python:
-C:\isaacsim\python.bat .\experiments\calibration\generate_hidden_truth.py
-C:\isaacsim\python.bat .\experiments\calibration\fit_parameters.py --config .\configs\calibration.yaml
-C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pre>
+C:\isaacsim-6.0.1\python.bat .\experiments\calibration\generate_hidden_truth.py
+C:\isaacsim-6.0.1\python.bat .\experiments\calibration\fit_parameters.py --config .\configs\calibration.yaml
+C:\isaacsim-6.0.1\python.bat .\experiments\calibration\evaluate_held_out.py</code></pre>
                 <p>Gain Tuner is UI-oriented. Bundled MuJoCo includes the official <code>mujoco.sysid</code> API, but there is no ready Isaac/PhysX calibration CLI. Trace collection, fitting, uncertainty, and held-out evaluation remain portfolio code you must author.</p>
               </div>
 
@@ -1583,7 +1585,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
 
               <div class="module-command">
                 <h3>Installed benchmark references</h3>
-                <pre><code>Set-Location C:\isaacsim
+                <pre><code>Set-Location C:\isaacsim-6.0.1
 .\python.bat .\standalone_examples\benchmarks\benchmark_core_world.py --num-envs 1 --backend-type JSONFileMetrics
 .\python.bat .\standalone_examples\benchmarks\benchmark_camera.py --num-cameras 1 --resolution 640 480 --num-frames 120 --backend-type JSONFileMetrics
 .\python.bat .\run_tests.py --dry-run --output "$env:TEMP\isaac_test_report.xml"</code></pre>
@@ -1781,7 +1783,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
       <div class="sim-grid">
         <article class="card">
           <span class="number">Pipeline bullet</span>
-          <p>Built a config-driven Isaac Sim 6.0 RC Franka pick-and-place validation pipeline with seeded reset, contact/effort logging, and ROS 2 clock/TF/joint/sensor contracts; reproduced <code>[successes]/[episodes]</code> nominal outcomes from one command.</p>
+          <p>Built a config-driven Isaac Sim 6.0.1 Franka pick-and-place validation pipeline with seeded reset, contact/effort logging, and ROS 2 clock/TF/joint/sensor contracts; reproduced <code>[successes]/[episodes]</code> nominal outcomes from one command.</p>
         </article>
         <article class="card">
           <span class="number">Fidelity bullet</span>
@@ -1900,6 +1902,7 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
     <div class="footer-links">
       <a href="architecture.html">Architecture &amp; debugging</a>
       <a href="reasoning.html">Reasoning &amp; code flows</a>
+      <a href="ros2-dual-mode.html">ROS switch guide</a>
       <a href="resources.html">Deep resources</a>
       <a href="practice.html">Practice</a>
       <a href="../index.html">Portfolio</a>
@@ -1909,6 +1912,6 @@ C:\isaacsim\python.bat .\experiments\calibration\evaluate_held_out.py</code></pr
   </footer>
 
   <script src="course.js"></script>
-  <script src="../book-layout.js?v=20260730-1"></script>
+  <script src="../book-layout.js?v=20260802-1"></script>
 </body>
 </html>
