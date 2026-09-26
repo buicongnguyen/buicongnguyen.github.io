@@ -121,10 +121,9 @@ launcher: robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
 <li>Select <code>/ROS2Clock</code> in the Stage tree and inspect it.</li>
 </ol>
 <pre class="mermaid">flowchart LR
-    Tick[&quot;On Playback Tick&quot;] --&gt;|execution| Read[&quot;Isaac Read Simulation Time&quot;]
-    Tick --&gt;|execution| Pub[&quot;ROS 2 Publish Clock&quot;]
+    Tick[&quot;On Playback Tick&quot;] --&gt;|execution| Pub[&quot;ROS 2 Publish Clock&quot;]
     Ctx[&quot;ROS 2 Context&lt;br/&gt;domain 0&quot;] --&gt;|context| Pub
-    Read --&gt;|simulation timestamp| Pub
+    Read[&quot;Isaac Read Simulation Time&quot;] --&gt;|simulation timestamp| Pub
     Pub --&gt; Topic[&quot;/clock&lt;br/&gt;rosgraph_msgs/msg/Clock&quot;]
 </pre>
 <p>The visual layout can differ, but the contracts must exist:</p>
@@ -198,7 +197,7 @@ rosgraph_msgs/msg/Clock
 </tr>
 </tbody>
 </table></div>
-<p>The time reader defaults to monotonic time across stop/replay to prevent backward jumps. Set <code>resetOnStop=true</code> only when an experiment requires episode time to restart and all consumers tolerate the jump.</p>
+<p>In Isaac Sim 6.0.1 the time reader defaults to <code>resetOnStop=true</code>, and the Clock shortcut also sets it explicitly, so Stop → Play restarts <code>/clock</code> near zero. Set <code>resetOnStop=false</code> when time must stay monotonic across stop/replay to prevent backward jumps; keep <code>true</code> only when an experiment requires episode time to restart and all consumers tolerate the jump.</p>
 <h2 id="step-6-save-evidence">Step 6 — save evidence</h2>
 <p>Save the stage as <code>$Run\ros2_clock.usd</code>, and save beside it:</p>
 <ul>

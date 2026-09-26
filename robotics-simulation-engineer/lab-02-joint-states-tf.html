@@ -38,7 +38,7 @@
     Art[&quot;TurtleBot articulation&quot;] --&gt; Read[&quot;Isaac Read Joint State&quot;]
     Read --&gt; Joint[&quot;ROS 2 Publish Joint State&quot;] --&gt; JS[&quot;/joint_states&quot;]
     Art --&gt; Compute[&quot;Isaac Compute Transform Tree&quot;]
-    Compute --&gt; PubTF[&quot;ROS 2 Publish Transform Tree&quot;] --&gt; TF[&quot;/tf + /tf_static&quot;]
+    Compute --&gt; PubTF[&quot;ROS 2 Publish Transform Tree&quot;] --&gt; TF[&quot;/tf&quot;]
     Art --&gt; Odom[&quot;Isaac Compute Odometry&quot;] --&gt; PubO[&quot;ROS 2 Publish Odometry&quot;] --&gt; OT[&quot;/odom&quot;]
     Odom --&gt; RawTF[&quot;ROS 2 Publish Raw Transform Tree&quot;] --&gt; OTF[&quot;odom → base_link&quot;]
     Clock[&quot;simulation timestamp&quot;] --&gt; Joint
@@ -91,6 +91,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
 </tbody>
 </table></div>
 <p>Feed Isaac Read Simulation Time into every publisher timestamp. The odometry message does not create the corresponding TF edge by itself; the Raw Transform Tree publisher owns that edge.</p>
+<p>One Publish Transform Tree node publishes to one topic (<code>topicName</code>, default <code>tf</code>). <code>staticPublisher</code> only switches it to latched static QoS, so <code>/tf_static</code> needs a second node with <code>staticPublisher</code> enabled and <code>topicName</code> set to <code>tf_static</code>.</p>
 <p>Robot-wide state graphs belong at the robot root. For the shipped processed TurtleBot, NVIDIA documents the main robot prim as <code>/World/tb3_burger_processed</code> and the articulation root under <code>Geometry/base_footprint/base_link</code>. Verify the actual stage before copying a path.</p>
 <h2 id="step-4-inspect-the-ros-contract">Step 4 — inspect the ROS contract</h2>
 <pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t

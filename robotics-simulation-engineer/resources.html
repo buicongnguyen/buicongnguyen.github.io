@@ -85,7 +85,7 @@
         <article class="card">
           <span class="status-badge gap">Pin if added</span>
           <h3>Isaac Lab: pin the chosen revision</h3>
-          <p>The maintained <code>main</code> documentation now covers Isaac Sim 6 workflows and Python 3.12. Select a compatible release or commit, record it in the manifest, and check the local RC before adding Lab to the core project.</p>
+          <p>The maintained <code>main</code> documentation (Isaac Lab 2.3.x) still installs Isaac Sim 5.x with Python 3.11; the <code>develop</code> documentation targets Isaac Sim 6.1 with Python 3.12. Select a compatible release or commit, record it in the manifest, and check the local RC before adding Lab to the core project.</p>
         </article>
         <article class="card">
           <span class="status-badge gap">Install by Day 6</span>
@@ -240,7 +240,7 @@ Set-Location C:\isaacsim-6.0.1
             <article class="resource-item">
               <div class="resource-meta"><span>Control lab</span><span>30 minutes</span></div>
               <h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup_tutorials/joint_tuning.html">Tuning Joint Drive Gains</a></h3>
-              <p><strong>Extract:</strong> drive types, stiffness, damping, step response, sinusoidal response, effort limits, and payload dependence.</p>
+              <p><strong>Extract:</strong> drive types, stiffness, damping, step response, sinusoidal response, effort limits, and stress-test stability.</p>
               <p><strong>Build:</strong> scripted step/chirp tests with overshoot, settling time, RMSE, and peak effort.</p>
               <p><strong>Stop when:</strong> the gain manifest passes the declared test for three payloads.</p>
             </article>
@@ -399,7 +399,7 @@ Set-Location C:\isaacsim-6.0.1
             <article class="resource-item">
               <div class="resource-meta"><span>Gazebo</span><span>Reference</span></div>
               <h3><a href="https://gazebosim.org/docs/harmonic/ros2_integration/">Gazebo Harmonic ROS 2 Integration</a></h3>
-              <p><strong>Extract:</strong> SDF/world model, transport bridge, simulation clock, sensors, TF, QoS, and ros2_control integration.</p>
+              <p><strong>Extract:</strong> SDF/world model, ros_gz_bridge topic mapping, sensor topics, TF, QoS overrides, and ROS 2 Simulation Interfaces. Clock bridging and ros2_control are documented separately.</p>
               <p><strong>Build:</strong> make one SDF model obey the same topic/frame/time contract as the Isaac version.</p>
               <p><strong>Stop when:</strong> the parity test has one question, one metric, and one conclusion.</p>
             </article>

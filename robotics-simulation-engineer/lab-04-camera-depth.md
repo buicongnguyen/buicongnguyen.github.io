@@ -2,7 +2,7 @@
 
 - **Prerequisite:** Lab 03 command watchdog gate passes.
 - **Goal:** publish perception data whose schema, optical frame, acquisition timestamp, cadence, and payload can be defended.
-- **Pass:** at least one RGB or depth Image message passes the supplied probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.
+- **Pass:** at least one RGB or depth Image topic passes the supplied multi-sample probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-04-camera-depth.html>
 - [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)

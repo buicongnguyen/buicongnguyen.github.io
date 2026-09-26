@@ -128,12 +128,13 @@
 <p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>. The bag goes inside this attempt's run folder; <code>ros2 bag record</code> creates the directory itself and refuses to overwrite an existing one.</p>
 <pre><code class="language-powershell">$Bag = &quot;$Run\lab05_bag&quot;
 </code></pre>
+<p>The recorder, replay, and observer terminals in Steps 3–8 each start without these variables. Set the session variables and this same <code>$Bag</code> line in each one. Both are fixed paths, not timestamps, so every terminal points at the same bag.</p>
 <p>Check all required topics and types before recording:</p>
 <pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 </code></pre>
 <h2 id="step-3-record-one-controlled-episode">Step 3 — record one controlled episode</h2>
 <p>In a dedicated terminal:</p>
-<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path &quot;$Assets\rosbag_qos_overrides.yaml&quot; /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path &quot;$Assets\rosbag_qos_overrides.yaml&quot; --topics /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 </code></pre>
 <p>Recording <code>/cmd_vel_raw</code> as well as <code>/cmd_vel</code> lets the checker measure stale-to-zero latency instead of only seeing that a zero happened.</p>
 <p>While recording:</p>
@@ -174,7 +175,7 @@ Get-ChildItem -LiteralPath $Bag
 </ol>
 <pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_states --verbose
 </code></pre>
-<p>The publisher count should be zero before replay. This prevents recorded and live data from interleaving.</p>
+<p>The publisher count should be zero before replay; if no node uses the topic any more, <code>ros2 topic info</code> instead prints <code>Unknown topic '/joint_states'</code> and exits nonzero, which also confirms no live publisher. This prevents recorded and live data from interleaving.</p>
 <h2 id="step-7-replay-and-validate-consumers-in-separate-terminals">Step 7 — replay and validate consumers in separate terminals</h2>
 <p>Replay terminal:</p>
 <pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag play $Bag --qos-profile-overrides-path &quot;$Assets\rosbag_qos_overrides.yaml&quot; --topics /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info

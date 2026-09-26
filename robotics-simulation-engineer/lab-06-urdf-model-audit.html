@@ -113,7 +113,7 @@
 <p>Faults 1–4 must fail. Faults 5 and 6 are reported as review warnings. Restore the original before continuing. A validator that never fails is not evidence. <code>tests/test_lab_tools.py</code> encodes each of these faults, so CI proves the auditor can still fail.</p>
 <p>Fault 6 is not hypothetical. An earlier version of this fixture had the wheel's axial moment on <code>iyy</code> and a 4% error in the base <code>iyy</code>, and the earlier auditor passed it because it only checked positive-definiteness.</p>
 <h2 id="step-3-record-import-choices-before-clicking-import">Step 3 — record import choices before clicking Import</h2>
-<p>In Isaac Sim choose <strong>File → Import</strong>, select the URDF, and write an import manifest:</p>
+<p>In Isaac Sim choose <strong>File → Import</strong>, select the URDF, and write an import manifest. In 6.0.1 the dialog does not show drive type, joint target, or default density; those are <code>URDFImporterConfig</code> fields (<code>joint_drive_type</code>, <code>joint_target_type</code>, <code>link_density</code>) for scripted import, so record whether you set or left them unchanged:</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>

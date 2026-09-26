@@ -48,7 +48,7 @@ window.practicePageData = {
     { title: "Synchronization contract", text: "Locks protect invariants. Condition variables wait for state changes and should be used with a predicate loop." },
     { title: "Virtual memory", text: "Virtual memory hides physical placement, enforces protection, enables demand paging, and supports shared mappings." },
     { title: "Page cache", text: "Buffered file I/O usually goes through the page cache, which can improve performance but complicates durability and memory accounting." },
-    { title: "File descriptor inheritance", text: "Descriptors can survive fork and exec unless close-on-exec is set, which matters for servers and subprocess management." },
+    { title: "File descriptor inheritance", text: "Descriptors are inherited across fork and survive exec unless close-on-exec is set, which matters for servers and subprocess management." },
     { title: "Real-time concern", text: "Real-time systems optimize worst-case latency and predictability, not just average throughput." },
     { title: "Debugging rule", text: "When stuck, classify the wait: CPU-bound, blocked on I/O, blocked on a lock/futex, sleeping on a timer, or stopped by a signal." }
   ],

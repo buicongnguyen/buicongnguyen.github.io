@@ -4,7 +4,7 @@ Use this after the first ttsim smoke test. The complete editable source is maint
 
 ## Follow one value through six boundaries
 
-1. **Host program:** build TT-Metalium with `./build_metal.sh --build-type Debug` and use `gdb` to inspect buffers, programs, core ranges and runtime arguments.
+1. **Host program:** build TT-Metalium with `./build_metal.sh --build-type Debug --build-programming-examples` and use `gdb` to inspect buffers, programs, core ranges and runtime arguments.
 2. **BRISC/NCRISC data movement:** enable `TT_METAL_DPRINT_CORES=0,0`, then select one RISC with `TT_METAL_DPRINT_RISCVS=BR` or `NC`.
 3. **Circular buffers and L1:** use `debug_dump_cb`, `debug_dump_l1`, or matching `DEBUG_CHECKPOINT` calls in every active kernel on the core.
 4. **TRISC compute pipeline:** repeat small DPRINT passes for `TR0` (unpack), `TR1` (math) and `TR2` (pack). Find the last correct stage.

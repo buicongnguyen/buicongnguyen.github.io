@@ -77,6 +77,8 @@ Use the session variables from [Shared startup](ros2-labs.md#shared-startup). Th
 $Bag = "$Run\lab05_bag"
 ```
 
+The recorder, replay, and observer terminals in Steps 3–8 each start without these variables. Set the session variables and this same `$Bag` line in each one. Both are fixed paths, not timestamps, so every terminal points at the same bag.
+
 Check all required topics and types before recording:
 
 ```powershell
@@ -88,7 +90,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 In a dedicated terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "$Assets\rosbag_qos_overrides.yaml" /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "$Assets\rosbag_qos_overrides.yaml" --topics /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
 
 Recording `/cmd_vel_raw` as well as `/cmd_vel` lets the checker measure stale-to-zero latency instead of only seeing that a zero happened.
@@ -144,7 +146,7 @@ The rules live in `lab_contracts.py` and are unit-tested offline. `tests/ros/tes
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_states --verbose
 ```
 
-The publisher count should be zero before replay. This prevents recorded and live data from interleaving.
+The publisher count should be zero before replay; if no node uses the topic any more, `ros2 topic info` instead prints `Unknown topic '/joint_states'` and exits nonzero, which also confirms no live publisher. This prevents recorded and live data from interleaving.
 
 ## Step 7 — replay and validate consumers in separate terminals
 

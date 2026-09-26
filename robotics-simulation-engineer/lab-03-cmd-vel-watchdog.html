@@ -79,10 +79,12 @@
 <p>The node refuses a non-finite or non-positive <code>--timeout</code> or <code>--rate</code>. <code>nan</code> parses as a float, and every comparison with NaN is false, so a NaN timeout would never go stale.</p>
 <p>When you stop the node with <code>Ctrl+C</code>, it publishes one final zero Twist. It installs no rclpy signal handler, so the ROS context is still valid for that last publish.</p>
 <p>Terminal 4 observes the safe output:</p>
-<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /cmd_vel
+<pre><code class="language-powershell"># New terminal: set the session variables from Shared startup (ros2-labs.md) first
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /cmd_vel
 </code></pre>
 <p>Terminal 5 sends a fresh command stream:</p>
-<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub -r 10 /cmd_vel_raw geometry_msgs/msg/Twist &quot;{linear: {x: 0.2}, angular: {z: 0.0}}&quot;
+<pre><code class="language-powershell"># New terminal: set the session variables from Shared startup (ros2-labs.md) first
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub -r 10 /cmd_vel_raw geometry_msgs/msg/Twist &quot;{linear: {x: 0.2}, angular: {z: 0.0}}&quot;
 </code></pre>
 <p>The robot should move forward. Press <code>Ctrl+C</code> only in Terminal 5. Within approximately <code>0.5 s + 0.05 s</code>, the watchdog must publish zero Twist and the robot must decelerate to rest according to its joint drives and contact physics.</p>
 <h2 id="step-5-exercise-the-watchdog-state-machine">Step 5 — exercise the watchdog state machine</h2>
@@ -120,7 +122,7 @@
 </tr>
 <tr>
 <td>Pause simulator</td>
-<td>no physics progression</td>
+<td>stream stopped while paused</td>
 <td>watchdog still becomes stale on steady time; zero waits at subscriber until execution resumes</td>
 </tr>
 </tbody>
