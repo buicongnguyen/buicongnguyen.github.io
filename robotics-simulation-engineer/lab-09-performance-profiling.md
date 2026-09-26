@@ -43,15 +43,16 @@ Use this schema:
 run,sim_seconds,wall_seconds,frames,gpu_memory_mb,notes
 ```
 
-Capture at least five baseline rows. Then summarize:
+Capture at least five baseline rows in `$Run\baseline.csv`. Rehearse the tool on the supplied fixture, then summarize your own rows; the fixture only shows the report format and is never your baseline:
 
 ```powershell
 $Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
 $Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
 New-Item -ItemType Directory -Force -Path $Run | Out-Null
+C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" "$Assets\fixtures\benchmark_runs.csv"
 C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
-  "$Assets\fixtures\benchmark_runs.csv" `
-  --output "$Assets\fixtures\benchmark_baseline.json"
+  "$Run\baseline.csv" `
+  --output "$Run\baseline.json"
 ```
 
 The report includes median, 5th/95th percentiles, and RTF coefficient of variation. High variation means the benchmark is not stable enough for a small optimization claim.
@@ -85,7 +86,7 @@ Never change resolution, tick rate, collider complexity, and environment count t
 ```powershell
 C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
   "$Run\optimized.csv" `
-  --baseline "$Assets\fixtures\benchmark_baseline.json" `
+  --baseline "$Run\baseline.json" `
   --max-rtf-regression 0.05 `
   --output "$Run\optimized_report.json"
 ```

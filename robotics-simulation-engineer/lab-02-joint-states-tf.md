@@ -19,7 +19,7 @@ flowchart LR
     Art["TurtleBot articulation"] --> Read["Isaac Read Joint State"]
     Read --> Joint["ROS 2 Publish Joint State"] --> JS["/joint_states"]
     Art --> Compute["Isaac Compute Transform Tree"]
-    Compute --> PubTF["ROS 2 Publish Transform Tree"] --> TF["/tf + /tf_static"]
+    Compute --> PubTF["ROS 2 Publish Transform Tree"] --> TF["/tf"]
     Art --> Odom["Isaac Compute Odometry"] --> PubO["ROS 2 Publish Odometry"] --> OT["/odom"]
     Odom --> RawTF["ROS 2 Publish Raw Transform Tree"] --> OTF["odom → base_link"]
     Clock["simulation timestamp"] --> Joint
@@ -63,6 +63,8 @@ Isaac Sim 6.0 separates data acquisition from ROS publication. Older tutorials m
 | Isaac Compute Odometry | ROS2 Publish Raw Transform Tree | translation/orientation for the dynamic `odom → base_link` transform |
 
 Feed Isaac Read Simulation Time into every publisher timestamp. The odometry message does not create the corresponding TF edge by itself; the Raw Transform Tree publisher owns that edge.
+
+One Publish Transform Tree node publishes to one topic (`topicName`, default `tf`). `staticPublisher` only switches it to latched static QoS, so `/tf_static` needs a second node with `staticPublisher` enabled and `topicName` set to `tf_static`.
 
 Robot-wide state graphs belong at the robot root. For the shipped processed TurtleBot, NVIDIA documents the main robot prim as `/World/tb3_burger_processed` and the articulation root under `Geometry/base_footprint/base_link`. Verify the actual stage before copying a path.
 

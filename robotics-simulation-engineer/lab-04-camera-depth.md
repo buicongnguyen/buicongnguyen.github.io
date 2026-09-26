@@ -2,7 +2,7 @@
 
 - **Prerequisite:** Lab 03 command watchdog gate passes.
 - **Goal:** publish perception data whose schema, optical frame, acquisition timestamp, cadence, and payload can be defended.
-- **Pass:** at least one RGB or depth Image message passes the supplied probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.
+- **Pass:** at least one RGB or depth Image topic passes the supplied multi-sample probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-04-camera-depth.html>
 - [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
@@ -78,8 +78,10 @@ step >= width * bytes_per_pixel (step_covers_row)
 payload_bytes == step * height
 non-empty encoding
 non-empty optical frame_id
-five timestamps strictly increase in simulation time
+five timestamps strictly increase
 ```
+
+The probe checks ordering only. To show the stamps are simulation time, compare them with `/clock` while the timeline is playing.
 
 Run it again for a depth Image topic after discovering the real name. Record the depth encoding and units from the official annotator/reference; do not infer metric units from the numeric range alone.
 

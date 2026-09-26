@@ -78,6 +78,7 @@ flowchart TD
 ## Shared startup
 
 ```powershell
+# Set $Launcher in every fresh terminal before its commands
 $Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 # Terminal 1

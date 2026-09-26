@@ -148,6 +148,8 @@ ros2 doctor --report
 cd ~
 git clone --recurse-submodules https://github.com/isaac-sim/IsaacSim-ros_workspaces.git
 cd ~/IsaacSim-ros_workspaces/humble_ws
+sudo rosdep init   # first time on this Ubuntu install only
+rosdep update
 rosdep install -i --from-path src --rosdistro humble -y
 colcon build --symlink-install</code></pre>
       <h3>Launch Windows Isaac Sim with its bundled Humble backend</h3>

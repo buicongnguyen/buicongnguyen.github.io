@@ -97,7 +97,7 @@ Write one results row per scenario:
 scenario_id,success,position_error,yaw_error,stop_distance,failure_reason
 ```
 
-Missing rows are failures of experimental completeness, not silently excluded data.
+Write `success` as a number, `1` for pass and `0` for fail; the evaluator counts values `>= 0.5` as passes and rejects text such as `true`. Missing rows are failures of experimental completeness, not silently excluded data.
 
 ## Step 5 — evaluate completeness and pass rate
 

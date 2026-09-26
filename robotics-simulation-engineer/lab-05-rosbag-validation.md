@@ -67,7 +67,7 @@ required_behaviors:
 
 Do not use `ros2 bag record -a` for the primary artifact. An explicit topic list prevents accidental collection of irrelevant or sensitive topics and makes the contract reviewable.
 
-Create `lab-assets/rosbag_qos_overrides.yaml` and use it for bandwidth-heavy sensor topics and transient-local static transforms. QoS overrides are part of the experiment contract, not an afterthought.
+Use the supplied `lab-assets/rosbag_qos_overrides.yaml` for bandwidth-heavy sensor topics and transient-local static transforms. QoS overrides are part of the experiment contract, not an afterthought.
 
 ## Step 2 — prepare a bounded output directory
 
@@ -76,6 +76,14 @@ $Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Star
 $RunRoot = "C:\Users\n\source\repos\issac_sim\projects\ros2_pipeline\runs"
 $Bag = Join-Path $RunRoot ("lab05_" + (Get-Date -Format "yyyyMMdd_HHmmss"))
 New-Item -ItemType Directory -Force -Path $RunRoot | Out-Null
+Set-Content -LiteralPath (Join-Path $RunRoot "latest_bag.txt") -Value $Bag
+```
+
+Every new terminal in Steps 3–7 (recorder, replay, observer) starts without these variables. Do not rerun the timestamp line there, because it would point at a new, empty bag path; reuse the saved one instead:
+
+```powershell
+$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Bag = Get-Content -LiteralPath "C:\Users\n\source\repos\issac_sim\projects\ros2_pipeline\runs\latest_bag.txt"
 ```
 
 Check all required topics and types before recording:
@@ -89,7 +97,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 In a dedicated terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" --topics /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
 
 While recording:
@@ -131,7 +139,7 @@ If metadata is damaged after an abnormal stop, preserve the original and use `ro
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_states --verbose
 ```
 
-The publisher count should be zero before replay. This prevents recorded and live data from interleaving.
+The publisher count should be zero before replay; if no node uses the topic any more, `ros2 topic info` instead prints `Unknown topic '/joint_states'` and exits nonzero, which also confirms no live publisher. This prevents recorded and live data from interleaving.
 
 ## Step 6 — replay and validate in separate terminals
 

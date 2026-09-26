@@ -185,9 +185,12 @@ from enum import Enum, auto
 from time import perf_counter
 from isaacsim import SimulationApp        # runtime boundary
 
+args = parse_cli()                        # ordinary argparse only; no Kit imports
 app = SimulationApp({"headless": args.headless})
 
 # Import Kit/Isaac APIs only after the app exists.
+# isaacsim.core.api is deprecated since 6.0.0 (extsDeprecated); the 6.0 tutorials
+# use isaacsim.core.experimental.* + SimulationManager. Check before copying.
 from isaacsim.core.api import World
 
 class Phase(Enum):
@@ -241,6 +244,9 @@ try:
             if result.terminal:
                 phase = Phase.TERMINAL
                 break
+        else:                               # step budget spent: TIMEOUT, never success
+            result = timeout_result(state_next, cfg.max_steps)
+            phase = Phase.TERMINAL
 
         writer.finish_episode(episode, result, perf_counter() - wall_start)
         phase = Phase.FLUSHING
@@ -646,7 +652,7 @@ This still does not prove: _____________________________________.</code></pre>
       <div class="reference-grid">
         <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/introduction/workflows.html">Isaac Sim workflows<span>GUI, extension, and standalone execution semantics.</span></a>
         <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/py/source/extensions/isaacsim.simulation_app/docs/api.html">SimulationApp API<span>Runtime construction, update, lifecycle, cleanup, and exit code.</span></a>
-        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/core_api_tutorials/tutorial_core_hello_world.html">6.0 standalone Hello World<span>App-before-import ordering and the World reset/step pattern.</span></a>
+        <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/core_api_tutorials/tutorial_core_hello_world.html">6.0 standalone Hello World<span>App-before-import ordering, experimental core prims, SimulationManager callbacks, and app-update stepping.</span></a>
         <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/py/source/extensions/isaacsim.core.simulation_manager/docs/index.html">Simulation Manager<span>Play/setup/step/pause/stop lifecycle and event boundaries.</span></a>
         <a href="https://docs.isaacsim.omniverse.nvidia.com/latest/physics/simulation_fundamentals.html">Physics fundamentals<span>Timestep, stepping, contact, collision, and simulation behavior.</span></a>
         <a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/physics/new_physics_engine.html">Physics data flow<span>USD authoring, physics tensors, Fabric, and engine integration.</span></a>

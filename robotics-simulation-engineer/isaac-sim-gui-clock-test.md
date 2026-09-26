@@ -103,10 +103,9 @@ If ROS 2 menus are absent, open **Window → Extensions**, search for `isaacsim.
 
 ```mermaid
 flowchart LR
-    Tick["On Playback Tick"] -->|execution| Read["Isaac Read Simulation Time"]
-    Tick -->|execution| Pub["ROS 2 Publish Clock"]
+    Tick["On Playback Tick"] -->|execution| Pub["ROS 2 Publish Clock"]
     Ctx["ROS 2 Context<br/>domain 0"] -->|context| Pub
-    Read -->|simulation timestamp| Pub
+    Read["Isaac Read Simulation Time"] -->|simulation timestamp| Pub
     Pub --> Topic["/clock<br/>rosgraph_msgs/msg/Clock"]
 ```
 
@@ -178,7 +177,7 @@ stateDiagram-v2
 | Stop | Graph execution stops |
 | Play again | Time resumes; reset depends on `resetOnStop` |
 
-The time reader defaults to monotonic time across stop/replay to prevent backward jumps. Set `resetOnStop=true` only when an experiment requires episode time to restart and all consumers tolerate the jump.
+In Isaac Sim 6.0.1 the time reader defaults to `resetOnStop=true`, and the Clock shortcut also sets it explicitly, so Stop → Play restarts `/clock` near zero. Set `resetOnStop=false` when time must stay monotonic across stop/replay to prevent backward jumps; keep `true` only when an experiment requires episode time to restart and all consumers tolerate the jump.
 
 ## Step 6 — save evidence
 

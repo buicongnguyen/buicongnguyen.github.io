@@ -81,12 +81,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\sourc
 Terminal 4 observes the safe output:
 
 ```powershell
+$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /cmd_vel
 ```
 
 Terminal 5 sends a fresh command stream:
 
 ```powershell
+$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub -r 10 /cmd_vel_raw geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
 ```
 
@@ -110,7 +112,7 @@ Run four cases:
 | Forward | `x=0.2, z=0` at 10 Hz | robot advances; wheel signs follow model convention |
 | Turn | `x=0, z=0.5` at 10 Hz | opposite/different wheel speeds; yaw changes |
 | Stop stream | publisher terminated | zero Twist within bound |
-| Pause simulator | no physics progression | watchdog still becomes stale on steady time; zero waits at subscriber until execution resumes |
+| Pause simulator | stream stopped while paused | watchdog still becomes stale on steady time; zero waits at subscriber until execution resumes |
 
 ## Step 6 — separate command receipt from physical response
 

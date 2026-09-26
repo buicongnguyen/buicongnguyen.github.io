@@ -72,7 +72,7 @@ The first three must fail; the missing collider is reported for review. Restore 
 
 ## Step 3 — record import choices before clicking Import
 
-In Isaac Sim choose **File → Import**, select the URDF, and write an import manifest:
+In Isaac Sim choose **File → Import**, select the URDF, and write an import manifest. In 6.0.1 the dialog does not show drive type, joint target, or default density; those are `URDFImporterConfig` fields (`joint_drive_type`, `joint_target_type`, `link_density`) for scripted import, so record whether you set or left them unchanged:
 
 | Setting | Decision to record | Why it matters |
 |---|---|---|
