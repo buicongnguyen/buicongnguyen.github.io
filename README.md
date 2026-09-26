@@ -40,11 +40,13 @@ Run the dependency-light lab tests with:
 
 ```powershell
 python -m pip install -r requirements-learning.txt
-Get-ChildItem .\labs -Recurse -Filter 'test_*.py' | ForEach-Object {
-  Push-Location $_.DirectoryName
-  try { python -m pytest $_.Name -q } finally { Pop-Location }
-}
+python .\scripts\check_labs.py
 ```
+
+The runner executes each lab's tests from its own directory. Labs with a planted
+defect test the learner's file by default; the runner checks that the reference
+passes (`LAB_IMPL=solution`) and that the unrepaired file still fails. CI runs the
+same check before deploying.
 
 ## Mirrored project pages
 

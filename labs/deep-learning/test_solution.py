@@ -1,6 +1,10 @@
+import importlib
+import os
+
 import pytest
 
-from solution import train
+# The tests exercise the file you repair; LAB_IMPL=solution checks the reference.
+train = importlib.import_module(os.environ.get("LAB_IMPL", "broken_training")).train
 
 
 def test_training_converges():

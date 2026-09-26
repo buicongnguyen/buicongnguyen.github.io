@@ -2,6 +2,9 @@ import numpy as np
 
 
 def rollout(seed, steps=100):
+    # seed=None would draw fresh OS entropy and silently make the rollout nondeterministic.
+    if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)):
+        raise ValueError("seed must be an integer")
     if isinstance(steps, bool) or not isinstance(steps, (int, np.integer)) or steps <= 0:
         raise ValueError("steps must be a positive integer")
     rng = np.random.default_rng(seed)
@@ -21,8 +24,9 @@ def first_divergence(left, right, atol=1e-12, rtol=1e-12):
         raise ValueError("traces must contain numeric values") from error
     if left_values.shape != right_values.shape:
         raise ValueError("traces must have matching shapes")
-    if left_values.size == 0:
-        return None
+    # inf == inf would otherwise count as agreement and NaN as an ordinary divergence.
+    if not np.isfinite(left_values).all() or not np.isfinite(right_values).all():
+        raise ValueError("traces must contain only finite state")
     if (
         isinstance(atol, (bool, np.bool_))
         or isinstance(rtol, (bool, np.bool_))
@@ -33,5 +37,7 @@ def first_divergence(left, right, atol=1e-12, rtol=1e-12):
         or rtol < 0
     ):
         raise ValueError("tolerances must be finite and non-negative")
+    if left_values.size == 0:
+        return None
     matches = np.isclose(left_values, right_values, atol=atol, rtol=rtol, equal_nan=False)
     return None if matches.all() else int(np.flatnonzero(~matches)[0])

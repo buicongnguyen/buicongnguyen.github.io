@@ -3,6 +3,16 @@ import numpy as np
 
 
 def train(seed=7, steps=300, learning_rate=0.2):
+    # The argument checks are sound; the planted defect is in the update rule.
+    if isinstance(steps, bool) or not isinstance(steps, (int, np.integer)) or steps <= 0:
+        raise ValueError("steps must be a positive integer")
+    if (
+        isinstance(learning_rate, (bool, np.bool_))
+        or not isinstance(learning_rate, (int, float, np.integer, np.floating))
+        or not np.isfinite(learning_rate)
+        or learning_rate <= 0
+    ):
+        raise ValueError("learning_rate must be a positive finite scalar")
     rng=np.random.default_rng(seed); x=rng.normal(size=(200,2)); y=(x[:,0]+0.5*x[:,1]>0).astype(float)
     weights=np.zeros(2); bias=0.0; losses=[]
     for _ in range(steps):

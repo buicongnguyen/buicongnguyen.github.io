@@ -1,21 +1,60 @@
-from concurrent.futures import ThreadPoolExecutor
+import importlib
+import os
+import threading
+import time
+
 import pytest
 
 from broken_locking import Account
-from solution import transfer
+
+# The tests exercise the file you repair; LAB_IMPL=solution checks the reference.
+transfer = importlib.import_module(os.environ.get("LAB_IMPL", "broken_locking")).transfer
+
+
+class SlowLock:
+    """A Lock that holds briefly after each acquisition so an AB/BA order deadlocks reliably."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+
+    def acquire(self, blocking=True, timeout=-1):
+        acquired = self._lock.acquire(blocking, timeout)
+        if acquired:
+            time.sleep(0.001)
+        return acquired
+
+    def release(self):
+        self._lock.release()
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *_exc):
+        self.release()
+        return False
 
 
 def test_opposing_transfers_complete_and_conserve_balance():
     # Equal names prove that the lock order does not depend on a non-unique label.
-    left = Account("account", 1000)
-    right = Account("account", 1000)
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        futures = []
-        for _ in range(200):
-            futures.append(pool.submit(transfer, left, right, 1))
-            futures.append(pool.submit(transfer, right, left, 1))
-        for future in futures:
-            future.result(timeout=2)
+    left = Account("account", 1000, SlowLock())
+    right = Account("account", 1000, SlowLock())
+
+    def worker(source, target):
+        for _ in range(20):
+            transfer(source, target, 1)
+
+    # Daemon threads: a deadlocked run fails the test instead of hanging pytest.
+    threads = [
+        threading.Thread(target=worker, args=pair, daemon=True)
+        for pair in [(left, right), (right, left)] * 2
+    ]
+    for thread in threads:
+        thread.start()
+    deadline = time.monotonic() + 10
+    for thread in threads:
+        thread.join(max(0.0, deadline - time.monotonic()))
+    assert not any(thread.is_alive() for thread in threads), "opposing transfers deadlocked (wait-for cycle)"
     assert (left.balance, right.balance) == (1000, 1000)
     assert left.balance + right.balance == 2000
 

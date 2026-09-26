@@ -5,7 +5,7 @@
 1. Fix the seed and record baseline loss.
 2. Print parameter and gradient norms for five steps.
 3. State the expected update direction.
-4. Change one line, rerun the same data, and retain before/after curves.
+4. Repair only the update rule, rerun the same data, and retain before/after curves.
 5. Add a regression for loss and accuracy.
 
-Pass `python -m pytest test_solution.py -q`. Submit observation → invariant → discriminating check → repair → regression. The artifact is the causal diagnosis, not only the corrected line.
+Pass `python -m pytest test_solution.py -q`; the tests exercise `broken_training.py` (`LAB_IMPL=solution` runs them against the reference). Submit observation → invariant → discriminating check → repair → regression. The artifact is the causal diagnosis, not only the corrected line.

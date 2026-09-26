@@ -14,6 +14,21 @@ def test_seed_and_divergence_contract():
     assert np.isfinite(a).all()
 
 
+def test_repeated_resets_reproduce_the_reference():
+    reference = rollout(42)
+    for _ in range(100):
+        assert first_divergence(rollout(42), reference) is None
+
+
+def test_rejects_non_finite_state_and_unseeded_rollout():
+    with pytest.raises(ValueError):
+        first_divergence([0.0, float("inf")], [0.0, float("inf")])
+    with pytest.raises(ValueError):
+        first_divergence([0.0, float("nan")], [0.0, 1.0])
+    with pytest.raises(ValueError):
+        rollout(None)
+
+
 def test_rejects_invalid_lengths_shapes_and_tolerances():
     with pytest.raises(ValueError):
         rollout(42, steps=0)
