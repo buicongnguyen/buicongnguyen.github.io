@@ -21,12 +21,17 @@ button, img { -webkit-user-select: none; user-select: none; }
 img { -webkit-user-drag: none; }
 
 .app {
+  --shelf-height: 0px; --scene-height: max(170px, 30dvh);
+  min-height: calc(486px + var(--scene-height) + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom));
   position: relative; isolation: isolate; width: 100%; max-width: 520px; height: 100svh; height: 100dvh; max-height: 1060px;
   margin: 0 auto; overflow: hidden; background: var(--cream);
-  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 52px minmax(170px, 30%) 78px minmax(190px, 1fr) 40px 76px 50px;
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 52px var(--scene-height) 78px minmax(190px, 1fr) var(--shelf-height) 40px 76px 50px;
   padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 0 80px #6d2a5e55;
 }
+.app[data-shelf-unlocked=true] { --shelf-height: 52px; }
+/* Keep the zero-height shelf in the grid before it unlocks. */
+.prep-shelf[hidden] { display: flex !important; visibility: hidden; padding: 0; border: 0; overflow: hidden; }
 
 /* ------------------------------------------------------------- top bar */
 .topbar {
@@ -147,12 +152,17 @@ img { -webkit-user-drag: none; }
   background-image: repeating-linear-gradient(0deg, #ff6a5a4d 0 26px, transparent 26px 52px), repeating-linear-gradient(90deg, #ff6a5a4d 0 26px, transparent 26px 52px);
   box-shadow: inset 0 12px 16px #a0402020, inset 0 -8px 14px #a0402018;
 }
-.baskets { position: absolute; left: 6px; top: 6px; z-index: 6; display: flex; gap: 5px; }
+.baskets { position: absolute; left: 6px; right: 52px; top: 6px; z-index: 6; display: flex; gap: 5px; }
+.worktop { container-type: size; }
 .basket {
   display: flex; align-items: center; gap: 3px; min-height: 36px; padding: 2px 9px 2px 3px; border: 0; border-radius: 99px;
   font-size: 11px; font-weight: 800; background: #fffbf2; box-shadow: 0 3px 0 #e8c49a; color: var(--wood-deep);
 }
 .basket img { width: 28px; height: 28px; object-fit: contain; }
+@container (max-width: 380px) {
+  .basket span { display: none; }
+  .basket { padding: 2px 7px; }
+}
 .basket[aria-pressed=true] { background: linear-gradient(#20c2b0, var(--teal)); color: #fff; box-shadow: 0 3px 0 var(--teal-deep); }
 .coaster { position: absolute; left: 50%; top: 54%; width: 96px; height: 70px; transform: translate(-50%, -50%); border-radius: 50%;
   border: 3px dashed #ff8a6a99; display: grid; place-items: center; color: #ff8a6a88; font-size: 28px; background: #fff8ec99; }
@@ -176,6 +186,20 @@ img { -webkit-user-drag: none; }
 .pair-preview { position: absolute; z-index: 15; left: 50%; bottom: 8px; transform: translateX(-50%); padding: 6px 12px; border-radius: 99px;
   background: var(--plum); color: #fff; font-weight: 800; font-size: 12px; white-space: nowrap; pointer-events: none; box-shadow: 0 3px 0 #3a1030; }
 .tidy { position: absolute; right: 4px; top: 4px; z-index: 6; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #fffbf2; box-shadow: 0 3px 0 #e8c49a; font-size: 20px; color: var(--wood-deep); }
+
+/* -------------------------------------------------------------- prep shelf */
+.prep-shelf { display: flex; align-items: center; gap: 8px; padding: 2px 10px; background: #f7d9b8; border-top: 3px solid #d89c68; box-shadow: inset 0 -3px #d89c68; }
+.prep-toggle { flex-shrink: 0; min-width: 104px; min-height: 44px; padding: 3px 8px; border: 0; border-radius: 12px; background: var(--paper); color: var(--plum); }
+.prep-toggle strong, .prep-toggle small { display: block; }
+.prep-toggle strong { font-size: 12px; }
+.prep-toggle small { font-size: 9px; }
+.prep-toggle[aria-pressed=true] { background: var(--teal-deep); color: white; }
+.saved-cups { display: flex; gap: 6px; }
+.saved-cup { width: 44px; height: 44px; border: 2px dashed #c5906d; border-radius: 12px; background: #fff6e699; padding: 0; color: #9a684e; font-size: 22px; }
+.saved-cup[data-filled=true] { border-style: solid; border-color: var(--teal); background: var(--paper); }
+.saved-cup img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.shelf-note { font-size: 9px; line-height: 1.2; color: var(--wood-deep); }
+@container (max-width: 300px) { .basket { padding: 2px 3px; } }
 
 /* ------------------------------------------------------------- feedback */
 .feedback { display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 2px 12px; background: var(--cream); overflow: hidden; }
@@ -309,7 +333,8 @@ dialog h3 { margin: 12px 0 4px; font: 900 16px var(--round); color: var(--coral-
 /* ------------------------------------------------------------ viewports */
 @media (min-width: 700px) { .app { border-left: 3px solid #fff8; border-right: 3px solid #fff8; } }
 @media (max-height: 760px) {
-  .app { grid-template-rows: 46px minmax(150px, 28%) 68px minmax(180px, 1fr) 34px 66px 44px; }
+  .app { --scene-height: max(150px, 26dvh); min-height: calc(438px + var(--scene-height) + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom)); grid-template-rows: 46px var(--scene-height) 68px minmax(180px, 1fr) var(--shelf-height) 34px 66px 44px; }
+  .app[data-shelf-unlocked=true] { --scene-height: max(120px, 21dvh); min-height: calc(468px + var(--scene-height) + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom)); grid-template-rows: 46px var(--scene-height) 68px minmax(210px, 1fr) var(--shelf-height) 34px 66px 44px; }
   .topbar { padding: 4px 12px; }
   .wordmark h1 { font-size: 19px; }
   .portrait { width: 44px; height: 44px; }
@@ -323,7 +348,8 @@ dialog h3 { margin: 12px 0 4px; font: 900 16px var(--round); color: var(--coral-
   .feedback > small { font-size: 10px; }
 }
 @media (max-height: 620px) {
-  .app { grid-template-rows: 42px 120px 60px minmax(170px, 1fr) 28px 58px 46px; }
+  .app { min-height: calc(514px + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom)); grid-template-rows: 42px 110px 60px minmax(170px, 1fr) var(--shelf-height) 28px 58px 46px; }
+  .app[data-shelf-unlocked=true] { min-height: calc(512px + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom)); grid-template-rows: 42px 88px 60px minmax(190px, 1fr) var(--shelf-height) 28px 58px 46px; }
   .subtitle { display: none; }
   .flower { font-size: 22px; }
   .wordmark h1 { font-size: 17px; }
@@ -369,16 +395,33 @@ dialog h3 { margin: 12px 0 4px; font: 900 16px var(--round); color: var(--coral-
   .bottom-bar { gap: 4px; }
   .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-height: 460px) and (min-width: 600px) {
-  .app { max-width: 100%; grid-template-columns: 44% 56%; grid-template-rows: 46px 64px minmax(160px, 1fr) 58px; }
+@media (max-height: 460px) and (min-width: 480px) {
+  .app, .app[data-shelf-unlocked=true] { max-width: 100%; min-height: calc(338px + var(--shelf-height) + env(safe-area-inset-top) + env(safe-area-inset-bottom)); grid-template-columns: 44% 56%; grid-template-rows: 46px 64px minmax(170px, 1fr) var(--shelf-height) 58px; }
   .topbar { grid-column: 1; grid-row: 1; }
-  .scene { grid-column: 1; grid-row: 2 / 4; }
-  .chapter { grid-column: 1; grid-row: 4; }
+  .scene { grid-column: 1; grid-row: 2 / 5; }
+  .chapter { grid-column: 1; grid-row: 5; }
   .order { grid-column: 2; grid-row: 1 / 3; }
   .worktop { grid-column: 2; grid-row: 3; }
   .feedback { display: none; }
-  .bottom-bar { grid-column: 2; grid-row: 4; }
-  .ingredient { width: 84px; height: 88px; margin: -44px 0 0 -42px; }
-  .ingredient img { width: 72px; height: 72px; }
+  .prep-shelf { grid-column: 2; grid-row: 4; gap: 5px; padding-inline: 6px; }
+  .shelf-note { display: none; }
+  .bottom-bar { grid-column: 2; grid-row: 5; }
   .story-toast { top: 22%; }
+}
+@media (max-height: 460px) and (min-width: 480px) and (max-width: 700px) {
+  .topbar { gap: 4px; padding: 4px 6px; }
+  .wordmark h1 { font-size: 15px; }
+  .flower { font-size: 20px; }
+  .glow { display: none; }
+  .balance { font-size: 14px; padding-right: 6px; }
+  .icon-button { width: 30px; height: 30px; flex-shrink: 0; }
+}
+@container (max-height: 220px) {
+  .ingredient { width: 80px; height: 76px; margin: -38px 0 0 -40px; }
+  .ingredient img { width: 64px; height: 64px; }
+  .ingredient .label { font-size: 11px; padding-inline: 6px; }
+}
+@container (max-height: 200px) {
+  .ingredient { width: 74px; height: 66px; margin: -33px 0 0 -37px; }
+  .ingredient img { width: 56px; height: 56px; }
 }

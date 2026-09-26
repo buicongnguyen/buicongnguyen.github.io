@@ -22,7 +22,7 @@ function load() {
 }
 let state = load() || C.freshState();
 let busy = false, active = null, drag = null, selected = null, hint = null, focus = 0, suppress = 0, audio;
-let staffTimer, finishTimer, toastTimer;
+let staffTimer, finishTimer, toastTimer, stockTimer;
 const moments = [], toasts = [];
 const seenLetters = () => { try { return Number(localStorage.getItem(C.STORAGE + ':letters')) || 0; } catch { return 0; } };
 const welcome = C.offline(state);
@@ -106,6 +106,7 @@ function render() {
   root.dataset.busy = String(busy);
   root.dataset.golden = String(s.golden > 0);
   root.dataset.festival = String(s.festival);
+  root.dataset.shelfUnlocked = String(s.level >= 1);
   root.dataset.ready = 'true';
   q('[data-coins]').textContent = s.coins;
   const pips = q('[data-glow-pips]').children;
@@ -125,6 +126,7 @@ function render() {
   renderLine();
   renderOrder();
   renderTable();
+  renderShelf();
   renderChapter();
   q('[data-book-count]').textContent = `${Object.keys(s.discovered).length}/${C.RECIPES.length}`;
   const letters = letterEntries().length, unread = letters - seenLetters();
@@ -195,7 +197,7 @@ function renderLine() {
 }
 
 function renderOrder() {
-  const g = busy && active ? active.line[active.result.index] : state.queue[focus];
+  const g = busy && active && !active.result.stored ? active.line[active.result.index] : state.queue[focus];
   if (!g) return;
   const r = C.recipeByKey(g.key), known = guestKnown(g), rosa = g.person === 'rosa';
   q('[data-portrait]').src = sprite(g.person + '-portrait');
@@ -289,6 +291,26 @@ function renderChapter() {
   }
 }
 
+function renderShelf() {
+  q('[data-shelf]').hidden = state.level < 1;
+  const prep = q('[data-prep]');
+  prep.disabled = busy;
+  prep.setAttribute('aria-pressed', String(state.prep));
+  q('[data-prep-label]').textContent = state.prep ? 'Make ahead' : 'Serve now';
+  q('[data-prep-detail]').textContent = state.prep ? 'Tap to serve now' : 'Tap to make ahead';
+  for (const button of root.querySelectorAll('[data-stock]')) {
+    const drink = C.recipeByKey(state.stock[Number(button.dataset.stock)]);
+    button.disabled = busy || !drink;
+    button.dataset.filled = String(!!drink);
+    const img = button.querySelector('img');
+    img.hidden = !drink;
+    if (drink) img.src = sprite(drink.art);
+    button.querySelector('span').hidden = !!drink;
+    button.setAttribute('aria-label', drink ? `${drink.name}. Tap to serve; matching orders serve automatically.` : `Empty preparation space ${Number(button.dataset.stock) + 1}`);
+    button.title = drink ? drink.name : 'Save a drink for later';
+  }
+}
+
 // ------------------------------------------------------------ interaction ---
 function pickBasket(b) {
   if (busy || drag || !C.chooseBasket(state, b)) return;
@@ -335,15 +357,17 @@ function commit(idA, idB) {
   const a = state.tokens[idA], b = state.tokens[idB];
   if (!a || !b) return;
   const startA = appPoint(buttons.get(idA)), startB = appPoint(buttons.get(idB)), line = JSON.parse(JSON.stringify(state.queue));
-  const result = C.serve(state, idA, idB);
+  const result = state.prep ? C.prepare(state, idA, idB) : C.serve(state, idA, idB);
   if (!result) {
     selected = null;
     clearTarget();
     render();
-    say('Auntie Rosa is waiting for her Lantern latte.', 'Only that cup will do. Read her recipe card in the book.');
+    if (state.prep) say('Your shelf is full.', 'Tap a saved cup to serve it, or switch to Serve now.');
+    else say('Auntie Rosa is waiting for her Lantern latte.', 'Only that cup will do. Read her recipe card in the book.');
     return;
   }
   busy = true;
+  clearTimeout(stockTimer);
   active = {result, line};
   hint = null;
   selected = null;
@@ -355,6 +379,10 @@ function commit(idA, idB) {
   finishTimer = setTimeout(() => finish(result), reduced() ? 380 : 1500);
   sound('pour');
   try { mixing(a.type, b.type, startA, startB, result); } catch { effects.replaceChildren(); }
+  if (result.stored) {
+    say(`${result.name} saved for later.`, 'Matching guests get it automatically. Tap a saved cup to serve anyone.');
+    return;
+  }
   const who = C.personName(result.person);
   if (result.favorite) say(`${who}'s favorite! +${result.earned}${result.golden ? ' · golden ×2' : ''}${result.sharp ? ' · sharp eye!' : ''}`,
     result.isNew ? `New recipe: ${result.name}` : result.thanks || '');
@@ -369,7 +397,7 @@ function finish(result) {
   focus = 0;
   render();
   const arrived = q(`[data-guest="${Math.min(result.index, state.queue.length - 1)}"]`);
-  if (arrived && !reduced()) arrived.animate([{transform: 'translateX(calc(-50% + 40px))', opacity: 0}, {transform: 'translateX(-50%)', opacity: 1}], {duration: 450, easing: 'ease-out'});
+  if (!result.stored && arrived && !reduced()) arrived.animate([{transform: 'translateX(calc(-50% + 40px))', opacity: 0}, {transform: 'translateX(-50%)', opacity: 1}], {duration: 450, easing: 'ease-out'});
   sound(result.isNew ? 'new' : 'reward');
   if (result.isNew) pulse(q('[data-book]'));
   queueMoments(result.chapters);
@@ -380,11 +408,40 @@ function finish(result) {
     sound('golden');
     toast('rosa', 'Golden hour! The next 5 cups pay double.');
   }
+  scheduleStock();
+}
+
+function deliverStock(index, automatic = false) {
+  if (busy || drag || document.hidden || root.querySelector('dialog[open]')) return;
+  const start = appPoint(q(`[data-stock="${index}"]`)), line = structuredClone(state.queue);
+  const result = C.serveStock(state, index, automatic);
+  if (!result) return;
+  clearTimeout(stockTimer);
+  busy = true;
+  active = {result, line};
+  selected = null;
+  hint = null;
+  clearTarget();
+  save();
+  render();
+  finishTimer = setTimeout(() => finish(result), reduced() ? 380 : 700);
+  try { mixing(null, null, start, start, result); } catch { effects.replaceChildren(); }
+  sound('pour');
+  say(`${result.name} for ${C.personName(result.person)}. +${result.earned}`, result.favorite ? 'Ready right on time! Favorite tip included.' : 'Every saved cup earns coins.');
+}
+
+function scheduleStock() {
+  clearTimeout(stockTimer);
+  if (busy || drag || document.hidden || root.querySelector('dialog[open]') || C.stockMatch(state) < 0) return;
+  stockTimer = setTimeout(() => {
+    const index = C.stockMatch(state);
+    if (index >= 0) deliverStock(index, true);
+  }, 500);
 }
 
 function mixing(a, b, startA, startB, result) {
   effects.replaceChildren();
-  const p = appPoint(table), guest = q(`[data-guest="${result.index}"]`) || q('[data-order]'), dest = appPoint(guest);
+  const p = appPoint(table), target = result.stored ? q(`[data-stock="${result.index}"]`) : q(`[data-guest="${result.index}"]`), dest = appPoint(target || q('[data-order]'));
   const img = (name, pt, cls) => {
     const el = Object.assign(document.createElement('img'), {src: sprite(name), className: cls, alt: ''});
     el.style.left = pt.x + 'px';
@@ -393,6 +450,11 @@ function mixing(a, b, startA, startB, result) {
     return el;
   };
   if (reduced()) return;
+  if (result.fromStock) {
+    img(result.art, startA, 'fly-drink').animate([{transform: 'scale(.5)'}, {transform: `translate(${dest.x - startA.x}px,${dest.y - startA.y}px) scale(.4)`, opacity: 0}],
+      {duration: 650, fill: 'forwards', easing: 'ease-in-out'});
+    return;
+  }
   const one = img(a, startA, 'fly-prop'), two = img(b, startB, 'fly-prop');
   one.animate([{transform: 'scale(1)'}, {transform: `translate(${p.x - startA.x - 24}px,${p.y - startA.y - 14}px) rotate(-24deg) scale(.75)`, offset: .72},
     {transform: `translate(${p.x - startA.x}px,${p.y - startA.y}px) scale(.05)`, opacity: 0}], {duration: 520, fill: 'forwards', easing: 'cubic-bezier(.2,.6,.3,1)'});
@@ -415,6 +477,7 @@ function mixing(a, b, startA, startB, result) {
     spark.animate([{opacity: 0, transform: 'scale(0)'}, {opacity: 1, offset: .1}, {opacity: 0, transform: `translate(${Math.cos(ang) * 90}px,${Math.sin(ang) * 60}px) scale(.3)`}],
       {duration: 720, delay: 430, fill: 'forwards', easing: 'ease-out'});
   }
+  if (result.stored) return;
   const coins = Object.assign(document.createElement('span'), {className: 'coin-float', textContent: '+' + result.earned});
   coins.style.left = dest.x + 'px';
   coins.style.top = dest.y - 30 + 'px';
@@ -521,6 +584,7 @@ function openBook() {
       const b = C.basketFor(state, r);
       if (b && !C.onTable(state, r)) C.chooseBasket(state, b);
       hint = r.parts;
+      selected = null;
       save();
       render();
       q('[data-book-dialog]').close();
@@ -606,6 +670,7 @@ for (let i = 0; i < 4; i++) {
     if (!drag || drag.id !== i || drag.pointer !== e.pointerId) return;
     const old = drag;
     drag = null;
+    scheduleStock();
     button.dataset.lifted = 'false';
     if (!old.moved) return;
     suppress = performance.now() + 180;
@@ -625,6 +690,7 @@ for (let i = 0; i < 4; i++) {
     drag = null;
     button.dataset.lifted = 'false';
     position(button, bounded(state.tokens[i].x, state.tokens[i].y));
+    scheduleStock();
     clearTarget();
     suppress = performance.now() + 180;
   };
@@ -671,6 +737,17 @@ function scheduleStaff() {
 
 // ------------------------------------------------------------------ wiring ---
 q('[data-peek]').addEventListener('click', showPair);
+q('[data-prep]').addEventListener('click', () => {
+  if (busy || drag || state.level < 1) return;
+  state.prep = !state.prep;
+  selected = null;
+  clearTarget();
+  save();
+  render();
+  say(state.prep ? 'Make a cup for later.' : 'Back to serving your guests.', state.prep ? 'Three spaces. Matching orders serve automatically.' : 'Every drink earns coins. Favorites add a tip.');
+  scheduleStock();
+});
+for (const button of root.querySelectorAll('[data-stock]')) button.addEventListener('click', () => deliverStock(Number(button.dataset.stock)));
 q('[data-tidy]').addEventListener('click', () => {
   if (busy || drag) return;
   state.tokens.forEach((t, i) => Object.assign(t, {x: C.home[i][0], y: C.home[i][1]}));
@@ -690,14 +767,16 @@ q('[data-buy]').addEventListener('click', () => {
   scheduleStaff();
   sound('new');
   say(`${res.action}: done!`, res.level === 2 ? 'The bakery basket is open. Sora and Leo are coming by.' : res.level === 4 ? 'The garden basket is open. Noor is on her way.' :
-    res.level === 5 ? 'The lantern basket is open. Someone special is coming.' : res.level === 1 ? 'Three guests can wait in line now. Serve anyone!' : 'Mina is making coffees on her own.');
+    res.level === 5 ? 'The lantern basket is open. Someone special is coming.' : res.level === 1 ? 'Your prep shelf is open. Make ahead for the line of three!' : 'Mina is making coffees on her own.');
   queueMoments(res.chapters);
+  scheduleStock();
 });
 q('[data-book]').addEventListener('click', openBook);
 q('[data-chapter-open]').addEventListener('click', () => (C.chapterProgress(state)?.kind === 'friends' ? openLetters : openBook)());
 q('[data-letters]').addEventListener('click', openLetters);
 q('[data-sound]').addEventListener('click', () => { state.sound = !state.sound; sound('pick'); save(); render(); });
 for (const d of root.querySelectorAll('dialog.sheet')) {
+  d.addEventListener('close', scheduleStock);
   d.querySelector('[data-close]').addEventListener('click', () => d.close());
   d.addEventListener('click', e => {
     if (e.target !== d) return;
@@ -705,22 +784,24 @@ for (const d of root.querySelectorAll('dialog.sheet')) {
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
   });
 }
-q('[data-moment]').addEventListener('close', () => { if (moments.length) nextMoment(); else { nextToast(); render(); } });
+q('[data-moment]').addEventListener('close', () => { if (moments.length) nextMoment(); else { nextToast(); render(); scheduleStock(); } });
 q('[data-toast]').addEventListener('click', nextToast);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { clearTimeout(staffTimer); save(); return; }
+  if (document.hidden) { clearTimeout(staffTimer); clearTimeout(stockTimer); save(); return; }
   const amount = C.offline(state);
   if (amount) say(`Mina kept the café going: +${amount} coins.`, 'Up to five minutes of earnings while you were away.');
   save();
   render();
   scheduleStaff();
+  scheduleStock();
 });
-window.addEventListener('pagehide', () => { clearTimeout(staffTimer); save(); });
+window.addEventListener('pagehide', () => { clearTimeout(staffTimer); clearTimeout(stockTimer); save(); });
 new ResizeObserver(() => { if (!drag) render(); }).observe(table);
 
 render();
 save();
 scheduleStaff();
+scheduleStock();
 if (!storageOK) say('Your café is open. Saving is unavailable in this browser.');
 else if (migrated) say('Welcome back! Your café moved to Lantern Street.', 'Coins, renovations, recipes and friendships came with you.');
 else if (state.served === 0) {

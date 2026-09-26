@@ -51,6 +51,16 @@
       <button class="tidy" data-tidy aria-label="Return ingredients to their places">↺</button>
     </section>
 
+    <section class="prep-shelf" data-shelf hidden aria-label="Make-ahead shelf. Matching orders serve automatically.">
+      <button class="prep-toggle" data-prep aria-pressed="false"><strong data-prep-label>Serve now</strong><small data-prep-detail>Tap to make ahead</small></button>
+      <div class="saved-cups" aria-label="Three saved drinks">
+        <button class="saved-cup" data-stock="0" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
+        <button class="saved-cup" data-stock="1" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
+        <button class="saved-cup" data-stock="2" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
+      </div>
+      <span class="shelf-note">Saved cups<br>serve matches</span>
+    </section>
+
     <div class="feedback" role="status" aria-live="polite"><span data-feedback>Drag the strawberry onto the milk.</span><small data-feedback-detail>Every cup earns coins. A guest's favorite earns a tip.</small></div>
 
     <section class="chapter" data-chapter-card aria-label="Current chapter">
@@ -77,7 +87,7 @@
       <h2 id="book-title">Recipe book</h2>
       <div class="card-box" data-card-box hidden>
         <h3>Auntie Rosa's recipe box</h3>
-        <p class="sheet-note">Each card is a riddle about one pair. Make it for anyone to solve it.</p>
+        <p class="sheet-note">Each card is a riddle about one pair. Mix that pair to solve it.</p>
         <div class="riddles" data-riddles></div>
       </div>
       <div class="recipe-grid" data-recipes></div>

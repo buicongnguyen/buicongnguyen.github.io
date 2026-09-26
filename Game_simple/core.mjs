@@ -5,6 +5,7 @@ export const LEGACY_V3 = 'tiny-dessert-table-v3';
 
 export const BASE_PAY = 10, TIP = 5, SHARP_EYE = 10, GLOW_MAX = 5, GOLDEN_CUPS = 5, MAX_HEARTS = 5;
 export const BEST_FRIEND_GIFT = 40, STAFF_PAY = 10, STAFF_MS = 20000, OFFLINE_CAP_MS = 300000;
+export const STOCK_LIMIT = 3;
 
 export const LABELS = {
   strawberry: 'Strawberry', mango: 'Mango', milk: 'Milk', coffee: 'Coffee', banana: 'Banana', cocoa: 'Cocoa',
@@ -163,7 +164,7 @@ export function freshState(seed = Math.floor(Math.random() * 2 ** 31)) {
   const s = {
     version: 5, seed: seed >>> 0, coins: 0, served: 0, favorites: 0, level: 0, chapter: 0, mark: {served: 0, favorites: 0, golden: 0},
     glow: 0, golden: 0, goldenCount: 0, discovered: {}, bond: Object.fromEntries(PEOPLE.map(p => [p, 0])), beats: [],
-    cards: [], queue: [], nextGuest: 0, festival: false, staffMillis: 0, sound: false, lastSeen: Date.now(),
+    cards: [], queue: [], stock: [], prep: false, nextGuest: 0, festival: false, staffMillis: 0, sound: false, lastSeen: Date.now(),
     basket: 'sunrise', tokens: BASKETS.sunrise.items.map((type, i) => ({id: i, type, x: home[i][0], y: home[i][1]})),
   };
   ensureQueue(s);
@@ -267,18 +268,54 @@ export function receiver(s, drink) {
 export function serve(s, idA, idB) {
   const a = s.tokens[idA], b = s.tokens[idB];
   if (!a || !b || a === b) return null;
-  const drink = recipe(a.type, b.type), to = drink && receiver(s, drink);
+  const drink = recipe(a.type, b.type);
+  return drink ? sellDrink(s, drink) : null;
+}
+
+export function prepare(s, idA, idB) {
+  if (s.level < 1 || s.stock.length >= STOCK_LIMIT) return null;
+  const a = s.tokens[idA], b = s.tokens[idB];
+  if (!a || !b || a === b) return null;
+  const drink = recipe(a.type, b.type);
+  if (!drink) return null;
+  const isNew = !s.discovered[drink.key];
+  s.stock.push(drink.key);
+  s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
+  const card = solveCard(s, drink), chapters = advance(s);
+  ensureQueue(s);
+  return {...drink, stored: true, index: s.stock.length - 1, earned: 0, isNew, card, chapters};
+}
+
+export const stockMatch = s => s.stock.findIndex(key => s.queue.some(g => g.key === key));
+
+export function serveStock(s, index, matchOnly = false) {
+  if (!Number.isInteger(index) || index < 0 || index >= s.stock.length) return null;
+  const drink = recipeByKey(s.stock[index]), to = drink && receiver(s, drink);
+  if (!to || (matchOnly && !to.favorite)) return null;
+  const result = sellDrink(s, drink, true);
+  if (result) s.stock.splice(index, 1);
+  return result && {...result, fromStock: true, stockIndex: index};
+}
+
+function solveCard(s, drink) {
+  const card = cardsOpen(s).find(c => c.key === drink.key && !s.cards.includes(c.id));
+  if (card) { s.cards.push(card.id); s.coins += card.reward; }
+  return card || null;
+}
+
+function sellDrink(s, drink, fromStock = false) {
+  const to = receiver(s, drink);
   if (!to) return null;
   const guest = s.queue[to.index], person = guest.person, favorite = to.favorite;
   const isNew = !s.discovered[drink.key];
-  const sharp = favorite && isNew && !guest.peeked && person !== 'rosa' && picturesOnly(s);
+  const sharp = !fromStock && favorite && isNew && !guest.peeked && person !== 'rosa' && picturesOnly(s);
   const golden = s.golden > 0;
   let earned = BASE_PAY + (favorite ? TIP : 0) + (sharp ? SHARP_EYE : 0);
   if (golden) { earned *= 2; s.golden--; }
   s.coins += earned;
   s.served++;
   if (favorite) s.favorites++;
-  s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
+  if (!fromStock) s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
 
   let heart = null, goldenStart = false, card = null;
   if (favorite && REGULARS[person] && hearts(s, person) < MAX_HEARTS) {
@@ -294,8 +331,7 @@ export function serve(s, idA, idB) {
     s.glow++;
     if (s.glow >= GLOW_MAX) { s.glow = 0; s.golden = GOLDEN_CUPS; s.goldenCount++; goldenStart = true; }
   }
-  const open = cardsOpen(s).find(c => c.key === drink.key && !s.cards.includes(c.id));
-  if (open) { s.cards.push(open.id); s.coins += open.reward; card = open; }
+  card = solveCard(s, drink);
   if (person === 'rosa' && favorite) s.festival = true;
   s.queue.splice(to.index, 1);
   const chapters = advance(s);
@@ -351,6 +387,8 @@ export function validate(s) {
   clean.lastSeen = Number.isFinite(s.lastSeen) ? Math.min(s.lastSeen, Date.now()) : Date.now();
   clean.staffMillis = Number.isFinite(s.staffMillis) && s.staffMillis >= 0 && s.staffMillis < STAFF_MS ? s.staffMillis : 0;
   clean.basket = unlockedBaskets(clean).includes(s.basket) ? s.basket : 'sunrise';
+  clean.stock = cleanStock(clean, s.stock);
+  clean.prep = clean.level >= 1 && s.prep === true;
   const items = BASKETS[clean.basket].items, unit = v => Math.min(1, Math.max(0, v));
   clean.tokens = s.tokens.map((t, i) => ({id: i, type: items[i],
     x: Number.isFinite(t?.x) ? unit(t.x) : home[i][0], y: Number.isFinite(t?.y) ? unit(t.y) : home[i][1]}));
@@ -365,7 +403,11 @@ export function validate(s) {
   return clean;
 }
 
-// Carries coins, renovations, recipes and friendships forward from v4 (and v3 through it).
+function cleanStock(s, stock) {
+  return s.level >= 1 && Array.isArray(stock) ? stock.filter(key => validKey(key) && basketFor(s, recipeByKey(key))).slice(0, STOCK_LIMIT) : [];
+}
+
+// Carries coins, renovations, recipes, saved drinks and friendships forward from v4.
 export function migrate(old, seed) {
   if (old?.version === 3) {
     if (!nat(old.coins) || !nat(old.served) || ![0, 1, 2, 3].includes(old.upgrades)) return null;
@@ -374,16 +416,18 @@ export function migrate(old, seed) {
   }
   if (!old || old.version !== 4 || !nat(old.coins) || !nat(old.served) || !nat(old.level) || old.level > 5) return null;
   const s = freshState(seed);
-  s.coins = old.coins + (Array.isArray(old.stock) ? old.stock.length * BASE_PAY : 0);
+  s.coins = old.coins;
   s.served = old.served;
   s.favorites = Math.min(nat(old.exact) ? old.exact : 0, old.served);
   s.level = old.level;
+  s.stock = cleanStock(s, old.stock);
   for (const k of Object.keys(old.discovered || {})) if (validKey(k)) s.discovered[k] = 1;
   for (const p of PEOPLE) {
     s.bond[p] = Math.min(4 * BOND_PER_HEART, Math.floor((nat(old.visits?.[p]) ? old.visits[p] : 0) / 2));
     for (const h of [2, 4]) if (hearts(s, p) >= h) s.beats.push(`${p}:${h}`);
   }
   s.staffMillis = Number.isFinite(old.staffMillis) && old.staffMillis >= 0 && old.staffMillis < STAFF_MS ? old.staffMillis : 0;
+  s.lastSeen = Number.isFinite(old.lastSeen) ? Math.min(old.lastSeen, Date.now()) : Date.now();
   s.sound = old.sound === true;
   // Replay chapters against lifetime totals, without paying their gifts again.
   s.mark = {served: 0, favorites: 0, golden: 0};
