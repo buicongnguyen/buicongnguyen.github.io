@@ -59,8 +59,8 @@
     const button = document.querySelector(".site-theme-toggle");
     if (button) {
       button.innerHTML = `<span aria-hidden="true">${light ? "☀️" : "🌙"}</span><span class="site-theme-toggle-label">${light ? "Light" : "Dark"}</span>`;
+      // The label names the action, so no aria-pressed: "Switch to dark mode, pressed" contradicts itself.
       button.setAttribute("aria-label", `Switch to ${light ? "dark" : "light"} mode`);
-      button.setAttribute("aria-pressed", String(light));
     }
   }
 

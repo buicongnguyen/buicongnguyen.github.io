@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 
-MEMORY_LINE = re.compile(r"^\s*([A-Za-z_]\w*)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)\s*$")
+# GNU ld prints an optional Attributes column (for example "xrw" or "!w") after the length.
+MEMORY_LINE = re.compile(r"^\s*([A-Za-z_]\w*)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)(?:\s+!?[rwxailRWXAIL!]+)?\s*$")
 SECTION_LINE = re.compile(r"^\s*(\.[^\s]+)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)\s*$")
 
 
@@ -64,7 +66,12 @@ def main() -> int:
     parser.add_argument("--section", default=".dma_buffer")
     parser.add_argument("--memory", default="SRAM")
     args = parser.parse_args()
-    report = analyze_map(Path(args.map_file).read_text(encoding="utf-8"), args.section, args.memory)
+    # Exit 2 for unreadable or malformed input so it is never mistaken for an overflow (exit 1).
+    try:
+        report = analyze_map(Path(args.map_file).read_text(encoding="utf-8-sig"), args.section, args.memory)
+    except (OSError, UnicodeDecodeError, ValueError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
     print(report)
     return 0 if report["fits"] else 1
 

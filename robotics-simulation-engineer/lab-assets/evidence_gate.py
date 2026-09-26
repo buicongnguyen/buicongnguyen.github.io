@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+from report_io import emit
+
 
 def read_json(path: Path):
     """Read JSON written by any common tool, including Windows PowerShell 5.1 `>` (UTF-16 + BOM)."""
@@ -50,10 +52,7 @@ def main() -> None:
         report = evaluate(args.require)
     except ValueError as error:
         report = {"ok": False, "error": str(error)}
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+    report, _ = emit(report, args.output)
     if not report["ok"]:
         sys.exit(2)
 

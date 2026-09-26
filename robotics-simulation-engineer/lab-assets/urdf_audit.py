@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from report_io import emit
+
+URDF_JOINT_TYPES = {"revolute", "continuous", "prismatic", "fixed", "floating", "planar"}
 # Relative error above which declared inertia is flagged against its collision primitive.
 GEOMETRY_TOLERANCE = 0.25
 # Published URDF inertias are usually rounded to 4-5 significant digits, which can push a
@@ -189,6 +191,8 @@ def audit_urdf(path: Path) -> dict:
         else:
             children[parent].append(child)
             child_links.add(child)
+        if joint_type not in URDF_JOINT_TYPES:
+            errors.append(f"joint {name!r} has unknown type {joint_type!r}")
         if joint_type in {"revolute", "prismatic"}:
             limit = joint.find("limit")
             lower, upper = number(limit, "lower"), number(limit, "upper")
@@ -268,10 +272,7 @@ def main() -> None:
         report = audit_urdf(args.urdf)
     except (OSError, ET.ParseError) as error:
         report = {"ok": False, "path": str(args.urdf), "errors": [str(error)], "warnings": []}
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+    report, _ = emit(report, args.output)
     if not report["ok"]:
         sys.exit(2)
 

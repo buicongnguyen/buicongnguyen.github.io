@@ -239,6 +239,8 @@ function make(tag, className, text) {
   return el;
 }
 
+let totalText = "";
+
 function render() {
   const root = document.getElementById("qa-root");
   let total = 0;
@@ -271,7 +273,8 @@ function render() {
     }
     root.appendChild(sec);
   }
-  document.getElementById("stats").textContent = `${total} questions across ${data.length} interview domains`;
+  totalText = `${total} questions across ${data.length} interview domains`;
+  document.getElementById("stats").textContent = totalText;
 }
 
 function filterCards() {
@@ -288,7 +291,7 @@ function filterCards() {
   document.querySelectorAll("#qa-root > section").forEach((section) => {
     section.classList.toggle("hidden", !section.querySelector(".qa-card:not(.hidden)"));
   });
-  document.getElementById("stats").textContent = q ? `${shown} matching questions` : "90 questions across 3 interview domains";
+  document.getElementById("stats").textContent = q ? `${shown} matching questions` : totalText;
 }
 
 render();

@@ -19,6 +19,8 @@ import statistics
 import sys
 from pathlib import Path
 
+from report_io import emit
+
 EXACT_PERMUTATION_LIMIT = 200_000
 MONTE_CARLO_PERMUTATIONS = 20_000
 
@@ -35,7 +37,11 @@ def percentile(values: list[float], fraction: float) -> float:
 
 def summarize(rows: list[dict[str, str]]) -> dict:
     metrics = []
-    for row in rows:
+    for index, row in enumerate(rows, start=1):
+        # csv.DictReader fills cells missing from a short row with None.
+        missing = [name for name in ("run", "sim_seconds", "wall_seconds", "frames") if row.get(name) is None]
+        if missing:
+            raise ValueError(f"benchmark row {index} is missing {', '.join(missing)}")
         wall = float(row["wall_seconds"])
         sim = float(row["sim_seconds"])
         frames = float(row["frames"])
@@ -161,16 +167,15 @@ def main() -> None:
         report["workload"] = parse_workload(args.workload)
         if args.baseline:
             baseline = json.loads(args.baseline.read_text(encoding="utf-8-sig"))
+            if not isinstance(baseline, dict) or not isinstance(baseline.get("rows"), list):
+                raise ValueError("--baseline must be a report JSON object written by this tool")
             report["comparison"] = compare(report, baseline, args.max_rtf_regression, args.claim_improvement, args.alpha)
             report["ok"] = report["comparison"]["ok"]
         elif args.claim_improvement:
             raise ValueError("--claim-improvement needs --baseline")
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         report = {"ok": False, "error": str(error)}
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+    report, _ = emit(report, args.output)
     if not report["ok"]:
         sys.exit(2)
 

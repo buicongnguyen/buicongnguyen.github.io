@@ -624,6 +624,8 @@
     details.qa > summary { display: block; }
     details.qa > summary::before { display: inline-block; margin-right: 8px; }
     .qmeta { margin: 8px 0 0 0; }
+    /* Wide comparison tables scroll inside themselves instead of widening the page. */
+    table { display: block; overflow-x: auto; }
   }
 
   @media print {
@@ -2001,7 +2003,7 @@ May not help:
   <div class="ans">
     <p><b>Answer:</b> Run liveness analysis over the scheduled graph. Tensors with non-overlapping lifetimes can reuse the same buffer. Tensors whose lifetimes overlap need separate buffers unless in-place update, aliasing, or recomputation is legal.</p>
 <pre><code>op index:  1  2  3  4  5  6
-A live:    [===========]
+A live:    [========]
 B live:       [====]
 C live:          [=========]
 D live:                [====]
@@ -2567,20 +2569,28 @@ vector&lt;Tile&gt; tileGrid(int H, int W, int TH, int TW) {
 
   var run = debounce(function () {
     var term = q.value.trim().toLowerCase();
+    // Search opens matching cards and later closes only the ones it opened,
+    // so cards the reader opened or answered stay as they were.
     cards.forEach(function (card) {
+      var isDetails = card.tagName.toLowerCase() === "details";
       if (!term) {
         card.classList.remove("nohit");
-        if (card.tagName.toLowerCase() === "details" && card !== document.querySelector("#coding details.qa")) {
+        if (isDetails && card.dataset.searchOpened) {
           card.removeAttribute("open");
+          delete card.dataset.searchOpened;
         }
         return;
       }
 
       var hit = card.dataset.text.indexOf(term) !== -1;
       card.classList.toggle("nohit", !hit);
-      if (card.tagName.toLowerCase() === "details") {
-        if (hit) card.setAttribute("open", "");
-        else card.removeAttribute("open");
+      if (!isDetails) return;
+      if (hit && !card.open) {
+        card.setAttribute("open", "");
+        card.dataset.searchOpened = "1";
+      } else if (!hit && card.dataset.searchOpened) {
+        card.removeAttribute("open");
+        delete card.dataset.searchOpened;
       }
     });
   }, 120);
@@ -2593,11 +2603,39 @@ vector&lt;Tile&gt; tileGrid(int H, int W, int TH, int TW) {
     }
   });
 
+  // Stable per-question choice order: most authored answers sit in slot B, so
+  // show a fixed shuffle instead (same letters on every visit).
+  function choiceOrder(key, count) {
+    var seed = 2166136261;
+    var order = [];
+    var i, j, swap;
+    for (i = 0; i < key.length; i += 1) seed = Math.imul(seed ^ key.charCodeAt(i), 16777619);
+    for (i = 0; i < count; i += 1) order.push(i);
+    for (i = count - 1; i > 0; i -= 1) {
+      seed ^= seed << 13;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;
+      j = (seed >>> 0) % (i + 1);
+      swap = order[i]; order[i] = order[j]; order[j] = swap;
+    }
+    return order;
+  }
+
   // Interactive multiple choice: reveal the answer only after an option is picked.
   Array.prototype.slice.call(document.querySelectorAll("details.qa")).forEach(function (card) {
     var list = card.querySelector("ol.choices");
     if (!list) return;
     card.classList.add("mcq");
+
+    var authored = Array.prototype.slice.call(list.children);
+    choiceOrder(card.querySelector("summary").textContent, authored.length).forEach(function (index) {
+      list.appendChild(authored[index]);
+    });
+    var answerLabel = card.querySelector(".why > b");
+    var correctIndex = Array.prototype.indexOf.call(list.children, list.querySelector("li.correct"));
+    if (answerLabel && correctIndex >= 0 && /^Answer: [A-D]\.$/.test(answerLabel.textContent.trim())) {
+      answerLabel.textContent = "Answer: " + "ABCD".charAt(correctIndex) + ".";
+    }
 
     var hint = document.createElement("p");
     hint.className = "mcq-hint";
@@ -2609,6 +2647,9 @@ vector&lt;Tile&gt; tileGrid(int H, int W, int TH, int TW) {
       card.classList.add("answered");
       li.classList.add("chosen");
       if (!li.classList.contains("correct")) li.classList.add("wrong");
+      Array.prototype.slice.call(list.children).forEach(function (item) {
+        item.setAttribute("aria-disabled", "true");
+      });
     }
 
     Array.prototype.slice.call(list.querySelectorAll("li")).forEach(function (li) {

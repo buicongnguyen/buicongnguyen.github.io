@@ -1,7 +1,8 @@
 """Receive multiple sensor_msgs/Image messages and emit a bounded contract report."""
 
+from __future__ import annotations
+
 import argparse
-import json
 import math
 import sys
 import time
@@ -9,6 +10,7 @@ from pathlib import Path
 
 import rclpy
 from lab_contracts import build_camera_info_report, build_image_report
+from report_io import emit
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import CameraInfo, Image
@@ -58,13 +60,6 @@ def normalize_info(message: CameraInfo) -> dict:
     }
 
 
-def emit(report: dict, output: Path | None) -> None:
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if output:
-        output.write_text(rendered + "\n", encoding="utf-8")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--topic", required=True)
@@ -103,7 +98,9 @@ def main() -> None:
         if args.camera_info:
             report["camera_info"] = build_camera_info_report(report, normalize_info(node.info))
             report["ok"] = report["ok"] and report["camera_info"]["ok"]
-        emit(report, args.output)
+        report, saved = emit(report, args.output)
+        if not saved:
+            sys.exit(2)
         if not report["ok"]:
             sys.exit(3)
     except KeyboardInterrupt:

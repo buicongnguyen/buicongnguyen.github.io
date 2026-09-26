@@ -8,6 +8,7 @@ import rclpy
 from geometry_msgs.msg import Twist
 from lab_contracts import is_stale
 from rclpy.clock import Clock, ClockType
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from rclpy.signals import SignalHandlerOptions
 
@@ -68,11 +69,17 @@ def main() -> None:
     node = TwistWatchdog(args.input, args.output, args.timeout, args.rate)
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
-        node.publisher.publish(Twist())
-        node.get_logger().info("Published final zero Twist")
+        # An external shutdown can still invalidate the context first, so the final zero
+        # command is best effort and must not mask the exit path.
+        if rclpy.ok():
+            try:
+                node.publisher.publish(Twist())
+                node.get_logger().info("Published final zero Twist")
+            except Exception as error:  # noqa: BLE001 - report, then continue shutting down
+                node.get_logger().error(f"Final zero Twist was not published: {error}")
         node.destroy_node()
         rclpy.try_shutdown()
 

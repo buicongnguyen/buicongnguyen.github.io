@@ -12,6 +12,13 @@ def test_simulation_returns_finite_trace():
     assert trace[-1, 1] > trace[0, 1]
 
 
+@pytest.mark.parametrize("duration, dt, steps", [(0.3, 0.1, 3), (0.7, 0.1, 7), (0.25, 0.1, 2)])
+def test_step_count_survives_float_division(duration, dt, steps):
+    trace = simulate(dt=dt, duration=duration)
+    assert len(trace) == steps
+    np.testing.assert_allclose(trace[-1, 0], steps * dt)
+
+
 @pytest.mark.parametrize(
     "arguments",
     [

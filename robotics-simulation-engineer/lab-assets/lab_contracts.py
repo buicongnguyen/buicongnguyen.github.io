@@ -9,32 +9,32 @@ from __future__ import annotations
 import math
 from typing import Any
 
-# Bytes per pixel for the uncompressed encodings Isaac Sim camera helpers publish.
-# Unknown encodings skip the stride check instead of guessing.
+# Bytes per pixel for the sensor_msgs/Image encodings the labs publish or record.
+# Encoding names are case-sensitive in sensor_msgs/image_encodings.
 BYTES_PER_PIXEL = {
     "mono8": 1,
-    "8uc1": 1,
+    "8UC1": 1,
     "mono16": 2,
-    "16uc1": 2,
+    "16UC1": 2,
     "rgb8": 3,
     "bgr8": 3,
     "rgba8": 4,
     "bgra8": 4,
-    "32fc1": 4,
+    "32FC1": 4,
 }
 
 
 def _finite_positive(value: Any, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0.0:
-        raise ValueError(f"{name} must be a finite positive number")
+        raise ValueError(f"{name} must be positive and finite")
     return float(value)
 
 
 def is_stale(last_receipt: float | None, now: float, timeout: float) -> bool:
     """Return whether a command has exceeded its steady-clock receipt timeout.
 
-    A NaN or infinite timeout would make every comparison false and the watchdog
-    would forward commands forever, so invalid input fails closed with ValueError.
+    NaN compares False with everything, so an unchecked NaN timeout would never go
+    stale and the watchdog would forward commands forever: invalid input fails closed.
     """
     _finite_positive(timeout, "timeout")
     if not math.isfinite(now):
@@ -51,28 +51,30 @@ def build_image_report(topic: str, samples: list[dict[str, Any]]) -> dict[str, A
 
     first = samples[0]
     stamps = [int(sample["stamp_ns"]) for sample in samples]
-    encoding = str(first["encoding"])
-    bytes_per_pixel = BYTES_PER_PIXEL.get(encoding.lower())
-    # sensor_msgs/Image defines data as exactly step * height bytes.
     structural = all(
         int(sample["width"]) > 0
         and int(sample["height"]) > 0
         and int(sample["step"]) > 0
+        # sensor_msgs/Image defines data as exactly step * height bytes.
         and int(sample["payload_bytes"]) == int(sample["step"]) * int(sample["height"])
         for sample in samples
     )
-    stride_ok = bytes_per_pixel is None or all(
-        int(sample["step"]) >= int(sample["width"]) * bytes_per_pixel for sample in samples
+    # A row must hold width * bytes-per-pixel; unknown encodings still need at least one byte per pixel.
+    row_stride = all(
+        int(sample["step"]) >= int(sample["width"]) * BYTES_PER_PIXEL.get(sample["encoding"], 1)
+        for sample in samples
     )
+    bytes_per_pixel = BYTES_PER_PIXEL.get(first["encoding"])
     identity = ("width", "height", "step", "encoding", "frame_id")
     consistent = all(tuple(sample[key] for key in identity) == tuple(first[key] for key in identity) for sample in samples)
     stamps_increase = all(current > previous for previous, current in zip(stamps, stamps[1:]))
     stamp_span_ns = stamps[-1] - stamps[0]
     sim_rate_hz = None if stamp_span_ns <= 0 else (len(stamps) - 1) * 1_000_000_000 / stamp_span_ns
     checks = {
-        "payload_equals_step_times_height": structural,
-        "step_covers_width": stride_ok,
-        "encoding_nonempty": bool(encoding),
+        "sample_count": len(samples) >= 2,
+        "structural_payload": structural,
+        "step_covers_row": row_stride,
+        "encoding_nonempty": bool(first["encoding"]),
         "frame_id_nonempty": bool(first["frame_id"]),
         "geometry_consistent": consistent,
         "timestamps_strictly_increase": stamps_increase,
@@ -90,9 +92,10 @@ def build_image_report(topic: str, samples: list[dict[str, Any]]) -> dict[str, A
         "estimated_sim_stamp_rate_hz": sim_rate_hz,
         "width": int(first["width"]),
         "height": int(first["height"]),
-        "encoding": encoding,
-        "bytes_per_pixel": bytes_per_pixel,
+        "encoding": first["encoding"],
         "step": int(first["step"]),
+        "bytes_per_pixel": bytes_per_pixel,
+        "minimum_step": int(first["width"]) * (bytes_per_pixel or 1),
         "payload_bytes": int(first["payload_bytes"]),
         "expected_payload_bytes": int(first["step"]) * int(first["height"]),
     }

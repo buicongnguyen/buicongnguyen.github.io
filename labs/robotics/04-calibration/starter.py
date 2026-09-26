@@ -7,8 +7,8 @@ def fit_grid(candidates, calibration_x, calibration_y, model):
     features = np.asarray(calibration_x)
     if parameters.ndim != 1 or parameters.size == 0 or not np.isfinite(parameters).all():
         raise ValueError("candidates must be a non-empty finite one-dimensional sequence")
-    if expected.size == 0 or not np.isfinite(expected).all():
-        raise ValueError("calibration targets must be non-empty and finite")
+    if expected.ndim == 0 or expected.size == 0 or not np.isfinite(expected).all():
+        raise ValueError("calibration targets must be a non-empty finite sequence")
     if features.ndim == 0 or features.shape[0] != expected.shape[0]:
         raise ValueError("calibration features and targets must have the same sample count")
 

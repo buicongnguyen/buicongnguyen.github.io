@@ -42,6 +42,45 @@
     }
   }
 
+  // Stable per-question choice order: the authored data lists the answer first,
+  // so show a fixed shuffle instead (same letters on every visit).
+  function choiceOrder(key, count) {
+    let seed = 2166136261;
+    for (let i = 0; i < key.length; i += 1) seed = Math.imul(seed ^ key.charCodeAt(i), 16777619);
+    const order = Array.from({ length: count }, (_, i) => i);
+    for (let i = count - 1; i > 0; i -= 1) {
+      seed ^= seed << 13;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;
+      const j = (seed >>> 0) % (i + 1);
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order;
+  }
+
+  // Retrieval practice: the answer and explanation stay hidden until a choice is picked.
+  function makeChoosable(card, ol) {
+    const items = Array.from(ol.children);
+    function choose(li) {
+      if (card.classList.contains("answered")) return;
+      card.classList.add("answered");
+      li.classList.add("chosen");
+      if (!li.classList.contains("correct")) li.classList.add("wrong");
+      items.forEach((item) => item.setAttribute("aria-disabled", "true"));
+    }
+    items.forEach((li) => {
+      li.tabIndex = 0;
+      li.setAttribute("role", "button");
+      li.addEventListener("click", () => choose(li));
+      li.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose(li);
+        }
+      });
+    });
+  }
+
   function renderQuestions() {
     const root = document.getElementById("questions-root");
     if (!root) return;
@@ -52,17 +91,19 @@
       groupWrap.appendChild(node("h3", "", group.title));
       for (const q of group.questions) {
         count += 1;
-        const card = node("details", "qa");
+        const card = node("details", "qa mcq");
         card.dataset.search = `${group.title} ${q.q} ${q.choices.join(" ")} ${q.why}`.toLowerCase();
         const summary = node("summary", "", `${count}. ${q.q}`);
         summary.appendChild(node("span", "tag", group.tag));
         const answer = node("div", "answer");
+        answer.appendChild(node("p", "mcq-hint", "Pick an option to reveal the answer."));
         const ol = node("ol", "choices");
         ol.type = "A";
-        q.choices.forEach((choice, index) => {
-          const li = node("li", index === q.answer ? "correct" : "", choice);
+        choiceOrder(q.q, q.choices.length).forEach((index) => {
+          const li = node("li", index === q.answer ? "correct" : "", q.choices[index]);
           ol.appendChild(li);
         });
+        makeChoosable(card, ol);
         answer.appendChild(ol);
         const why = node("p", "why", q.why);
         answer.appendChild(why);

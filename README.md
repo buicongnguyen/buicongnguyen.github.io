@@ -57,7 +57,7 @@ python scripts/check_all.py
 
 It covers:
 - the lab-tool tests, including every planted fault;
-- each exercise in both directions: with `LAB_IMPL=solution` the reference must pass, and the learner's file (starter or planted defect) must fail;
+- each exercise in both directions, via `scripts/check_labs.py`. The runner executes each lab's tests from its own directory. With `LAB_IMPL=solution` the reference must pass, and the learner's file (starter or planted defect) must still fail;
 - the generated lab pages match their Markdown;
 - internal links and anchors are valid, with case-sensitive paths as on Pages;
 - every page is a chapter in the book spine;

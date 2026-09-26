@@ -16,6 +16,8 @@ import random
 import sys
 from pathlib import Path
 
+from report_io import emit
+
 BINS_PER_PARAMETER = 4
 TRUE_VALUES = {"1", "true", "pass", "yes"}
 FALSE_VALUES = {"0", "false", "fail", "no"}
@@ -24,6 +26,8 @@ FALSE_VALUES = {"0", "false", "fail", "no"}
 def generate(bounds: dict[str, list[float]], count: int, seed: int) -> dict:
     if count <= 0:
         raise ValueError("count must be positive")
+    if not isinstance(bounds, dict):
+        raise ValueError("bounds must be a JSON object of name: [low, high]")
     if not bounds:
         raise ValueError("bounds must declare at least one parameter")
     rng = random.Random(seed)
@@ -156,14 +160,14 @@ def main() -> None:
             report = {"ok": True, **report}
         else:
             manifest = json.loads(args.manifest.read_text(encoding="utf-8-sig"))
+            if not isinstance(manifest, dict) or not isinstance(manifest.get("scenarios"), list):
+                raise ValueError("manifest must be a JSON object written by the generate command")
             with args.results.open(newline="", encoding="utf-8-sig") as stream:
                 report = evaluate(manifest, list(csv.DictReader(stream)), args.minimum_pass_rate, args.require_lower_bound)
-            if args.output:
-                args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(report, indent=2))
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         report = {"ok": False, "error": str(error)}
-        print(json.dumps(report, indent=2))
+    # generate always writes its manifest to --output; only evaluate's --output is optional.
+    report, _ = emit(report, args.output if args.command == "evaluate" else None)
     if not report.get("ok", False):
         sys.exit(2)
 

@@ -1,7 +1,8 @@
 """Tests for the broken-training lab.
 
-By default these test *your* repair in broken_training.py; run the reference with
-LAB_IMPL=solution. Part 1 is the causal repair; Part 2 is input hardening.
+By default these exercise *your* repair in broken_training.py; LAB_IMPL=solution checks
+the reference. The argument checks in broken_training.py are already sound, so every
+failure here traces back to the planted update-rule defect.
 """
 
 import importlib
@@ -12,7 +13,6 @@ import pytest
 lab = importlib.import_module(os.environ.get("LAB_IMPL", "broken_training"))
 
 
-# Part 1: the planted defect
 def test_training_converges():
     losses, accuracy = lab.train()
     assert losses[-1] < 0.3 * losses[0]
@@ -24,7 +24,6 @@ def test_loss_decreases_monotonically_for_a_small_step():
     assert all(later <= earlier + 1e-12 for earlier, later in zip(losses, losses[1:]))
 
 
-# Part 2: hardening
 @pytest.mark.parametrize(
     "arguments",
     [

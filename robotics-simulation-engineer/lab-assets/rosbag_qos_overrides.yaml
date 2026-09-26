@@ -12,4 +12,4 @@
   reliability: reliable
   durability: transient_local
   history: keep_last
-  depth: 1
+  depth: 100

@@ -18,3 +18,5 @@ def test_rejects_empty_grid_and_shape_broadcasting():
         fit_grid([1], [1, 2], [2, 4], lambda _x, _p: np.asarray([[2], [4]]))
     with pytest.raises(ValueError):
         rmse([1, 2], [[1], [2]])
+    with pytest.raises(ValueError):
+        fit_grid([1.0], [1.0], 2.0, lambda x, p: p * np.asarray(x))

@@ -24,6 +24,7 @@ from lab_contracts import (
     check_tf_tree,
     check_watchdog,
 )
+from report_io import emit
 
 IMAGE_SAMPLE_LIMIT = 30
 
@@ -171,10 +172,7 @@ def main() -> None:
         report = {"bag": str(args.bag), "manifest": str(args.manifest), **evaluate(read_bag(args.bag, manifest), manifest)}
     except (OSError, RuntimeError, ValueError, KeyError, json.JSONDecodeError) as error:
         report = {"ok": False, "bag": str(args.bag), "error": str(error)}
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+    report, _ = emit(report, args.output)
     if not report["ok"]:
         sys.exit(2)
 

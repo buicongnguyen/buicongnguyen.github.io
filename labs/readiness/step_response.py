@@ -12,7 +12,8 @@ def simulate(kp=25.0, kd=10.0, mass=1.0, dt=0.001, duration=3.0, target=1.0):
         raise ValueError("mass, dt, and duration must be positive")
     if kp < 0 or kd < 0:
         raise ValueError("controller gains must be non-negative")
-    steps = int(duration / dt)
+    # The epsilon absorbs float error: 0.3 / 0.1 is 2.999..., which int() would truncate to 2 steps.
+    steps = int(np.floor(duration / dt + 1e-9))
     if steps < 1:
         raise ValueError("duration must include at least one timestep")
 

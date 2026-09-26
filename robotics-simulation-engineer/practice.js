@@ -226,10 +226,14 @@
       const selectedIndex = Number(selected.value);
       const correct = applyResult(card, group, question, selectedIndex);
       const previous = results[id] || {};
-      const reviewStage = correct ? Math.min((previous.reviewStage || 0) + 1, 3) : 0;
+      const now = Date.now();
+      // Only a correct answer given when the question is due advances the review
+      // interval; re-checking before then must not skip stages.
+      const due = !previous.nextReview || previous.nextReview <= now;
+      const reviewStage = correct ? (due ? Math.min((previous.reviewStage || 0) + 1, 3) : previous.reviewStage || 1) : 0;
       const delays = [1, 3, 7];
-      const nextReview = correct ? Date.now() + delays[Math.max(0, reviewStage - 1)] * 86400000 : Date.now();
-      results[id] = { selected: selectedIndex, correct: correct, checked: true, mode: assessmentMode, attemptedAt: Date.now(), reviewStage: reviewStage, nextReview: nextReview };
+      const nextReview = correct ? (due ? now + delays[Math.max(0, reviewStage - 1)] * 86400000 : previous.nextReview) : now;
+      results[id] = { selected: selectedIndex, correct: correct, checked: true, mode: assessmentMode, attemptedAt: now, reviewStage: reviewStage, nextReview: nextReview };
       saveResults();
       updateStats();
     });
@@ -307,12 +311,16 @@
         const preEntries = groupCards.map(function (card) { return pretestResults[card.dataset.questionId]; }).filter(function (entry) {
           return entry && entry.checked !== false;
         });
-        // Both tests are scored over every question in the group, so answering one easy
-        // question cannot show as 100%; an unanswered question counts as not yet correct.
-        const prePercent = Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / groupCards.length * 100);
-        const postPercent = Math.round(groupCorrect / groupCards.length * 100);
-        const change = postPercent - prePercent;
-        score.appendChild(make("span", "", "Change from pre-test: " + (change >= 0 ? "+" : "") + change + " points (" + prePercent + "% → " + postPercent + "% of all questions)"));
+        if (!preEntries.length || !entries.length) {
+          score.appendChild(make("span", "", "Change from pre-test: needs answers in both tests"));
+        } else {
+          // Both tests are scored over every question in the group, so answering one easy
+          // question cannot show as 100%; an unanswered question counts as not yet correct.
+          const prePercent = Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / groupCards.length * 100);
+          const postPercent = Math.round(groupCorrect / groupCards.length * 100);
+          const change = postPercent - prePercent;
+          score.appendChild(make("span", "", "Change from pre-test: " + (change >= 0 ? "+" : "") + change + " points (" + prePercent + "% → " + postPercent + "% of all questions)"));
+        }
       }
       objectiveScores.appendChild(score);
     });

@@ -17,10 +17,15 @@ import statistics
 import sys
 from pathlib import Path
 
+from report_io import emit
+
 RESERVED_COLUMNS = {"scenario_id", "repeat", "notes"}
 
 
 def _finite(value: object, what: str) -> float:
+    # csv.DictReader fills cells missing from a short row with None.
+    if value is None:
+        raise ValueError(f"{what} is missing")
     number = float(value)  # type: ignore[arg-type]
     if not math.isfinite(number):
         raise ValueError(f"{what} must be finite")
@@ -28,6 +33,10 @@ def _finite(value: object, what: str) -> float:
 
 
 def _metric_contract(contract: dict, targets: dict) -> tuple[dict[str, float], dict[str, float], dict[str, float]]:
+    if not isinstance(contract, dict) or not all(isinstance(contract.get(key, {}), dict) for key in ("targets", "scales", "weights")):
+        raise ValueError("contract must be a JSON object whose targets, scales, and weights are objects")
+    if not isinstance(targets, dict):
+        raise ValueError("targets must be an object of metric: value")
     scales = contract["scales"]
     weights = contract.get("weights", {name: 1.0 for name in targets})
     if set(targets) != set(scales) or not set(targets).issubset(weights):
@@ -197,12 +206,9 @@ def main() -> None:
         elif not args.calibration_only:
             report["ok"] = False
             report["errors"].append("no --holdout rows: selection is unvalidated (use --calibration-only to explore)")
-    except (OSError, ValueError, KeyError, json.JSONDecodeError, statistics.StatisticsError) as error:
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError, statistics.StatisticsError) as error:
         report = {"ok": False, "error": str(error)}
-    rendered = json.dumps(report, indent=2)
-    print(rendered)
-    if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+    report, _ = emit(report, args.output)
     if not report["ok"]:
         sys.exit(2)
 

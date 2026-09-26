@@ -12,6 +12,8 @@
   --good-bg: #0f2a17;
   --warn: #f2cc60;
   --warn-bg: #2a2109;
+  --bad: #ffa198;
+  --bad-bg: #2d1216;
   --code: #0b0f14;
 }
 * { box-sizing: border-box; }
@@ -104,6 +106,17 @@ summary:hover { background: var(--panel2); }
 .choices { margin: 0; padding-left: 24px; }
 .choices li { margin: 5px 0; padding: 4px 6px; border-radius: 6px; }
 .choices li.correct { background: var(--good-bg); color: var(--good); }
+/* Pick-to-reveal multiple choice: nothing is marked until a choice is made. */
+.mcq-hint { margin: 0 0 8px; color: var(--ink-dim); font-size: .88rem; font-style: italic; }
+.qa.mcq .choices li { border: 1px solid var(--line); }
+.qa.mcq:not(.answered) .choices li { cursor: pointer; }
+.qa.mcq:not(.answered) .choices li:hover { border-color: var(--accent); background: var(--panel2); }
+.qa.mcq:not(.answered) .choices li:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.qa.mcq:not(.answered) .choices li.correct { background: none; color: inherit; }
+.qa.mcq:not(.answered) .why { display: none; }
+.qa.mcq.answered .mcq-hint { display: none; }
+.qa.mcq.answered .choices li.correct { border-color: var(--good); font-weight: 700; }
+.qa.mcq.answered .choices li.chosen.wrong { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); font-weight: 700; }
 .why {
   margin-top: 10px;
   border-left: 3px solid var(--accent);

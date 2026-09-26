@@ -23,7 +23,8 @@ $workspace = if ($env:ISAAC_ROS_WS) { $env:ISAAC_ROS_WS } else { "C:\IsaacSim-ro
 $manifest = Join-Path $workspace "pixi.toml"
 $pixi = $env:PIXI_EXE
 if (-not $pixi) {
-    $found = Get-Command pixi -ErrorAction SilentlyContinue
+    # -CommandType Application skips any alias or function that happens to be named pixi.
+    $found = Get-Command pixi -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     $pixi = if ($found) { $found.Source } else { Join-Path $env:LOCALAPPDATA "pixi\bin\pixi.exe" }
 }
 if (-not (Test-Path -LiteralPath $pixi)) {
@@ -53,10 +54,11 @@ Write-Host "Removed $($removed.Count) conflicting PATH entries for this process 
 # --manifest-path keeps the caller's working directory, so relative paths such as a bag
 # output directory land where the user ran the command, not inside NVIDIA's checkout.
 function Invoke-Pixi {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
-    & $pixi @Arguments
+    # A simple function (no param block) so every argument, including ROS flags such as -o,
+    # reaches pixi verbatim instead of binding to PowerShell common parameters.
+    & $pixi @args
     if ($LASTEXITCODE -ne 0) {
-        throw "pixi $($Arguments -join ' ') failed with exit code $LASTEXITCODE"
+        throw "pixi $($args -join ' ') failed with exit code $LASTEXITCODE"
     }
 }
 
