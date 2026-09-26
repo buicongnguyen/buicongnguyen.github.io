@@ -1,34 +1,24 @@
-import math
-import statistics
-import time
-from numbers import Integral
+"""Drill 6: fair benchmark harness. Implement benchmark.
+
+    python -m pytest test_lab.py -q      # tests this file; they fail until you finish
+"""
+
+import math  # noqa: F401 - you will need these
+import statistics  # noqa: F401
+import time  # noqa: F401 - call time.perf_counter(); the tests replace it with a fake clock
 
 
 def benchmark(operation, warmup=3, repeats=10, synchronize=lambda: None):
-    if not callable(operation) or not callable(synchronize):
-        raise ValueError("operation and synchronize must be callable")
-    if isinstance(warmup, bool) or not isinstance(warmup, Integral) or warmup < 0:
-        raise ValueError("warmup must be a non-negative integer")
-    if isinstance(repeats, bool) or not isinstance(repeats, Integral) or repeats <= 0:
-        raise ValueError("repeats must be a positive integer")
-    warmup = int(warmup)
-    repeats = int(repeats)
-    for _ in range(warmup):
-        operation()
-        synchronize()
-    samples = []
-    for _ in range(repeats):
-        synchronize()
-        start = time.perf_counter()
-        operation()
-        synchronize()
-        samples.append(time.perf_counter() - start)
-    ordered = sorted(samples)
-    p90_index = math.ceil(0.9 * len(ordered)) - 1
-    return {
-        "operation": getattr(operation, "__qualname__", type(operation).__name__),
-        "warmup": warmup,
-        "repeats": repeats,
-        "median_s": statistics.median(samples),
-        "p90_s": ordered[p90_index],
-    }
+    """Time `operation` and return a result dictionary.
+
+    - Run `warmup` untimed calls first, each followed by synchronize().
+    - For each of `repeats` measured calls: synchronize(), read time.perf_counter(), call
+      operation(), synchronize(), read time.perf_counter() again. Synchronizing before
+      the second read makes asynchronous work (for example a GPU kernel) count.
+    - Return {"operation": its __qualname__, "warmup", "repeats", "median_s", "p90_s"},
+      where p90_s is the nearest-rank 90th percentile: the ceil(0.9 * n)-th smallest sample.
+
+    Raise ValueError when operation or synchronize is not callable, warmup is not a
+    non-negative integer, or repeats is not a positive integer (a bool is not an integer).
+    """
+    raise NotImplementedError("implement benchmark")

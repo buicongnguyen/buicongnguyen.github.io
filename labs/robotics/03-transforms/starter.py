@@ -1,30 +1,28 @@
-import numpy as np
+"""Drill 3: rigid transform composition. Implement compose and transform_point.
 
+    python -m pytest test_lab.py -q      # tests this file; they fail until you finish
 
-def _as_transform(value):
-    transform = np.asarray(value, float)
-    if transform.shape != (4, 4) or not np.isfinite(transform).all():
-        raise ValueError("expected a finite 4x4 transform")
-    if not np.allclose(transform[3], [0, 0, 0, 1], atol=1e-10, rtol=0):
-        raise ValueError("expected a homogeneous final row")
-    rotation = transform[:3, :3]
-    if (
-        not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-10, rtol=0)
-        or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-10, rtol=0)
-    ):
-        raise ValueError("rotation must be orthonormal with determinant +1")
-    return transform
+Name every transform A_from_B: it maps coordinates expressed in frame B into frame A.
+Then A_from_C = A_from_B @ B_from_C, and the inner frame names must match.
+"""
+
+import numpy as np  # noqa: F401 - you will need it
 
 
 def compose(a_from_b, b_from_c):
-    result = _as_transform(a_from_b) @ _as_transform(b_from_c)
-    if not np.isfinite(result).all():
-        raise ValueError("composed transform must remain finite")
-    return result
+    """Return the 4x4 A_from_C transform.
+
+    Raise ValueError unless both inputs are finite 4x4 homogeneous rigid transforms:
+    last row [0, 0, 0, 1], rotation block orthonormal (R.T @ R == I) with det(R) == +1.
+    A scale or a reflection is not a rigid transform.
+    """
+    raise NotImplementedError("implement compose")
 
 
 def transform_point(a_from_b, point_b):
-    point = np.asarray(point_b, float)
-    if point.shape != (3,) or not np.isfinite(point).all():
-        raise ValueError("expected a finite xyz point")
-    return (_as_transform(a_from_b) @ np.r_[point, 1.0])[:3]
+    """Return point_b (a finite xyz point in frame B) expressed in frame A.
+
+    Raise ValueError for a non-rigid transform or a point that is not three finite numbers.
+    Hint: append 1 to make the point homogeneous, multiply, and drop the last element.
+    """
+    raise NotImplementedError("implement transform_point")

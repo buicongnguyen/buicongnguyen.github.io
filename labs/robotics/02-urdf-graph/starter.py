@@ -1,34 +1,22 @@
+"""Drill 2: URDF joint-graph validator. Implement validate_tree, then run the tests.
+
+    python -m pytest test_lab.py -q      # tests this file; they fail until you finish
+"""
+
+
 def validate_tree(joints):
-    parents = {}
-    nodes = set()
-    try:
-        edges = list(joints)
-    except TypeError as error:
-        raise ValueError("joints must be an iterable of parent-child pairs") from error
-    for edge in edges:
-        if not isinstance(edge, (tuple, list)) or len(edge) != 2:
-            raise ValueError("each joint must be a parent-child pair")
-        parent, child = edge
-        if not isinstance(parent, str) or not parent.strip() or not isinstance(child, str) or not child.strip():
-            raise ValueError("link names must be non-empty strings")
-        if parent == child:
-            raise ValueError("a link cannot be its own parent")
-        if child in parents:
-            raise ValueError("child has multiple parents")
-        parents[child] = parent
-        nodes.update((parent, child))
-    roots = nodes - set(parents)
-    if len(roots) != 1:
-        raise ValueError("expected exactly one root")
-    root = next(iter(roots))
-    visited = set()
-    stack = [root]
-    while stack:
-        node = stack.pop()
-        if node in visited:
-            raise ValueError("cycle detected")
-        visited.add(node)
-        stack.extend(child for child, parent in parents.items() if parent == node)
-    if visited != nodes:
-        raise ValueError("graph is disconnected or cyclic")
-    return root
+    """Return the single root link of a valid kinematic tree.
+
+    `joints` is an iterable of (parent, child) link-name pairs. Raise ValueError when:
+    - `joints` is not iterable, or an item is not a two-element pair;
+    - a link name is empty or not a string, or a link is its own parent;
+    - a child has more than one parent;
+    - there is not exactly one root (a link that is never a child);
+    - some link cannot be reached from the root (a detached cycle or second tree).
+
+    Hints:
+    - Build a child -> parent map while validating each pair.
+    - A cycle that does not include the root still leaves exactly one root, so only a
+      traversal from the root reveals it: compare the visited set with all links.
+    """
+    raise NotImplementedError("implement validate_tree")

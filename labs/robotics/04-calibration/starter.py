@@ -1,42 +1,32 @@
-import numpy as np
+"""Drill 4: calibration sweep with a held-out check. Implement fit_grid and rmse.
+
+    python -m pytest test_lab.py -q      # tests this file; they fail until you finish
+
+Fit on calibration rows only, then report error on untouched held-out rows. A parameter
+chosen by looking at the held-out rows is no longer validated by them.
+"""
+
+import numpy as np  # noqa: F401 - you will need it
 
 
 def fit_grid(candidates, calibration_x, calibration_y, model):
-    parameters = np.asarray(candidates, dtype=float)
-    expected = np.asarray(calibration_y, dtype=float)
-    features = np.asarray(calibration_x)
-    if parameters.ndim != 1 or parameters.size == 0 or not np.isfinite(parameters).all():
-        raise ValueError("candidates must be a non-empty finite one-dimensional sequence")
-    if expected.ndim == 0 or expected.size == 0 or not np.isfinite(expected).all():
-        raise ValueError("calibration targets must be a non-empty finite sequence")
-    if features.ndim == 0 or features.shape[0] != expected.shape[0]:
-        raise ValueError("calibration features and targets must have the same sample count")
+    """Return the candidate parameter with the lowest mean squared calibration error.
 
-    scores = []
-    for parameter in parameters:
-        prediction = np.asarray(model(calibration_x, float(parameter)), dtype=float)
-        if prediction.shape != expected.shape or not np.isfinite(prediction).all():
-            raise ValueError("model output must match the finite target shape")
-        with np.errstate(over="ignore", invalid="ignore"):
-            score = np.mean((prediction - expected) ** 2)
-        if not np.isfinite(score):
-            raise ValueError("calibration error must remain finite")
-        scores.append(score)
-    return float(parameters[int(np.argmin(scores))])
+    `model(calibration_x, parameter)` returns predictions shaped like calibration_y.
+    Raise ValueError when:
+    - candidates is empty, not one-dimensional, or not finite;
+    - calibration_y is a scalar, empty, or not finite;
+    - calibration_x and calibration_y have different sample counts;
+    - a prediction's shape differs from calibration_y (do not let NumPy broadcast it) or
+      a prediction or score is not finite.
+    """
+    raise NotImplementedError("implement fit_grid")
 
 
 def rmse(expected, observed):
-    expected_values = np.asarray(expected, dtype=float)
-    observed_values = np.asarray(observed, dtype=float)
-    if (
-        expected_values.shape != observed_values.shape
-        or expected_values.size == 0
-        or not np.isfinite(expected_values).all()
-        or not np.isfinite(observed_values).all()
-    ):
-        raise ValueError("expected and observed must be non-empty finite arrays with matching shapes")
-    with np.errstate(over="ignore", invalid="ignore"):
-        result = np.sqrt(np.mean((expected_values - observed_values) ** 2))
-    if not np.isfinite(result):
-        raise ValueError("RMSE must remain finite")
-    return float(result)
+    """Return the root-mean-square error of two non-empty, finite, same-shape arrays.
+
+    Raise ValueError otherwise. Hint: [1, 2] versus [[1], [2]] broadcasts to 2x2 in
+    NumPy, which silently turns a shape bug into a wrong number.
+    """
+    raise NotImplementedError("implement rmse")

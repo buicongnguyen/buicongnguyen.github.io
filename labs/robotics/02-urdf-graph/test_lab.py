@@ -1,5 +1,14 @@
+"""Tests for this drill. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import pytest
-from starter import validate_tree
+
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+validate_tree = lab.validate_tree
 
 
 def test_tree_contracts():

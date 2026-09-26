@@ -1,7 +1,16 @@
+"""Tests for this drill. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import numpy as np
 import pytest
 
-from starter import compose, transform_point
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+compose = lab.compose
+transform_point = lab.transform_point
 
 
 def test_frame_order_and_round_trip():

@@ -1,7 +1,17 @@
+"""Readiness tests. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import numpy as np
 import pytest
 
-from readiness import box_inertia, compose, normalize_rows
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+box_inertia = lab.box_inertia
+compose = lab.compose
+normalize_rows = lab.normalize_rows
 
 
 def test_normalize_rows_and_reject_zero():

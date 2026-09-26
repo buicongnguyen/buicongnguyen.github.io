@@ -2,17 +2,23 @@
 
 Run these tasks before Module 0. Retain the command output, calculation, diagram, or contract named by each gate.
 
-## Python, NumPy, and pytest
+## Python, NumPy, transforms, and inertia
 
-Implement and test vector normalization. Pass when `pytest -q` exits successfully, a zero vector raises `ValueError`, and vector elements are not processed in a Python loop.
+Implement `normalize_rows`, `compose`, and `box_inertia` in `starter.py`; each docstring is the specification. Pass when the tests below exit successfully. `normalize_rows` must not loop over vector elements in Python, and a zero vector must raise `ValueError`.
 
 ```powershell
-python -m pytest .\labs\readiness\test_readiness.py -q
+python -m pytest .\labs\readiness\test_readiness.py -q                                   # your starter.py
+$env:LAB_IMPL = "solution"; python -m pytest .\labs\readiness\test_readiness.py -q; Remove-Item Env:LAB_IMPL   # reference
 ```
+
+Then do the calculations by hand:
+- Box inertia: calculate it for new dimensions, then check your numbers with `python .\labs\readiness\inertia_task.py`.
+- Transform order: explain it, then run `python .\labs\readiness\transform_task.py`.
+- Step response: change gains and mass in `python .\labs\readiness\step_response.py` and predict the overshoot first.
 
 ## Git and command line
 
-Create a temporary practice repository, make two focused commits on a branch, inspect `git diff HEAD~2..HEAD`, deliberately change two files, and restore only one. Pass with a clean, intelligible history and the intended final content.
+Create a temporary practice repository, make two focused commits on a branch, inspect `git diff HEAD~2..HEAD`, deliberately change two files, and restore only one. Pass when `git status` shows exactly the one change you kept, the history is intelligible, and the final content is what you intended.
 
 ## ROS contract
 

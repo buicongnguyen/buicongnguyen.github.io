@@ -1,7 +1,16 @@
+"""Tests for this drill. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import numpy as np
 import pytest
 
-from starter import fit_grid, rmse
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+fit_grid = lab.fit_grid
+rmse = lab.rmse
 
 
 def test_calibration_uses_declared_split():

@@ -1,6 +1,15 @@
+"""Tests for this drill. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import numpy as np
 import pytest
-from starter import validate_inertia
+
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+validate_inertia = lab.validate_inertia
 
 
 def test_valid_and_invalid_inertia():
@@ -19,3 +28,8 @@ def test_valid_and_invalid_inertia():
         validate_inertia(np.eye(3), atol=float("nan"))
     with pytest.raises(ValueError):
         validate_inertia(np.eye(3), atol="1e-10")
+
+
+def test_flat_plate_on_the_triangle_boundary_is_valid():
+    # A thin plate has I3 == I1 + I2 exactly; it is a real body, not a violation.
+    np.testing.assert_allclose(validate_inertia(np.diag([1.0, 1.0, 2.0])), [1.0, 1.0, 2.0])

@@ -1,6 +1,14 @@
+"""Tests for this drill. They exercise starter.py (your work) by default and fail until it is
+complete; LAB_IMPL=solution runs them against the reference implementation.
+"""
+
+import importlib
+import os
+
 import pytest
 
-from starter import benchmark
+lab = importlib.import_module(os.environ.get("LAB_IMPL", "starter"))
+benchmark = lab.benchmark
 
 
 def test_warmup_and_measurement_counts():
@@ -23,7 +31,7 @@ def test_warmup_and_measurement_counts():
 
 def test_p90_uses_nearest_rank(monkeypatch):
     timestamps = iter([0, 1, 1, 3, 3, 6, 6, 10, 10, 110])
-    monkeypatch.setattr("starter.time.perf_counter", lambda: next(timestamps))
+    monkeypatch.setattr(lab.time, "perf_counter", lambda: next(timestamps))
     result = benchmark(lambda: None, warmup=0, repeats=5)
     assert result["median_s"] == 3
     assert result["p90_s"] == 100

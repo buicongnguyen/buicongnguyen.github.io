@@ -1,43 +1,29 @@
-import numpy as np
+"""Drill 5: reset and determinism regression. Implement rollout and first_divergence.
+
+    python -m pytest test_lab.py -q      # tests this file; they fail until you finish
+"""
+
+import numpy as np  # noqa: F401 - you will need it
 
 
 def rollout(seed, steps=100):
-    # seed=None would draw fresh OS entropy and silently make the rollout nondeterministic.
-    if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)):
-        raise ValueError("seed must be an integer")
-    if isinstance(steps, bool) or not isinstance(steps, (int, np.integer)) or steps <= 0:
-        raise ValueError("steps must be a positive integer")
-    rng = np.random.default_rng(seed)
-    state = 0.0
-    rows = []
-    for _ in range(steps):
-        state = 0.98 * state + rng.normal(0, 0.01)
-        rows.append(state)
-    return np.asarray(rows)
+    """Return a length-`steps` trace of the process state = 0.98 * state + N(0, 0.01).
+
+    Use one np.random.default_rng(seed) per rollout, starting from state 0.0, so the same
+    seed always reproduces the same trace. Raise ValueError when:
+    - seed is not an integer (None would draw fresh OS entropy: silently nondeterministic);
+    - steps is not a positive integer (a bool is not an integer here).
+    """
+    raise NotImplementedError("implement rollout")
 
 
 def first_divergence(left, right, atol=1e-12, rtol=1e-12):
-    try:
-        left_values = np.asarray(left, dtype=float)
-        right_values = np.asarray(right, dtype=float)
-    except (TypeError, ValueError) as error:
-        raise ValueError("traces must contain numeric values") from error
-    if left_values.shape != right_values.shape:
-        raise ValueError("traces must have matching shapes")
-    # inf == inf would otherwise count as agreement and NaN as an ordinary divergence.
-    if not np.isfinite(left_values).all() or not np.isfinite(right_values).all():
-        raise ValueError("traces must contain only finite state")
-    if (
-        isinstance(atol, (bool, np.bool_))
-        or isinstance(rtol, (bool, np.bool_))
-        or not isinstance(atol, (int, float, np.integer, np.floating))
-        or not isinstance(rtol, (int, float, np.integer, np.floating))
-        or not np.isfinite([atol, rtol]).all()
-        or atol < 0
-        or rtol < 0
-    ):
-        raise ValueError("tolerances must be finite and non-negative")
-    if left_values.size == 0:
-        return None
-    matches = np.isclose(left_values, right_values, atol=atol, rtol=rtol, equal_nan=False)
-    return None if matches.all() else int(np.flatnonzero(~matches)[0])
+    """Return the index of the first sample where two traces disagree, or None.
+
+    Samples agree when np.isclose(left, right, atol=atol, rtol=rtol). Report the first
+    divergent index, not only whether the final checksums match. Raise ValueError when:
+    - a trace is not numeric, or the shapes differ;
+    - a trace contains NaN or infinity (inf == inf would otherwise look like agreement);
+    - atol or rtol is not a finite, non-negative number.
+    """
+    raise NotImplementedError("implement first_divergence")
