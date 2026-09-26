@@ -23,37 +23,57 @@ GitHub-hosted runners do not provide this workstation’s RTX simulator environm
 
 ## Step 1 — run the repository’s offline tests
 
+Use the session variables from [Shared startup](ros2-labs.md#shared-startup). The offline suite needs only the Python standard library:
+
 ```powershell
-C:\isaacsim-6.0.1\python.bat -m unittest discover `
-  -s C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\tests -v
+python -m unittest discover -s "$Assets\tests" -v
 ```
 
-The suite checks camera-message sequences, watchdog timeouts, URDF failures, sweep ranking, benchmark math, robustness coverage, and evidence aggregation.
+It covers four areas:
+- **Every contract:** clock, JointState, TF tree, watchdog latency, image payload, and CameraInfo.
+- **Every URDF planted fault from Lab 06.**
+- **Sweep, benchmark, and robustness statistics:** candidate means and identifiability, the held-out rule, the exact Mann–Whitney p-value, workload identity, the Latin-hypercube strata, the Wilson interval, and failure bins.
+- **Two end-to-end command runs** that execute the documented Lab 06–10 commands on the shipped fixtures, feed their reports to the evidence gate, and check that failing inputs exit non-zero.
+
+The local ROS lane runs the tools against real ROS: it writes MCAP bags through `bag_contract_check.py` and runs the watchdog node, including `Ctrl+C`.
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python -m unittest discover -s "$Assets\tests\ros" -v
+```
 
 ## Step 2 — prove negative tests
 
-Temporarily change a copied fixture, never the canonical file:
+Each planted fault below is already a test, so CI proves the validators can still fail. Find each one, then plant one yourself in a copied fixture (never the canonical file) and watch the matching test's target fail:
 
-- zero mass in a copied URDF;
-- repeated image timestamp;
-- missing evidence JSON;
-- `ok:false` report;
-- benchmark with zero wall duration.
+| Planted fault | Test |
+|---|---|
+| zero mass, unknown link, negative `ixx`, triangle violation, zero axis | `UrdfAuditTests.test_planted_faults` |
+| repeated or truncated image payload, short stride, empty encoding | `ContractTests.test_image_planted_faults` |
+| missing, malformed, non-object, `ok:false`, or `ok:"true"` evidence | `EvidenceGateTests.test_missing_false_malformed_and_non_object_reports_fail` |
+| zero wall duration | `BenchmarkTests.test_zero_wall_duration_is_rejected` |
+| confounded sweep, single runs | `ParameterSweepTests.test_confounded_sweep_is_rejected`, `test_single_runs_are_rejected` |
+| NaN watchdog timeout | `ContractTests.test_watchdog_rejects_timeouts_that_would_fail_open` |
 
 Each must fail for the correct reason. Restore the fixture and rerun green.
 
 ## Step 3 — aggregate a run contract
 
+Each earlier lab writes its report into `$Run`, so the gate names exactly those files:
+
 ```powershell
-$Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
-C:\isaacsim-6.0.1\python.bat "$Assets\evidence_gate.py" `
-  --require model="$Run\model_audit.json" `
-  --require physics="$Run\physics_fit_report.json" `
+python "$Assets\evidence_gate.py" `
   --require camera="$Run\camera_probe.json" `
+  --require bag="$Run\bag_contract.json" `
+  --require model="$Run\model_audit.json" `
+  --require physics="$Run\physics_fit.json" `
   --output "$Run\gate.json"
 ```
 
-The aggregator accepts only valid JSON with top-level `ok:true`. A missing, malformed, or explicitly failed report makes the combined gate fail.
+After Labs 09 and 10, add `--require performance="$Run\performance.json"` and `--require robustness="$Run\robustness.json"`.
+
+The aggregator accepts only a JSON object whose top-level `ok` is exactly `true`. A missing, malformed, non-object, or explicitly failed report, or a duplicated requirement name, makes the combined gate fail.
+
+It reads UTF-8, and also UTF-16 with a byte-order mark. Windows PowerShell 5.1's `>` redirection writes UTF-16, so a hand-redirected report still parses. Prefer each tool's `--output` anyway.
 
 ## Step 4 — understand the CI state machine
 
@@ -67,7 +87,13 @@ stateDiagram-v2
     Deploy --> PublicVerification
 ```
 
-The Pages workflow now executes the standard-library robotics tests before uploading the site artifact. It does not claim to launch Isaac Sim.
+The Pages workflow runs `python scripts/check_all.py` before uploading the site artifact. That runs:
+- the lab-tool tests;
+- every exercise in both directions (the reference must pass, and the planted defect or starter must fail);
+- internal link and anchor checks;
+- a check that the generated lab pages match their Markdown.
+
+It does not claim to launch Isaac Sim.
 
 ## Step 5 — define the optional local GPU lane
 

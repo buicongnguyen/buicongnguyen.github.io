@@ -2,13 +2,14 @@
 
 - **Prerequisite:** Labs 01–04 pass.
 - **Goal:** capture the interface contract and prove useful analysis can run again without live Isaac Sim publishers.
-- **Pass:** rosbag metadata contains the declared topics/types and replay reproduces observable message/schema/frame/timestamp analysis with Isaac Sim stopped.
+- **Pass:** rosbag metadata contains the declared topics/types, the offline bag checker reproduces the Lab 01–04 contracts, and replay reproduces observable message/schema/frame/timestamp analysis with Isaac Sim stopped.
 
 - Live page: <https://buicongnguyen.github.io/robotics-simulation-engineer/lab-05-rosbag-validation.html>
 - [NVIDIA Windows Jazzy/Pixi + Zenoh configuration](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
 - [NVIDIA Isaac Sim ROS Workspaces](https://github.com/isaac-sim/IsaacSim-ros_workspaces)
 - [ROS 2 Jazzy command-line tools](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Command-Line-Tools.html)
 - [ROS 2 replay testing](https://docs.ros.org/en/jazzy/p/replay_testing/)
+- Offline checker: [lab-assets/bag_contract_check.py](lab-assets/bag_contract_check.py) with [lab-assets/lab05_bag_manifest.json](lab-assets/lab05_bag_manifest.json)
 
 This PC’s Windows Pixi environment was checked on 3 August 2026 and exposes `ros2 bag record`, `info`, `play`, `convert`, `reindex`, and `burst`.
 
@@ -45,37 +46,35 @@ sequenceDiagram
 
 ## Step 1 — declare the recording contract
 
-Before recording, save this manifest and replace camera names with discovered topics:
+Before recording, copy the committed manifest into your run folder, then replace the camera names with the topics you discovered in Lab 04:
 
-```yaml
-required_topics:
-  - /clock
-  - /joint_states
-  - /tf
-  - /tf_static
-  - /odom
-  - /cmd_vel
-  - /camera_1/rgb/image_raw
-  - /camera_1/rgb/camera_info
-required_behaviors:
-  clock_monotonic: true
-  joint_arrays_valid: true
-  tf_connected_acyclic: true
-  watchdog_zero_observed: true
-  image_probe_ok: true
+```powershell
+Copy-Item "$Assets\lab05_bag_manifest.json" "$Run\bag_manifest.json"
 ```
+
+The manifest is the contract the offline checker enforces:
+
+| Key | Contract it runs |
+|---|---|
+| `required_topics` | each topic exists with this exact type and at least one message |
+| `/clock` in the list | Lab 01: simulation time never moves backward and does advance |
+| `/joint_states` in the list | Lab 02: array lengths, unique names, finite values, stable order, stamps never backward |
+| `/tf` or `/tf_static` in the list + `required_tf_edges` | Lab 02: one parent per child, no cycles, one root, `odom → base_link` present |
+| `watchdog` | Lab 03: first zero on `/cmd_vel` within `timeout + 1/rate + slack` after the last `/cmd_vel_raw` |
+| `image` | Lab 04: the camera probe's image and CameraInfo contracts |
+
+Add `/tf_static` to `required_topics` only if your stage deliberately publishes static transforms (Lab 02).
 
 Do not use `ros2 bag record -a` for the primary artifact. An explicit topic list prevents accidental collection of irrelevant or sensitive topics and makes the contract reviewable.
 
-Create `lab-assets/rosbag_qos_overrides.yaml` and use it for bandwidth-heavy sensor topics and transient-local static transforms. QoS overrides are part of the experiment contract, not an afterthought.
+Use the committed [`lab-assets/rosbag_qos_overrides.yaml`](lab-assets/rosbag_qos_overrides.yaml). Sensor streams commonly use best-effort reliability, while late static-TF consumers need transient-local durability. QoS overrides are part of the experiment contract, not an afterthought.
 
 ## Step 2 — prepare a bounded output directory
 
+Use the session variables from [Shared startup](ros2-labs.md#shared-startup). The bag goes inside this attempt's run folder; `ros2 bag record` creates the directory itself and refuses to overwrite an existing one.
+
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-$RunRoot = "C:\Users\n\source\repos\issac_sim\projects\ros2_pipeline\runs"
-$Bag = Join-Path $RunRoot ("lab05_" + (Get-Date -Format "yyyyMMdd_HHmmss"))
-New-Item -ItemType Directory -Force -Path $RunRoot | Out-Null
+$Bag = "$Run\lab05_bag"
 ```
 
 Check all required topics and types before recording:
@@ -89,8 +88,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 In a dedicated terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag record -o $Bag --qos-profile-overrides-path "$Assets\rosbag_qos_overrides.yaml" /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
+
+Recording `/cmd_vel_raw` as well as `/cmd_vel` lets the checker measure stale-to-zero latency instead of only seeing that a zero happened.
 
 While recording:
 
@@ -116,11 +117,23 @@ Confirm:
 - duration is greater than zero;
 - every declared topic has the expected type;
 - message counts are nonzero except an intentionally transient topic;
-- the bag size is plausible for the image resolution/duration.
+- the bag size is plausible for the image resolution/duration. An unexpectedly tiny bag often means missing sensor data.
 
 If metadata is damaged after an abnormal stop, preserve the original and use `ros2 bag reindex` on a copy; document the recovery.
 
-## Step 5 — isolate live publishers before replay
+## Step 5 — re-run the Lab 01–04 contracts offline
+
+The checker reads the bag directly, so it needs neither Isaac Sim nor a replay:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "$Assets\bag_contract_check.py" $Bag --manifest "$Run\bag_manifest.json" --output "$Run\bag_contract.json"
+```
+
+It exits non-zero unless every declared contract passes. Each entry under `checks` names its own failure, for example `frame 'base_link' has multiple parents` or a `stale_to_zero_s` above `bound_s`. Run it twice on the same bag: the report must be identical, which is the point of recording.
+
+The rules live in `lab_contracts.py` and are unit-tested offline. `tests/ros/test_ros_integration.py` writes real MCAP bags, one clean and three with planted faults (clock jumps backward, a TF child with two parents, a watchdog that never zeroes). It checks that each fault fails only its own contract.
+
+## Step 6 — isolate live publishers before replay
 
 1. Stop and close Isaac Sim.
 2. Stop the command publisher and watchdog.
@@ -133,12 +146,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_s
 
 The publisher count should be zero before replay. This prevents recorded and live data from interleaving.
 
-## Step 6 — replay and validate in separate terminals
+## Step 7 — replay and validate consumers in separate terminals
 
 Replay terminal:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag play $Bag --qos-profile-overrides-path "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\rosbag_qos_overrides.yaml" --topics /clock /joint_states /tf /tf_static /odom /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 bag play $Bag --qos-profile-overrides-path "$Assets\rosbag_qos_overrides.yaml" --topics /clock /joint_states /tf /tf_static /odom /cmd_vel_raw /cmd_vel /camera_1/rgb/image_raw /camera_1/rgb/camera_info
 ```
 
 Observer terminal:
@@ -152,21 +165,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/
 Camera contract probe during replay:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "$Assets\camera_probe.py" --topic /camera_1/rgb/image_raw --camera-info /camera_1/rgb/camera_info --samples 5 --timeout 15 --output "$Run\camera_probe_replay.json"
 ```
 
 Replay may finish before a late observer starts. Start observers first and use rosbag play options such as looping or a delayed start only after reading `ros2 bag play --help` for the installed version.
 
-## Step 7 — validate reproducibility boundaries
+## Step 8 — validate reproducibility boundaries
 
-Run the same checks used in earlier labs:
-
-```text
-Lab 01: clock timestamps appear and do not move backward in the episode
-Lab 02: JointState arrays remain structurally valid; TF frame names/types persist
-Lab 03: recorded /cmd_vel contains fresh commands and the watchdog zero
-Lab 04: image schema/payload/frame probe passes
-```
+Step 5 already re-ran the Lab 01–04 contracts on the recording. Replay adds the consumer side: the same probe that passed live (`$Run\camera_probe.json`) must pass on replayed data (`$Run\camera_probe_replay.json`).
 
 Compare live versus replay results in a table. Differences in wall-arrival rate during replay are expected unless playback rate and machine load are controlled; message timestamps and schemas are the primary reproducibility contract.
 
@@ -193,6 +199,7 @@ flowchart TD
 
 - recording manifest and exact command;
 - `ros2 bag info` output;
+- `$Run\bag_contract.json` from the offline checker;
 - bag metadata, duration, size, topic types, and counts;
 - screenshot/log proving Isaac publishers were stopped before replay;
 - replay JointState/odom samples and camera probe JSON;
@@ -204,4 +211,4 @@ Keep large bag data out of Git unless deliberately managed with an appropriate a
 
 ## Final gate
 
-Lab 05 passes when another engineer can launch the documented Windows environment, reproduce the clock/state/control/camera contracts, inspect the bag metadata, replay the selected topics with Isaac Sim stopped, and obtain the same schema/frame/timestamp conclusions. Continue to [Lab 06](lab-06-urdf-model-audit.md) to audit the robot model before physics tuning.
+Lab 05 passes when another engineer can launch the documented Windows environment, run `bag_contract_check.py` on your bag and get your `bag_contract.json`, replay the selected topics with Isaac Sim stopped, and obtain the same schema/frame/timestamp conclusions. Continue to [Lab 06](lab-06-urdf-model-audit.md) to audit the robot model before physics tuning.

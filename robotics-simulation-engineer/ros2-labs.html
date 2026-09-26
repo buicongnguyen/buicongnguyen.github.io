@@ -1,10 +1,224 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Ten practical Isaac Sim 6.0.1 and ROS 2 Jazzy labs from runtime contracts through model audit, physics identification, CI, profiling, and robustness."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-labs.html"><title>Isaac Sim + ROS 2 Labs 01–10 | Robotics Simulation Engineering</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="gui-clock-test.css?v=20260803-1"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to the lab path</a><header class="site-header"><a class="brand" href="index.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Robotics Simulation Engineering</span></a><nav aria-label="Lab path navigation"><a href="dashboard.html">Dashboard</a><a href="index.html">Course</a><a href="#path">Ten labs</a><a href="#architecture">Architecture</a><a href="#debug">Debug logic</a><a href="#evidence">Evidence</a></nav></header>
-<main id="main"><section class="hero dual-hero" aria-labelledby="path-title"><div><p class="eyebrow">Fast track · ten observable gates · one engineering story</p><h1 id="path-title">Isaac Sim + ROS 2 Practical Labs 01–10</h1><p class="lede">Build a trustworthy runtime first, then prove model quality, identify physics, automate regression tests, profile bottlenecks, and measure robustness. Each lab answers one question and produces evidence another engineer can review.</p><div class="hero-actions"><a class="button" href="isaac-sim-gui-clock-test.html">Start Lab 01</a><a class="button secondary" href="ros2-labs.md">Read Markdown</a><a class="button secondary" href="labs-06-10-plan.md">Read reviewed plan</a></div></div><aside class="hero-panel"><p class="eyebrow">Machine contract</p><dl><div><dt>Simulator</dt><dd>6.0.1</dd></div><div><dt>GPU</dt><dd>RTX 4080 SUPER</dd></div><div><dt>ROS</dt><dd>Jazzy</dd></div><div><dt>RMW</dt><dd>Zenoh</dd></div><div><dt>Domain</dt><dd>0</dd></div><div><dt>OS</dt><dd>Windows native</dd></div></dl></aside></section>
-<section class="section"><div class="section-heading"><p class="eyebrow">Official baseline</p><h2>Reproduce against pinned 6.0.1 documentation</h2></div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Windows Jazzy + Pixi + Zenoh</a></h3><p>Authoritative native-Windows setup and launch sequence.</p></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html">ROS 2 tutorials</a></h3><p>Clock, TF, TurtleBot, sensors, and graph references.</p></article><article class="card"><span class="status-badge">NVIDIA upstream</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">ROS workspaces</a></h3><p>Pixi manifest, packages, launch tasks, and middleware.</p></article><article class="card"><span class="status-badge">NVIDIA current</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/download.html">Current release page</a></h3><p>Review changes before upgrading the pinned course.</p></article></div></section>
-<section id="path" class="section"><div class="section-heading"><p class="eyebrow">Dependency-reviewed path</p><h2>Interfaces before models; correctness before speed; nominal before uncertainty</h2></div><nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-<div class="contract-grid"><article class="contract-card"><h3>01–02 · Time and state</h3><p>Prove execution, joint schemas, odometry, and frame ownership.</p><a href="isaac-sim-gui-clock-test.html">Start runtime truth →</a></article><article class="contract-card"><h3>03–05 · Behavior and evidence</h3><p>Trace safe commands, validate sensors, and replay interfaces offline.</p><a href="lab-03-cmd-vel-watchdog.html">Build observable behavior →</a></article><article class="contract-card"><h3>06–07 · Model and physics</h3><p>Audit URDF structure, then identify nominal parameters against declared targets.</p><a href="lab-06-urdf-model-audit.html">Audit before tuning →</a></article><article class="contract-card"><h3>08 · Regression CI</h3><p>Aggregate small deterministic reports into one machine-readable release gate.</p><a href="lab-08-regression-ci.html">Automate the contracts →</a></article><article class="contract-card"><h3>09 · Performance</h3><p>Measure repeated RTF/FPS and use Tracy to isolate the limiting subsystem.</p><a href="lab-09-performance-profiling.html">Profile before changing →</a></article><article class="contract-card"><h3>10 · Robustness</h3><p>Test seeded, justified uncertainty ranges and reserve held-out scenarios.</p><a href="lab-10-domain-randomization.html">Measure robustness →</a></article></div></section>
-<section id="architecture" class="section"><div class="section-heading"><p class="eyebrow">Architecture</p><h2>Data becomes evidence, then evidence becomes gates</h2></div><div class="data-pipeline" role="img" aria-label="Ten lab engineering pipeline"><div><span>1</span><strong>Runtime truth</strong><small>clock · state · frames</small></div><b>→</b><div><span>2</span><strong>Behavior</strong><small>control · sensors</small></div><b>→</b><div><span>3</span><strong>Evidence</strong><small>bag · reports</small></div><b>→</b><div><span>4</span><strong>Engineering</strong><small>model · physics · CI</small></div><b>→</b><div><span>5</span><strong>Scale</strong><small>profile · robustness</small></div></div><div class="callout"><strong>Why this order is defensible:</strong> tuning cannot repair a malformed model; CI cannot validate an undefined contract; profiling cannot distinguish useful work from incorrect work; randomization cannot compensate for an uncalibrated nominal case.</div></section>
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation logic</p><h2>Return to the earliest violated contract</h2></div><div class="debug-flow"><div><strong>Environment</strong><span>version · RMW · domain</span></div><b>→</b><div><strong>Lifecycle</strong><span>timeline · trigger</span></div><b>→</b><div><strong>Interface</strong><span>schema · frame · time</span></div><b>→</b><div><strong>Model</strong><span>graph · inertia · contact</span></div><b>→</b><div><strong>Behavior</strong><span>targets · repeatability</span></div><b>→</b><div><strong>Scale</strong><span>trace · uncertainty</span></div></div><div class="table-wrap"><table><caption>Decision logic</caption><tbody><tr><th>No data</th><td>identity → discovery → execution → publisher ownership</td></tr><tr><th>Data is wrong</th><td>type → dimensions → units → frame → timestamp → rate</td></tr><tr><th>Motion is wrong</th><td>command latch → unit conversion → joint order → limits → contact</td></tr><tr><th>Result changes</th><td>seed → reset state → warm-up → test duration → hidden parameters</td></tr><tr><th>Correct but slow</th><td>repeat baseline → CPU/GPU trace → change one variable → compare tails</td></tr><tr><th>Nominal passes, variants fail</th><td>inspect worst cases → validate ranges → improve controller/model → retest held-out set</td></tr></tbody></table></div></section>
-<section id="evidence" class="section"><div class="section-heading"><p class="eyebrow">Portfolio outcome</p><h2>Finish with reviewable engineering evidence</h2></div><ul class="evidence-list"><li>version, environment, and seed manifest</li><li>USD/URDF and graph screenshots</li><li>topic/QoS/frame/time contracts</li><li>watchdog and camera reports</li><li>rosbag metadata and replay comparison</li><li>URDF audit and physics sweep score</li><li>CI evidence-gate output</li><li>benchmark, trace, and robustness matrix</li></ul><div class="gate"><strong>Claim boundary:</strong> this proves simulation/ROS integration, model validation, regression discipline, profiling, and simulation robustness. Without a physical robot it is sim-to-real preparation, not measured sim-to-real transfer.</div></section>
-<nav class="lesson-nav"><a href="dashboard.html"><span>Course</span><strong>← Dashboard</strong></a><a href="isaac-sim-gui-clock-test.html"><span>Begin</span><strong>Lab 01 · Clock →</strong></a></nav></main><footer><p>Ten labs. Ten gates. One defensible simulation-engineering story.</p><div class="footer-links"><a href="isaac-sim-gui-clock-test.html">Start Lab 01</a><a href="lab-06-urdf-model-audit.html">Start advanced path</a><a href="resources.html">Resources</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="This fast track turns one native-Windows Isaac Sim pipeline into a reviewable simulation-engineering portfolio. Use the labs in order: each gate removes one class of ambiguity before the next lab adds">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from ros2-labs.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-labs.html">
+<title>Isaac Sim + ROS 2 Practical Labs 01–10 | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="ros2-labs.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from ros2-labs.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="isaac-sim-ros-2-practical-labs-0110">Isaac Sim + ROS 2 Practical Labs 01–10</h1>
+<p>This fast track turns one native-Windows Isaac Sim pipeline into a reviewable simulation-engineering portfolio. Use the labs in order: each gate removes one class of ambiguity before the next lab adds complexity.</p>
+<pre><code class="language-yaml">simulator: Isaac Sim 6.0.1 — the pip package inside the Pixi workspace (the launcher's verify step prints its path)
+standalone_install: C:\isaacsim-6.0.1 (used only as isaac_sim_package_path for runtime DLLs)
+ros: Jazzy
+workspace: C:\IsaacSim-ros_workspaces\jazzy_ws (override with ISAAC_ROS_WS)
+middleware: rmw_zenoh_cpp
+domain: 0
+gpu: RTX 4080 SUPER
+launcher: robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
+wsl: not used for this path
+</code></pre>
+<h2 id="official-baseline">Official baseline</h2>
+<ul>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Isaac Sim 6.0.1 ROS 2 installation on Windows</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html">Isaac Sim 6.0.1 ROS 2 tutorials</a></li>
+<li><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">NVIDIA Isaac Sim ROS workspaces</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/installation/download.html">Current Isaac Sim release downloads</a></li>
+</ul>
+<p>Use the pinned 6.0.1 pages to reproduce this course. Use the current page only to review what changes before upgrading.</p>
+<h2 id="ten-lab-dependency-path">Ten-lab dependency path</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Lab</th>
+<th>Question answered</th>
+<th>Gate</th>
+<th>Machine-checked evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="isaac-sim-gui-clock-test.html">01 Clock</a></td>
+<td>When does the simulation execute?</td>
+<td><code>/clock</code> has the right type, owner, and lifecycle</td>
+<td><code>clock</code> contract in the Lab 05 bag report</td>
+</tr>
+<tr>
+<td><a href="lab-02-joint-states-tf.html">02 State + TF</a></td>
+<td>What moved, and in which frame?</td>
+<td>joint arrays, odometry, and dynamic TF are consistent</td>
+<td><code>joint_states</code> and <code>tf</code> contracts in the bag report</td>
+</tr>
+<tr>
+<td><a href="lab-03-cmd-vel-watchdog.html">03 Control</a></td>
+<td>How does a request become bounded motion?</td>
+<td>stale input reaches zero within timeout + one period</td>
+<td><code>watchdog</code> contract in the bag report</td>
+</tr>
+<tr>
+<td><a href="lab-04-camera-depth.html">04 Camera</a></td>
+<td>What was observed?</td>
+<td>image schema, CameraInfo, frame, stamps, and cadence pass</td>
+<td><code>$Run\camera_probe.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-05-rosbag-validation.html">05 Replay</a></td>
+<td>Can interface analysis be repeated?</td>
+<td>the offline bag checker reproduces Labs 01–04 conclusions</td>
+<td><code>$Run\bag_contract.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-06-urdf-model-audit.html">06 Model audit</a></td>
+<td>Is the robot model structurally and physically credible?</td>
+<td>graph, joints, mass, realizable inertia, colliders</td>
+<td><code>$Run\model_audit.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-07-physics-identification.html">07 Physics ID</a></td>
+<td>Which parameters explain nominal behavior?</td>
+<td>one-family sweep, ≥3 repeats, held-out win beyond noise</td>
+<td><code>$Run\physics_fit.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-08-regression-ci.html">08 Regression CI</a></td>
+<td>Will a change break a known contract?</td>
+<td>planted faults fail, clean fixtures pass, evidence gate aggregates</td>
+<td><code>$Run\gate.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-09-performance-profiling.html">09 Profiling</a></td>
+<td>Where is the actual bottleneck?</td>
+<td>same workload, significant RTF gain, gates still green</td>
+<td><code>$Run\performance.json</code></td>
+</tr>
+<tr>
+<td><a href="lab-10-domain-randomization.html">10 Robustness</a></td>
+<td>Does performance survive plausible uncertainty?</td>
+<td>complete seeded scenarios; pass-rate lower bound meets the gate</td>
+<td><code>$Run\robustness.json</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The design and logic review for Labs 06–10 is recorded in <a href="labs-06-10-plan.md">Labs 06–10 plan and dependency review</a>.</p>
+<h2 id="big-picture-architecture">Big-picture architecture</h2>
+<pre class="mermaid">flowchart LR
+  subgraph Runtime[&quot;Runtime contracts · Labs 01–05&quot;]
+    Time[&quot;timeline + /clock&quot;] --&gt; State[&quot;joint state + odom + TF&quot;]
+    Command[&quot;raw Twist&quot;] --&gt; Guard[&quot;steady-clock watchdog&quot;] --&gt; State
+    Sensor[&quot;RGB/depth&quot;] --&gt; Bag[&quot;rosbag + bag checker&quot;]
+    State --&gt; Bag
+  end
+  subgraph Engineering[&quot;Engineering contracts · Labs 06–10&quot;]
+    Model[&quot;URDF/model audit&quot;] --&gt; Physics[&quot;parameter identification&quot;] --&gt; CI[&quot;regression CI&quot;]
+    CI --&gt; Profile[&quot;benchmark + trace&quot;] --&gt; Robust[&quot;seeded uncertainty tests&quot;]
+  end
+  Bag --&gt; Model
+</pre>
+<p><strong>Why this order is defensible:</strong> tuning cannot repair a malformed model; CI cannot validate an undefined contract; profiling cannot tell useful work from incorrect work; randomization cannot compensate for an uncalibrated nominal case.</p>
+<h2 id="debugging-rule">Debugging rule</h2>
+<p>When a test fails, move left until the first invariant fails:</p>
+<pre class="mermaid">flowchart TD
+  Fail[&quot;Observed failure&quot;] --&gt; Env{&quot;Same version, RMW, domain, seed?&quot;}
+  Env -- no --&gt; FixEnv[&quot;repair environment identity&quot;]
+  Env -- yes --&gt; Life{&quot;timeline and execution active?&quot;}
+  Life -- no --&gt; FixLife[&quot;repair lifecycle/graph trigger&quot;]
+  Life -- yes --&gt; Data{&quot;schema, frame, time, rate valid?&quot;}
+  Data -- no --&gt; FixData[&quot;repair interface contract&quot;]
+  Data -- yes --&gt; Model{&quot;URDF and physics credible?&quot;}
+  Model -- no --&gt; FixModel[&quot;repair model/parameters&quot;]
+  Model -- yes --&gt; Perf{&quot;correct but slow or fragile?&quot;}
+  Perf -- slow --&gt; Trace[&quot;profile before optimizing&quot;]
+  Perf -- fragile --&gt; Bounds[&quot;review uncertainty bounds and controller&quot;]
+</pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check in this order</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No data</td>
+<td>identity → discovery → execution → publisher ownership</td>
+</tr>
+<tr>
+<td>Data is wrong</td>
+<td>type → dimensions → units → frame → timestamp → rate</td>
+</tr>
+<tr>
+<td>Motion is wrong</td>
+<td>command latch → unit conversion → joint order → limits → contact</td>
+</tr>
+<tr>
+<td>Result changes between runs</td>
+<td>seed → reset state → warm-up → test duration → hidden parameters</td>
+</tr>
+<tr>
+<td>Correct but slow</td>
+<td>repeat baseline → CPU/GPU trace → change one variable → compare tails</td>
+</tr>
+<tr>
+<td>Nominal passes, variants fail</td>
+<td>inspect worst cases → validate ranges → improve controller/model → retest held-out set</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="shared-startup">Shared startup</h2>
+<p>Every lab command assumes these four session variables. Set them once in each new PowerShell 7 (<code>pwsh</code>) terminal:</p>
+<pre><code class="language-powershell">$Repo = &quot;C:\path\to\your\clone&quot;                         # the folder that contains robotics-simulation-engineer
+$Launcher = &quot;$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1&quot;
+$Assets = &quot;$Repo\robotics-simulation-engineer\lab-assets&quot;
+$Run = &quot;$Repo\runs\attempt-01&quot;                          # one folder per attempt; runs\ is git-ignored
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
+</code></pre>
+<p>Then start the three long-running processes:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+# Terminal 1
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh
+# Terminal 2
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim
+# Terminal 3+
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
+</code></pre>
+<ul>
+<li><strong>What <code>verify</code> checks.</strong> It fails unless <code>ROS_DISTRO=jazzy</code>, <code>RMW_IMPLEMENTATION=rmw_zenoh_cpp</code>, and a numeric <code>ROS_DOMAIN_ID</code> load in a clean process. It also prints which Isaac Sim package the <code>sim</code> task runs, so record that path in your run manifest.</li>
+<li><strong>Arguments pass through unchanged.</strong> The launcher forwards everything after the action, including ROS short flags such as <code>-o</code> and <code>-p</code>, and runs in your current directory.</li>
+<li><strong>Offline tools need no ROS.</strong> They use only the Python standard library, so any Python 3.10+ can run them.</li>
+</ul>
+<p>Keep WSL closed while using this native-Windows contract. Labs 02–05 can use NVIDIA's shipped <code>Samples → ROS2 → Scenario → turtlebot_tutorial.usd</code>; inspect its graph rather than treating it as a black box.</p>
+<h2 id="completion-evidence">Completion evidence</h2>
+<p>Keep in <code>$Run</code>:
+- the version manifest and USD/URDF files;
+- graph screenshots;
+- the contract reports and bag metadata;
+- the parameter-sweep report and CI output;
+- the benchmark and trace;
+- the robustness report;
+- one failure → isolation → fix note per lab.</p>
+<p>Lab 08's evidence gate combines the JSON reports into one pass/fail result.</p>
+<p>This is strong simulation-engineering evidence. Without a physical robot, describe Lab 10 as simulation robustness and sim-to-real preparation, not measured sim-to-real transfer.</p>
+<p class="chapter-source">This chapter is generated from <a href="ros2-labs.md">ros2-labs.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

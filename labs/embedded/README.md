@@ -8,6 +8,8 @@
 
 Submit the corrected assertion, firmware, map calculation, and an explanation distinguishing visibility, atomicity, ordering, and mutual exclusion. `solution.c` is one reference approach.
 
+A common mistake in the reader is making the second sequence load `memory_order_acquire` and assuming that orders the payload load before it. An acquire operation only prevents *later* accesses from moving above it. The payload load can still sink below the second sequence read and return a torn sample. `solution.c` puts an `atomic_thread_fence(memory_order_acquire)` between the two, and the writer uses a plain load and store instead of a read-modify-write. Check the objects your compiler emits for any `__atomic_*` library call on your target.
+
 Use the executable oracle after calculating the addresses by hand:
 
 ```powershell

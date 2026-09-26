@@ -13,7 +13,7 @@
   <title>Reasoning &amp; Code Flow Atlas | Robotics Simulation Engineering</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
   <link rel="stylesheet" href="reasoning.css?v=20260713-2">
-  <link rel="stylesheet" href="../book-layout.css?v=20260730-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260926-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to reasoning atlas</a>
@@ -147,7 +147,7 @@
         <p class="eyebrow">Isaac Sim 6.0 standalone code lifecycle</p>
         <h2>Initialization order is part of correctness</h2>
         <p class="section-note">
-          This sequence matches the installed <code>C:\isaacsim-6.0.1</code> Isaac Sim 6.0.1 pattern. Parse ordinary Python
+          This sequence follows the Isaac Sim 6.0.1 standalone pattern. <code>isaacsim.core.api</code> is deprecated in 6.0 (it ships under <code>extsDeprecated</code>), so treat its <code>World</code> calls as version-sensitive. Parse ordinary Python
           arguments first, create <code>SimulationApp</code>, and only then import APIs supplied by the running Kit
           application. Mark version-sensitive code and never mix 4.x/5.x snippets into a 6.0 project without an API check.
         </p>
@@ -185,10 +185,11 @@ from enum import Enum, auto
 from time import perf_counter
 from isaacsim import SimulationApp        # runtime boundary
 
+args = parse_args()                       # plain argparse: no Kit imports yet
 app = SimulationApp({"headless": args.headless})
 
 # Import Kit/Isaac APIs only after the app exists.
-from isaacsim.core.api import World
+from isaacsim.core.api import World       # deprecated in 6.0; see isaacsim.core.experimental
 
 class Phase(Enum):
     APP_READY = auto(); STAGE_READY = auto(); RESETTING = auto()
@@ -211,8 +212,8 @@ try:
 
     for episode in range(cfg.episodes):
         phase = Phase.RESETTING
-        reset_all_owners(handles, cfg, args.seed, episode)
-        world.reset()                       # initialization barrier
+        world.reset()                       # initialization barrier; restores defaults
+        reset_all_owners(handles, cfg, args.seed, episode)  # then apply this episode's x0
         reset_snapshot = assert_reset_contract(handles)
         writer.write_reset(reset_snapshot)
         phase = Phase.READY
@@ -285,7 +286,7 @@ finally:
           <div class="lifecycle-node phase-loop"><span>Input</span><strong>Read x<sub>k</sub> + task context</strong><small>State/frame/time valid at the control boundary.</small></div>
           <div class="lifecycle-node phase-loop"><span>Intent</span><strong>Compute u<sub>requested</sub></strong><small>Controller target before real actuator constraints.</small></div>
           <div class="lifecycle-node phase-loop"><span>Contract</span><strong>Produce u<sub>applied</sub></strong><small>Delay, rate limit, saturation, drive semantics, and watchdog.</small></div>
-          <div class="lifecycle-node phase-loop"><span>Transition</span><strong>Physics step</strong><small>Integrate, collide, solve constraints, and advance simulation time.</small></div>
+          <div class="lifecycle-node phase-loop"><span>Transition</span><strong>Physics step</strong><small>Detect collisions, solve contact and joint constraints, integrate, and advance simulation time.</small></div>
           <div class="lifecycle-node phase-loop"><span>Output</span><strong>Read x<sub>k+1</sub> + contacts</strong><small>Ground truth after the state transition.</small></div>
           <div class="lifecycle-node phase-loop"><span>Measurement</span><strong>Acquire, publish, log, evaluate</strong><small>Sensor value + source stamp + frame → observation and verdict.</small></div>
         </div>
@@ -382,7 +383,7 @@ finally:
           <div class="ordering-rule"><strong>Reset barrier</strong>Before observation, command, sensing, evaluation, or “ready” publication.</div>
           <div class="ordering-rule"><strong>Command ordering</strong>Apply and log u<sub>applied</sub> before the physics step it affects.</div>
           <div class="ordering-rule"><strong>Sensor ordering</strong>Acquire after the declared physics/render event, not “whenever the loop sees it.”</div>
-          <div class="ordering-rule"><strong>Timestamp ordering</strong>Source stamp ≤ publish time ≤ receipt time for a forward-moving clock.</div>
+          <div class="ordering-rule"><strong>Timestamp ordering</strong>Within one clock domain, source stamp ≤ publish time ≤ receipt time. A simulation-time stamp and a wall-clock receipt time are not comparable.</div>
           <div class="ordering-rule"><strong>Shutdown ordering</strong>Terminal record and artifacts flush before runtime close.</div>
         </div>
         <figcaption id="sequence-caption"><strong>Read it vertically:</strong> each row is both a message and an opportunity to assert a contract. The first incorrect row owns the next hypothesis.</figcaption>
@@ -450,7 +451,7 @@ finally:
           <div class="state-node state-terminal"><span>SAFE_STOP</span><strong>Hard timeout</strong><small>Explicit safe-stop command; old command is never reused.</small></div>
           <div class="state-node state-terminal"><span>LATCHED_FAULT</span><strong>Explicit reset required</strong><small>NaN, invalid frame/shape/range, impossible stamp, or backward clock jump.</small></div>
         </div>
-        <div class="callout"><strong>Freshness contract:</strong> <code>command_age = current_sim_time − accepted_command_time</code>. A reset or backward time jump must not make old data appear new.</div>
+        <div class="callout"><strong>Freshness contract:</strong> <code>command_age = steady_now − local_receipt_time</code> for the safety timeout, because simulation time freezes while paused and a sim-time age would never expire (Lab 03). Use simulation-time stamps to reject data from before a reset: a reset or backward time jump must not make old data appear new.</div>
         <figcaption id="watchdog-caption"><strong>Reason why:</strong> freshness is a state machine, not a single <code>if</code>. Define acceptance, recovery, soft timeout, hard timeout, and reset behavior before connecting a remote command source.</figcaption>
       </figure>
     </section>
@@ -683,6 +684,6 @@ This still does not prove: _____________________________________.</code></pre>
       <a href="#main">Back to top</a>
     </div>
   </footer>
-  <script src="../book-layout.js?v=20260802-1"></script>
+  <script src="../book-layout.js?v=20260926-1"></script>
 </body>
 </html>

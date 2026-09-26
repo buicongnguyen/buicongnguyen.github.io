@@ -29,10 +29,9 @@ flowchart LR
 
 ## Step 1 — start the known Windows contract
 
-Use the three-terminal sequence from Lab 01. In Terminal 3:
+Use the three-terminal sequence and session variables from [Shared startup](ros2-labs.md#shared-startup). In Terminal 3:
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
 ```
@@ -152,6 +151,14 @@ flowchart TD
 - topic type/QoS/publisher information;
 - rate measurements in simulation time and wall arrival time;
 - one diagnosed failure and correction.
+
+## Machine check
+
+Lab 05 records this episode and re-runs every invariant above offline. `bag_contract_check.py` reports on two contracts:
+- `joint_states`: array lengths, unique names, finite values, stable order, and stamps that never move backward;
+- `tf`: one parent per child, no cycles, one root, and the required `odom → base_link` edge.
+
+Keep this page's manual checks as the first diagnosis, and the bag report as the reproducible evidence.
 
 ## Gate
 

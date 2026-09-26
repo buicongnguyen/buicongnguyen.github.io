@@ -55,8 +55,9 @@ Record the actual wheel joint names from `/joint_states`; never assume names whe
 
 Use a bounded one-shot forward command:
 
+Use the session variables from [Shared startup](ros2-labs.md#shared-startup).
+
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
 ```
 
@@ -75,8 +76,12 @@ Verify `/joint_states` wheel velocities and `/odom` change consistently. If the 
 Terminal 3 runs the supplied node:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\cmd_vel_watchdog.py" --input /cmd_vel_raw --output /cmd_vel --timeout 0.5 --rate 20
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "$Assets\cmd_vel_watchdog.py" --input /cmd_vel_raw --output /cmd_vel --timeout 0.5 --rate 20
 ```
+
+The node refuses a non-finite or non-positive `--timeout` or `--rate`. `nan` parses as a float, and every comparison with NaN is false, so a NaN timeout would never go stale.
+
+When you stop the node with `Ctrl+C`, it publishes one final zero Twist. It installs no rclpy signal handler, so the ROS context is still valid for that last publish.
 
 Terminal 4 observes the safe output:
 
@@ -136,6 +141,12 @@ The watchdog uses an explicit steady-clock timer and monotonic receipt timestamp
 | Robot never stops | watchdog output | confirm raw/output topics differ and graph subscribes to safe output |
 | Watchdog stops immediately | input rate/timeout | publish faster than timeout; inspect receipt logs |
 | Zero command arrives but robot coasts | dynamics | damping, friction, gain, torque/velocity drive behavior |
+
+## Machine check
+
+Record `/cmd_vel_raw` and `/cmd_vel` in Lab 05. The bag checker's `watchdog` contract measures the time from the last raw command to the first zero on the safe topic. It fails if that exceeds `timeout + 1/rate` plus 0.05 s of recorder jitter.
+
+The ROS integration tests in `lab-assets/tests/ros` run this node for real, covering fresh → stale → zero and `Ctrl+C` → final zero.
 
 ## Evidence to save
 

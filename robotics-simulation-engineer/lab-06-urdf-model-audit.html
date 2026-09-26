@@ -1,14 +1,217 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Isaac Sim 6.0.1 URDF-to-USD robot model audit lab covering graph, mass, inertia, colliders, joints, import ownership, and dynamic smoke tests."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-06-urdf-model-audit.html"><title>Lab 06 · URDF-to-USD Model Audit</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 06</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim Practical Labs</span></a><nav aria-label="Lab 06 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#audit">Audit</a><a href="#import">Import</a><a href="#inspect">Inspect</a><a href="#smoke">Smoke</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 06 · model integrity · structure before tuning</p><h1>Audit a URDF Before Trusting Its USD</h1><p class="lede">Prove graph connectivity, masses, inertia matrices, joint limits, collider ownership, importer choices, and repeatable articulation behavior before changing friction or solver settings.</p><div class="hero-actions"><a class="button" href="#audit">Start Lab 06</a><a class="button secondary" href="lab-06-urdf-model-audit.md">Read Markdown</a><a class="button secondary" href="lab-assets/urdf_audit.py">Download auditor</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Graph</dt><dd>one root</dd></div><div><dt>Inertia</dt><dd>positive definite</dd></div><div><dt>Colliders</dt><dd>inspected</dd></div><div><dt>Joints</dt><dd>bounded</dd></div><div><dt>Reset</dt><dd>repeatable</dd></div><div><dt>Fault</dt><dd>detected</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html" aria-current="page"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-<section class="section"><div class="section-heading"><p class="eyebrow">Reasoning flow</p><h2>Fix the earliest invalid contract</h2></div><div class="logic-chain"><div><strong>URDF source</strong><small>links · joints · inertials</small></div><b>→</b><div><strong>Offline gate</strong><small>graph · limits · SPD inertia</small></div><b>→</b><div><strong>Importer</strong><small>declared choices</small></div><b>→</b><div><strong>USD behavior</strong><small>colliders · drives · reset</small></div></div><div class="callout warning"><strong>No compensating-error tuning:</strong> friction cannot repair a wrong axis; damping cannot repair an invalid inertia; solver iterations cannot repair interpenetrating colliders.</div></section>
-<section id="audit" class="section"><div class="section-heading"><p class="eyebrow">Steps 1–2</p><h2>Run a positive fixture and a planted fault</h2></div><pre class="local-command"><code>$Root = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer"
-C:\isaacsim-6.0.1\python.bat "$Root\lab-assets\urdf_audit.py" `
- "$Root\lab-assets\fixtures\valid_robot.urdf" `
- --output "$Root\lab-assets\fixtures\valid_robot_report.json"</code></pre><div class="contract-grid"><article class="contract-card"><h3>Topology</h3><p>one root, connected, acyclic, one parent per child</p></article><article class="contract-card"><h3>Physical metadata</h3><p>positive mass and symmetric positive-definite inertia</p></article><article class="contract-card"><h3>Actuation</h3><p>valid limits, effort, velocity, mimic target, collision review</p></article></div><p>Copy the fixture and inject zero mass, an unknown child, or negative inertia. The copy must fail. A warning is a review item; classify it rather than deleting it.</p></section>
-<section id="import" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Declare importer decisions before clicking Import</h2></div><div class="table-wrap"><table><caption>Import manifest</caption><thead><tr><th>Choice</th><th>Meaning</th><th>Risk</th></tr></thead><tbody><tr><td>Fix base</td><td>anchor or floating-base</td><td>changes DOF</td></tr><tr><td>Self collision</td><td>internal contact enabled</td><td>contact count/stability</td></tr><tr><td>Collider type</td><td>simple or convex decomposition</td><td>accuracy versus cost</td></tr><tr><td>Drive/target</td><td>force/acceleration; none/position/velocity</td><td>controller mismatch</td></tr><tr><td>Density</td><td>fallback for missing mass</td><td>silent physical assumption</td></tr></tbody></table></div><p>Use <strong>File → Import</strong>, write the USD to a project-owned path, keep the source URDF immutable, and preserve overrides in a separate layer when practical.</p></section>
-<section id="inspect" class="section"><div class="section-heading"><p class="eyebrow">Step 4</p><h2>Inspect solver ownership in the Stage</h2></div><ol class="ordered-checks"><li>Find the intended <code>ArticulationRootAPI</code> owner.</li><li>Enable <strong>Physics → Colliders → All</strong>; compare collision and visual geometry.</li><li>Check every joint axis, origin, limit, drive target, and wheel velocity drive.</li><li>Check mass, center of mass, inertia orientation, and units.</li><li>Use Physics Inspector; verify no nominal-pose collider intersection.</li></ol></section>
-<section id="smoke" class="section"><div class="section-heading"><p class="eyebrow">Step 5</p><h2>Challenge zero-input, command, stop, and reset</h2></div><div class="state-machine compact-state"><div class="state neutral"><span>S0</span><strong>Loaded</strong><small>frozen pose</small></div><div class="transition"><strong>Play</strong><span>zero input</span></div><div class="state active"><span>S1</span><strong>Settling</strong><small>finite + bounded</small></div><div class="transition"><strong>Command</strong><span>one joint</span></div><div class="state choice"><span>S2</span><strong>Exercising</strong><small>axis + limit</small></div><div class="transition"><strong>Reopen</strong><span>repeat</span></div><div class="state verify"><span>S3</span><strong>Reproduced</strong><small>3 trials</small></div></div><div class="gate"><strong>Gate:</strong> structure is explainable, three trials reproduce, and no physics knob hides a source-model defect.</div></section>
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation</p><h2>Do not start with solver tuning</h2></div><div class="debug-flow"><div><strong>Graph</strong><span>connected?</span></div><b>→</b><div><strong>Mass/inertia</strong><span>physical?</span></div><b>→</b><div><strong>Colliders</strong><span>overlap?</span></div><b>→</b><div><strong>Joint/drive</strong><span>axis + mode?</span></div><b>→</b><div><strong>Timestep</strong><span>only now</span></div><b>→</b><div><strong>Evidence</strong><span>saved?</span></div></div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/importer_exporter/import_urdf.html">URDF Import</a></h3></article><article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/ext_isaacsim_asset_importer_urdf.html">Importer settings</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-05-rosbag-validation.html"><span>Previous</span><strong>← Lab 05 · Replay</strong></a><a href="lab-07-physics-identification.html"><span>Next after gate</span><strong>Lab 07 · Physics identification →</strong></a></nav></main><footer><p>Structure before behavior. Evidence before tuning.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="prove that a robot description is structurally valid before tuning its simulated behavior.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-06-urdf-model-audit.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-06-urdf-model-audit.html">
+<title>Lab 06 — URDF-to-USD Robot Model Audit | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-06-urdf-model-audit.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-06-urdf-model-audit.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-06-urdf-to-usd-robot-model-audit">Lab 06 — URDF-to-USD Robot Model Audit</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Labs 01–05 pass and the evidence package identifies the simulator/workspace version.</li>
+<li><strong>Goal:</strong> prove that a robot description is structurally valid before tuning its simulated behavior.</li>
+<li>
+<p><strong>Pass:</strong> the offline URDF gate passes, imported USD ownership is understood, colliders/inertias/joints are inspected, and a repeatable dynamic smoke test has no unexplained instability.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/importer_exporter/import_urdf.html">NVIDIA URDF Import tutorial</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/ext_isaacsim_asset_importer_urdf.html">NVIDIA URDF Importer reference</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/physics/physics_inspector.html">NVIDIA Physics Inspector</a></li>
+<li>Auditor: <a href="lab-assets/urdf_audit.py">lab-assets/urdf_audit.py</a></li>
+</ul>
+<h2 id="why-model-audit-precedes-tuning">Why model audit precedes tuning</h2>
+<pre class="mermaid">flowchart LR
+    Source[&quot;URDF source&lt;br/&gt;links + joints + inertials&quot;] --&gt; Audit[&quot;Offline invariants&quot;]
+    Audit --&gt; Import[&quot;Importer choices&quot;]
+    Import --&gt; USD[&quot;USD articulation + colliders&quot;]
+    USD --&gt; Smoke[&quot;Dynamic smoke test&quot;]
+    Smoke --&gt; Evidence[&quot;Model audit report&quot;]
+</pre>
+<p>Friction cannot repair a disconnected tree. Damping cannot repair a wrong joint axis. More solver iterations cannot repair a non-physical inertia matrix. Fix the earliest invalid contract.</p>
+<h2 id="definitions-that-must-stay-separate">Definitions that must stay separate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Typical failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Visual geometry</td>
+<td>what the renderer draws</td>
+<td>pretty model hides bad physics</td>
+</tr>
+<tr>
+<td>Collision geometry</td>
+<td>shapes used for contact</td>
+<td>mesh too complex, missing, intersecting, or oversized</td>
+</tr>
+<tr>
+<td>Inertial frame</td>
+<td>center of mass and inertia orientation</td>
+<td>unexpected tipping or oscillation</td>
+</tr>
+<tr>
+<td>Joint frame/axis</td>
+<td>permitted relative motion</td>
+<td>sign, axis, or origin error</td>
+</tr>
+<tr>
+<td>Articulation root</td>
+<td>solver ownership boundary</td>
+<td>wrong root or disconnected links</td>
+</tr>
+<tr>
+<td>Drive</td>
+<td>control law applied at a joint</td>
+<td>position/velocity/effort mismatch</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="step-1-run-the-offline-gate">Step 1 — run the offline gate</h2>
+<p>Use the supplied known-good fixture first. The auditor uses only the Python standard library, so any Python 3.10+ works, and reports go to this attempt's run folder, never into <code>fixtures/</code>:</p>
+<pre><code class="language-powershell">python &quot;$Assets\urdf_audit.py&quot; &quot;$Assets\fixtures\valid_robot.urdf&quot; --output &quot;$Run\model_audit.json&quot;
+</code></pre>
+<p>The auditor checks:</p>
+<ul>
+<li>exactly one root link and a connected acyclic link graph;</li>
+<li>one parent joint per child;</li>
+<li>valid parent/child references and unique names, and mimic targets that exist;</li>
+<li>finite positive mass;</li>
+<li>a physically realizable inertia tensor: positive principal moments that also satisfy the triangle inequality (each moment ≤ the sum of the other two, with 0.1% allowance for rounded published values). Positive-definite alone is not enough. For example, <code>diag(1, 1, 3)</code> is positive-definite but no rigid body has it;</li>
+<li>required limits for revolute/prismatic joints;</li>
+<li>positive effort/velocity limits and non-zero joint axes;</li>
+<li>declared collision and inertial blocks.</li>
+</ul>
+<p>It also cross-checks each link's inertia against its collision shape. When a link has one box, cylinder, or sphere collider sharing the inertial frame, a moment that differs by more than 25% from a uniform solid of the same mass is reported as a review warning. That catches values typed onto the wrong axis.</p>
+<p>Warnings are review items, not automatic proof of failure. For example, a deliberately massless frame may be fixed into a parent, but that decision must be recorded.</p>
+<h2 id="step-2-perform-a-planted-fault-test">Step 2 — perform a planted-fault test</h2>
+<p>Copy the fixture and change one invariant at a time:</p>
+<ol>
+<li>Set a mass to zero.</li>
+<li>Make a joint child reference an unknown link.</li>
+<li>Make <code>ixx</code> negative.</li>
+<li>Raise the base <code>izz</code> to <code>0.25</code>, so <code>ixx + iyy &lt; izz</code>.</li>
+<li>Remove one collision block.</li>
+<li>Swap the wheel's <code>iyy</code> and <code>izz</code>, putting the axial moment on the wrong axis.</li>
+</ol>
+<p>Faults 1–4 must fail. Faults 5 and 6 are reported as review warnings. Restore the original before continuing. A validator that never fails is not evidence. <code>tests/test_lab_tools.py</code> encodes each of these faults, so CI proves the auditor can still fail.</p>
+<p>Fault 6 is not hypothetical. An earlier version of this fixture had the wheel's axial moment on <code>iyy</code> and a 4% error in the base <code>iyy</code>, and the earlier auditor passed it because it only checked positive-definiteness.</p>
+<h2 id="step-3-record-import-choices-before-clicking-import">Step 3 — record import choices before clicking Import</h2>
+<p>In Isaac Sim choose <strong>File → Import</strong>, select the URDF, and write an import manifest:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Decision to record</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>USD output</td>
+<td>project-owned path</td>
+<td>avoids editing generated cache content</td>
+</tr>
+<tr>
+<td>Fix base</td>
+<td>true only for anchored robots</td>
+<td>changes degrees of freedom</td>
+</tr>
+<tr>
+<td>Self collision</td>
+<td>justified on/off</td>
+<td>affects contact count and stability</td>
+</tr>
+<tr>
+<td>Collider type</td>
+<td>simple/convex decomposition</td>
+<td>accuracy/performance tradeoff</td>
+</tr>
+<tr>
+<td>Drive type</td>
+<td>force or acceleration</td>
+<td>changes mass sensitivity</td>
+</tr>
+<tr>
+<td>Joint target</td>
+<td>none/position/velocity</td>
+<td>must match controller semantics</td>
+</tr>
+<tr>
+<td>Default density</td>
+<td>fallback only</td>
+<td>must not silently replace known masses</td>
+</tr>
+</tbody>
+</table></div>
+<p>Do not overwrite the source URDF. Treat imported USD as a generated layer and place project-specific overrides in a separate USD layer when practical.</p>
+<h2 id="step-4-inspect-the-imported-usd">Step 4 — inspect the imported USD</h2>
+<p>In the Stage and Property panels verify:</p>
+<ol>
+<li>The intended prim owns <code>ArticulationRootAPI</code>.</li>
+<li>Each physical link has the expected rigid body and collider.</li>
+<li>Collision shapes match the visual silhouette without unnecessary detail.</li>
+<li>Joint axes and limits agree with the source model.</li>
+<li>Wheel joints use velocity drives; torque-controlled joints do not inherit position drives.</li>
+<li>Mass and center of mass are plausible in SI units.</li>
+<li>No colliders begin interpenetrating at the nominal pose.</li>
+</ol>
+<p>Turn on viewport collision visualization: <strong>eye icon → Show by type → Physics → Colliders → All</strong>. Use Physics Inspector for joint limits, drives, and articulation behavior.</p>
+<h2 id="step-5-run-a-deterministic-smoke-sequence">Step 5 — run a deterministic smoke sequence</h2>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Loaded
+    Loaded --&gt; Settling: Play with zero command
+    Settling --&gt; Stable: pose finite and bounded
+    Settling --&gt; Failed: explosion, drift, penetration
+    Stable --&gt; Exercising: command one joint
+    Exercising --&gt; Reset: stop and reopen stage
+    Reset --&gt; Settling: repeat same seed/config
+</pre>
+<p>Run at least three identical trials:</p>
+<ul>
+<li>5 seconds at zero command;</li>
+<li>one low-amplitude joint or wheel command;</li>
+<li>explicit zero command;</li>
+<li>Stop, reopen the saved stage, and repeat.</li>
+</ul>
+<p>Record initial/final pose, maximum joint speed, warnings, visible penetrations, and whether reset reproduces the result.</p>
+<h2 id="debugging-decision-tree">Debugging decision tree</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;Unstable model&quot;] --&gt; B{&quot;Offline graph/inertia gate passes?&quot;}
+    B --&gt;|No| C[&quot;Fix URDF source&quot;]
+    B --&gt;|Yes| D{&quot;Colliders overlap or are too complex?&quot;}
+    D --&gt;|Yes| E[&quot;Simplify/reposition collision geometry&quot;]
+    D --&gt;|No| F{&quot;Joint axis, limit, drive correct?&quot;}
+    F --&gt;|No| G[&quot;Fix model/control semantics&quot;]
+    F --&gt;|Yes| H[&quot;Then inspect timestep and solver settings&quot;]
+</pre>
+<h2 id="evidence-and-gate">Evidence and gate</h2>
+<p>Save the source hash, auditor JSON, import manifest, Stage screenshot with API ownership, collider screenshot, inertia/joint table, three smoke-test rows, and one planted-fault result.</p>
+<p><strong>Gate:</strong> proceed only when structure and physical metadata are explainable, the imported articulation behaves repeatably, and no tuning parameter is being used to conceal a model defect.</p>
+<p>Next: <a href="lab-07-physics-identification.html">Lab 07 — Physics identification</a>.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-06-urdf-model-audit.md">lab-06-urdf-model-audit.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

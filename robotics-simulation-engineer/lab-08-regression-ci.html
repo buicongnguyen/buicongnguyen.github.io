@@ -1,15 +1,138 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Robotics simulation regression and CI lab with offline contracts, planted faults, evidence aggregation, headless boundaries, and GitHub Pages gating."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-08-regression-ci.html"><title>Lab 08 · Automated Regression and CI</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 08</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim Practical Labs</span></a><nav aria-label="Lab 08 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#pyramid">Pyramid</a><a href="#tests">Tests</a><a href="#gate">Evidence</a><a href="#ci">CI</a><a href="#gpu">GPU lane</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 08 · deterministic failure · delivery discipline</p><h1>Turn Simulation Contracts into Automated Gates</h1><p class="lede">Run fast invariants before expensive simulator work, prove planted faults fail, aggregate evidence, and prevent GitHub Pages deployment when offline robotics contracts regress.</p><div class="hero-actions"><a class="button" href="#tests">Start Lab 08</a><a class="button secondary" href="lab-08-regression-ci.md">Read Markdown</a><a class="button secondary" href="lab-assets/tests/test_lab_tools.py">Open tests</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Offline</dt><dd>green</dd></div><div><dt>Fault</dt><dd>red</dd></div><div><dt>Evidence</dt><dd>complete</dd></div><div><dt>Pages</dt><dd>gated</dd></div><div><dt>GPU</dt><dd>honest</dd></div><div><dt>SHA</dt><dd>recorded</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html" aria-current="page"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-<section id="pyramid" class="section"><div class="section-heading"><p class="eyebrow">Test architecture</p><h2>Use the cheapest layer that can prove the contract</h2></div><div class="data-pipeline"><div><span>1</span><strong>Static</strong><small>URDF · schema · math</small></div><b>→</b><div><span>2</span><strong>Offline</strong><small>reports · bags · scoring</small></div><b>→</b><div><span>3</span><strong>Local GPU</strong><small>headless smoke</small></div><b>→</b><div><span>4</span><strong>GUI</strong><small>manual acceptance</small></div></div><div class="callout warning"><strong>Honest CI:</strong> GitHub-hosted Pages runners do not reproduce this RTX 4080 SUPER Isaac runtime. They run offline contracts; GPU tests stay local or on an explicitly owned self-hosted runner.</div></section>
-<section id="tests" class="section"><div class="section-heading"><p class="eyebrow">Steps 1–2</p><h2>Run green, inject red, restore green</h2></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat -m unittest discover `
- -s C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\tests -v</code></pre><p>Tests cover multi-image timestamp/geometry contracts, watchdog timeout boundaries, URDF failures, parameter ranking, benchmark math, robustness completeness, and evidence aggregation. Inject a copied zero-mass URDF, repeated stamp, or <code>ok:false</code> report and prove the expected failure.</p></section>
-<section id="gate" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Aggregate named evidence</h2></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat "$Assets\evidence_gate.py" `
- --require model="$Run\model_audit.json" `
- --require physics="$Run\physics_fit_report.json" `
- --require camera="$Run\camera_probe.json" `
- --output "$Run\gate.json"</code></pre><div class="gate"><strong>Rule:</strong> missing, malformed, or top-level <code>ok:false</code> evidence blocks the combined gate.</div></section>
-<section id="ci" class="section"><div class="section-heading"><p class="eyebrow">Step 4</p><h2>Tests precede Pages packaging</h2></div><div class="state-machine compact-state"><div class="state neutral"><span>S0</span><strong>Checkout</strong><small>exact SHA</small></div><div class="transition"><strong>Run</strong><span>unittest</span></div><div class="state choice"><span>S1</span><strong>Gate</strong><small>pass/fail</small></div><div class="transition"><strong>Pass</strong><span>package</span></div><div class="state active"><span>S2</span><strong>Deploy</strong><small>Pages</small></div><div class="transition"><strong>Verify</strong><span>public</span></div><div class="state verify"><span>S3</span><strong>Evidence</strong><small>URL + SHA</small></div></div></section>
-<section id="gpu" class="section"><div class="section-heading"><p class="eyebrow">Step 5</p><h2>Define—not fake—the GPU lane</h2></div><ol class="ordered-checks"><li>Create <code>SimulationApp({"headless": True})</code> before other Isaac imports.</li><li>Load a frozen stage; step a bounded frame count.</li><li>Write machine-readable JSON and close the app.</li><li>Return nonzero on failure/timeout.</li><li>Before self-hosting, document runner GPU, driver, ownership, cleanup, concurrency, cache, and secrets.</li></ol><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_python.html">Python and SimulationApp</a></h3></article><article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/introduction/workflows.html">GUI vs standalone</a></h3></article></div><div class="gate"><strong>Gate:</strong> clean tests pass, planted fault blocks, evidence is complete, and public deployment cannot bypass offline robotics tests.</div></section>
-<nav class="lesson-nav"><a href="lab-07-physics-identification.html"><span>Previous</span><strong>← Lab 07 · Physics</strong></a><a href="lab-09-performance-profiling.html"><span>Next after gate</span><strong>Lab 09 · Performance →</strong></a></nav></main><footer><p>Fail cheaply. Preserve the reason. Deploy only green.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="turn the lab gates into deterministic automated failures before publishing or running an expensive GPU simulation.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-08-regression-ci.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-08-regression-ci.html">
+<title>Lab 08 — Automated Regression and CI | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-08-regression-ci.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-08-regression-ci.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-08-automated-regression-and-ci">Lab 08 — Automated Regression and CI</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 07 has a versioned nominal model and raw evidence.</li>
+<li><strong>Goal:</strong> turn the lab gates into deterministic automated failures before publishing or running an expensive GPU simulation.</li>
+<li>
+<p><strong>Pass:</strong> offline tests pass, a planted defect fails, evidence aggregation blocks incomplete runs, and GitHub Pages deploys only after tests.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_python.html">NVIDIA Python/SimulationApp workflow</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/introduction/workflows.html">NVIDIA workflow guidance</a></li>
+<li>Test suite: <a href="lab-assets/tests/test_lab_tools.py">lab-assets/tests/test_lab_tools.py</a></li>
+<li>Evidence gate: <a href="lab-assets/evidence_gate.py">lab-assets/evidence_gate.py</a></li>
+</ul>
+<h2 id="use-a-test-pyramid-not-one-giant-simulator-test">Use a test pyramid, not one giant simulator test</h2>
+<pre class="mermaid">flowchart TB
+    Static[&quot;Fast: schema, URDF, math, manifests&quot;] --&gt; Offline[&quot;Offline: reports, bags, scoring&quot;]
+    Offline --&gt; Headless[&quot;Local GPU: headless Isaac smoke&quot;]
+    Headless --&gt; GUI[&quot;Smallest: visual/manual acceptance&quot;]
+</pre>
+<p>GitHub-hosted runners do not provide this workstation’s RTX simulator environment. CI must say what ran. Offline contracts run on GitHub; GPU Isaac tests run locally or on a deliberately configured self-hosted runner.</p>
+<h2 id="step-1-run-the-repositorys-offline-tests">Step 1 — run the repository’s offline tests</h2>
+<p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>. The offline suite needs only the Python standard library:</p>
+<pre><code class="language-powershell">python -m unittest discover -s &quot;$Assets\tests&quot; -v
+</code></pre>
+<p>It covers four areas:
+- <strong>Every contract:</strong> clock, JointState, TF tree, watchdog latency, image payload, and CameraInfo.
+- <strong>Every URDF planted fault from Lab 06.</strong>
+- <strong>Sweep, benchmark, and robustness statistics:</strong> candidate means and identifiability, the held-out rule, the exact Mann–Whitney p-value, workload identity, the Latin-hypercube strata, the Wilson interval, and failure bins.
+- <strong>Two end-to-end command runs</strong> that execute the documented Lab 06–10 commands on the shipped fixtures, feed their reports to the evidence gate, and check that failing inputs exit non-zero.</p>
+<p>The local ROS lane runs the tools against real ROS: it writes MCAP bags through <code>bag_contract_check.py</code> and runs the watchdog node, including <code>Ctrl+C</code>.</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python -m unittest discover -s &quot;$Assets\tests\ros&quot; -v
+</code></pre>
+<h2 id="step-2-prove-negative-tests">Step 2 — prove negative tests</h2>
+<p>Each planted fault below is already a test, so CI proves the validators can still fail. Find each one, then plant one yourself in a copied fixture (never the canonical file) and watch the matching test's target fail:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Planted fault</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zero mass, unknown link, negative <code>ixx</code>, triangle violation, zero axis</td>
+<td><code>UrdfAuditTests.test_planted_faults</code></td>
+</tr>
+<tr>
+<td>repeated or truncated image payload, short stride, empty encoding</td>
+<td><code>ContractTests.test_image_planted_faults</code></td>
+</tr>
+<tr>
+<td>missing, malformed, non-object, <code>ok:false</code>, or <code>ok:"true"</code> evidence</td>
+<td><code>EvidenceGateTests.test_missing_false_malformed_and_non_object_reports_fail</code></td>
+</tr>
+<tr>
+<td>zero wall duration</td>
+<td><code>BenchmarkTests.test_zero_wall_duration_is_rejected</code></td>
+</tr>
+<tr>
+<td>confounded sweep, single runs</td>
+<td><code>ParameterSweepTests.test_confounded_sweep_is_rejected</code>, <code>test_single_runs_are_rejected</code></td>
+</tr>
+<tr>
+<td>NaN watchdog timeout</td>
+<td><code>ContractTests.test_watchdog_rejects_timeouts_that_would_fail_open</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Each must fail for the correct reason. Restore the fixture and rerun green.</p>
+<h2 id="step-3-aggregate-a-run-contract">Step 3 — aggregate a run contract</h2>
+<p>Each earlier lab writes its report into <code>$Run</code>, so the gate names exactly those files:</p>
+<pre><code class="language-powershell">python &quot;$Assets\evidence_gate.py&quot; `
+  --require camera=&quot;$Run\camera_probe.json&quot; `
+  --require bag=&quot;$Run\bag_contract.json&quot; `
+  --require model=&quot;$Run\model_audit.json&quot; `
+  --require physics=&quot;$Run\physics_fit.json&quot; `
+  --output &quot;$Run\gate.json&quot;
+</code></pre>
+<p>After Labs 09 and 10, add <code>--require performance="$Run\performance.json"</code> and <code>--require robustness="$Run\robustness.json"</code>.</p>
+<p>The aggregator accepts only a JSON object whose top-level <code>ok</code> is exactly <code>true</code>. A missing, malformed, non-object, or explicitly failed report, or a duplicated requirement name, makes the combined gate fail.</p>
+<p>It reads UTF-8, and also UTF-16 with a byte-order mark. Windows PowerShell 5.1's <code>&gt;</code> redirection writes UTF-16, so a hand-redirected report still parses. Prefer each tool's <code>--output</code> anyway.</p>
+<h2 id="step-4-understand-the-ci-state-machine">Step 4 — understand the CI state machine</h2>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Checkout
+    Checkout --&gt; OfflineTests
+    OfflineTests --&gt; Blocked: any failure
+    OfflineTests --&gt; PackagePages: all pass
+    PackagePages --&gt; Deploy
+    Deploy --&gt; PublicVerification
+</pre>
+<p>The Pages workflow runs <code>python scripts/check_all.py</code> before uploading the site artifact. That runs:
+- the lab-tool tests;
+- every exercise in both directions (the reference must pass, and the planted defect or starter must fail);
+- internal link and anchor checks;
+- a check that the generated lab pages match their Markdown.</p>
+<p>It does not claim to launch Isaac Sim.</p>
+<h2 id="step-5-define-the-optional-local-gpu-lane">Step 5 — define the optional local GPU lane</h2>
+<p>A local headless script must create <code>SimulationApp({"headless": True})</code> before importing Omniverse/Isaac modules, load a frozen stage, step a bounded number of frames, write JSON, close the app, and return a nonzero exit code on contract failure.</p>
+<p>Do not add an unconfigured <code>self-hosted</code> job to the repository. First document runner ownership, GPU driver, timeout, cleanup, concurrency, cache, and secrets policy.</p>
+<h2 id="debugging-order">Debugging order</h2>
+<pre><code class="language-text">syntax/import → fixture → pure invariant → evidence file → local GPU smoke → GUI
+</code></pre>
+<p>Escalating directly to the GUI makes failures harder to reproduce and slower to isolate.</p>
+<h2 id="evidence-and-gate">Evidence and gate</h2>
+<p>Save local test output, planted-fault output, aggregated gate JSON, workflow run URL/SHA, and a matrix stating which checks are offline, local GPU, or manual.</p>
+<p><strong>Gate:</strong> a clean commit passes; a planted defect blocks; the public deployment cannot bypass the offline robotics tests.</p>
+<p>Next: <a href="lab-09-performance-profiling.html">Lab 09 — Performance engineering</a>.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-08-regression-ci.md">lab-08-regression-ci.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

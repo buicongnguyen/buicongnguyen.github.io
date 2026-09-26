@@ -66,18 +66,6 @@
     updateProgress(false);
   }
 
-  // Keep the execution order calibration → uncertainty randomization while
-  // preserving stable module IDs for saved progress and inbound links.
-  const calibrationModule = document.getElementById("module-7");
-  const randomizationModule = document.getElementById("module-8");
-  if (
-    calibrationModule &&
-    randomizationModule &&
-    calibrationModule.parentElement === randomizationModule.parentElement
-  ) {
-    calibrationModule.parentElement.insertBefore(calibrationModule, randomizationModule);
-  }
-
   setupTracker({
     selector: "[data-module-check]",
     storageKey: "robotics-simulation-engineer-course-v1",

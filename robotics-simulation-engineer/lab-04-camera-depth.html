@@ -1,27 +1,167 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Step-by-step Isaac Sim ROS 2 RGB and depth camera validation lab for schema, frame, timestamp, cadence, and payload."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-04-camera-depth.html"><title>Lab 04 · RGB and Depth Validation</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 04</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a><nav aria-label="Lab 04 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#flow">Flow</a><a href="#discover">Discover</a><a href="#probe">Probe</a><a href="#geometry">Geometry</a><a href="#capacity">Capacity</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 04 · perception · optical frames · capacity</p><h1>Publish and Validate RGB/Depth Camera Data</h1><p class="lede">Move beyond “the camera topic exists.” Prove image schema, optical frame, acquisition time, calibration, payload shape, rate, and bandwidth with a bounded downloadable probe.</p><div class="hero-actions"><a class="button" href="#flow">Start Lab 04</a><a class="button secondary" href="lab-04-camera-depth.md">Read Markdown</a><a class="button secondary" href="lab-assets/camera_probe.py">Download probe</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Type</dt><dd>Image</dd></div><div><dt>Payload</dt><dd>shape-valid</dd></div><div><dt>Frame</dt><dd>optical</dd></div><div><dt>Time</dt><dd>simulation</dd></div><div><dt>Rate</dt><dd>measured</dd></div><div><dt>Bandwidth</dt><dd>recorded</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html" aria-current="page"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-
-<section id="flow" class="section"><div class="section-heading"><p class="eyebrow">Perception pipeline</p><h2>Validate the same sample across every boundary</h2></div><div class="data-pipeline" role="img" aria-label="Camera data flow"><div><span>1</span><strong>Physics pose</strong><small>camera extrinsic</small></div><b>→</b><div><span>2</span><strong>RTX acquisition</strong><small>pixels + sim stamp</small></div><b>→</b><div><span>3</span><strong>Camera Helper</strong><small>Image + Info</small></div><b>→</b><div><span>4</span><strong>Zenoh</strong><small>sensor QoS</small></div><b>→</b><div><span>5</span><strong>Probe</strong><small>shape + frame</small></div><b>→</b><div><span>6</span><strong>Evidence</strong><small>rate + bandwidth</small></div></div><div class="callout"><strong>Discovery is not data validity.</strong> A useful image requires coherent frame, stamp, encoding, dimensions, stride, payload, calibration, QoS, and delivery capacity.</div></section>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Step 1</p><h2>Use and inspect the reference camera scene</h2></div><ol class="ordered-checks"><li>Open <strong>Isaac Sim → Samples → ROS2 → Scenario → turtlebot_tutorial.usd</strong>.</li><li>Require the prior Clock/state/control gates.</li><li>Inspect camera prim, render product, and Camera Helper nodes.</li><li>Do not add duplicate helpers if the sample already publishes RGB/depth.</li><li>Remember: each Camera Helper retrieves one data type; RGB, depth, point cloud, and CameraInfo can use separate helpers.</li></ol></section>
-
-<section id="discover" class="section"><div class="section-heading"><p class="eyebrow">Step 2</p><h2>Discover actual topic names before copying commands</h2></div><pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t | Select-String -Pattern "camera|image|depth|point"
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic type /camera_1/rgb/image_raw
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="publish perception data whose schema, optical frame, acquisition timestamp, cadence, and payload can be defended.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-04-camera-depth.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-04-camera-depth.html">
+<title>Lab 04 — Publish and Validate RGB/Depth Camera Data | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-04-camera-depth.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-04-camera-depth.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-04-publish-and-validate-rgbdepth-camera-data">Lab 04 — Publish and Validate RGB/Depth Camera Data</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 03 command watchdog gate passes.</li>
+<li><strong>Goal:</strong> publish perception data whose schema, optical frame, acquisition timestamp, cadence, and payload can be defended.</li>
+<li>
+<p><strong>Pass:</strong> at least one RGB or depth Image message passes the supplied probe, CameraInfo matches the image geometry/frame, timestamps use simulation time, and measured rate/bandwidth are recorded.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">NVIDIA Windows Jazzy/Pixi + Zenoh configuration</a></li>
+<li><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">NVIDIA Isaac Sim ROS Workspaces</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera.html">NVIDIA ROS 2 Cameras</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera_publishing.html">NVIDIA Publishing Camera Data</a></li>
+<li>Downloadable probe: <a href="lab-assets/camera_probe.py">lab-assets/camera_probe.py</a></li>
+</ul>
+<h2 id="perception-data-flow">Perception data flow</h2>
+<pre class="mermaid">sequenceDiagram
+    participant P as Physics/timeline
+    participant C as RTX camera acquisition
+    participant H as ROS2 Camera Helper
+    participant Z as Zenoh
+    participant R as ROS consumer
+    P-&gt;&gt;C: pose + simulation timestamp
+    C-&gt;&gt;H: rendered pixels / depth
+    H-&gt;&gt;Z: Image + CameraInfo
+    Z-&gt;&gt;R: deliver with sensor QoS
+    R-&gt;&gt;R: validate stamp, frame, shape, encoding, payload, rate
+</pre>
+<p>An image topic being visible proves discovery only. A useful image also requires a coherent optical frame, acquisition timestamp, encoding, dimensions, row stride, payload size, calibration, QoS, and sustainable delivery rate.</p>
+<h2 id="step-1-use-the-turtlebot-scenario">Step 1 — use the TurtleBot scenario</h2>
+<p>Open the same shipped scene:</p>
+<pre><code class="language-text">Isaac Sim &gt; Samples &gt; ROS2 &gt; Scenario &gt; turtlebot_tutorial.usd
+</code></pre>
+<p>NVIDIA documents this scene as an example with multiple camera ROS topics. Its <code>/World/Camera_1</code> and <code>/World/Camera_2</code> cameras are stationary world cameras; a robot-mounted camera is a different frame-tree exercise. Inspect the camera prim, render product, and each Camera Helper rather than adding duplicate publishers.</p>
+<p>If building manually, add a camera to the robot, then use the ROS 2 camera publishing shortcut/helper. Each Camera Helper publishes one data type, so RGB, depth, point cloud, and CameraInfo may require separate helper nodes.</p>
+<h2 id="step-2-discover-actual-topic-names-and-types">Step 2 — discover actual topic names and types</h2>
+<p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>.</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t | Select-String -Pattern &quot;camera|image|depth|point&quot;
+</code></pre>
+<p>Common sample names include <code>/camera_1/rgb/image_raw</code> and <code>/camera_1/rgb/camera_info</code>, but use the actual output from your stage.</p>
+<p>For the chosen image topic:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic type /camera_1/rgb/image_raw
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /camera_1/rgb/image_raw --verbose
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /camera_1/rgb/camera_info --once</code></pre><p class="section-note">The shipped scenario commonly uses <code>/camera_1/rgb/image_raw</code> and <code>/camera_1/rgb/camera_info</code>. Replace them with the names discovered in your Stage.</p></section>
-
-<section id="probe" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Run the bounded Image contract probe</h2></div><pre class="local-command"><code>pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --timeout 15 --samples 5</code></pre><div class="contract-grid"><article class="contract-card"><h3>Shape</h3><p><code>width,height,step &gt; 0</code></p><small>Payload bytes must be at least <code>step × height</code>.</small></article><article class="contract-card"><h3>Meaning</h3><p>nonempty encoding + <code>frame_id</code></p><small>A robot-mounted camera needs a connected optical frame; a stationary world camera can use its own declared world-fixed frame.</small></article><article class="contract-card"><h3>Time</h3><p>strictly increasing acquisition stamps</p><small>The multi-sample probe calculates timestamp cadence; compare its clock domain with <code>/clock</code>.</small></article></div><div class="gate"><strong>Probe gate:</strong> JSON reports <code>ok: true</code> across at least five samples. Repeat against the discovered depth Image topic and record its encoding/official units.</div></section>
-
-<section id="geometry" class="section"><div class="section-heading"><p class="eyebrow">Step 4</p><h2>Validate optical geometry before adding noise</h2></div><div class="table-wrap"><table><caption>Geometry checklist</caption><tbody><tr><th>Optical axes</th><td>+x image right; +y image down; +z forward through image plane</td></tr><tr><th>Frame identity</th><td>Image and CameraInfo use the same <code>frame_id</code></td></tr><tr><th>Resolution</th><td>Image and CameraInfo width/height agree</td></tr><tr><th>Intrinsics</th><td>CameraInfo matrix matches current resolution</td></tr><tr><th>Extrinsic</th><td>TF places optical frame under intended robot link</td></tr><tr><th>Known target</th><td>right/left motion and known distance agree before noise</td></tr></tbody></table></div></section>
-
-<section id="capacity" class="section"><div class="section-heading"><p class="eyebrow">Steps 5–6</p><h2>Measure cadence, bandwidth, and one controlled change</h2></div><pre class="local-command"><code>pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/rgb/image_raw
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /camera_1/rgb/camera_info --once
+</code></pre>
+<p>Expected uncompressed image type: <code>sensor_msgs/msg/Image</code>.</p>
+<h2 id="step-3-run-a-bounded-payload-probe">Step 3 — run a bounded payload probe</h2>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python &quot;$Assets\camera_probe.py&quot; --topic /camera_1/rgb/image_raw --camera-info /camera_1/rgb/camera_info --samples 5 --timeout 15 --output &quot;$Run\camera_probe.json&quot;
+</code></pre>
+<p>The JSON report must show <code>ok: true</code>, which requires:</p>
+<pre><code class="language-text">width, height, step &gt; 0
+payload_bytes == step * height            (sensor_msgs/Image defines the exact size)
+step &gt;= width * bytes_per_pixel           (for known encodings such as rgb8, 32FC1)
+non-empty encoding and optical frame_id
+geometry and frame identical across samples
+five header stamps strictly increase
+CameraInfo: same frame_id, width, height; fx, fy &gt; 0; principal point inside the image
+</code></pre>
+<p>The probe checks that stamps increase, not which clock produced them. To confirm simulation time, compare <code>first_stamp_ns</code> with a <code>/clock</code> sample taken at the same moment.</p>
+<p><code>--output</code> writes UTF-8 JSON, which the Lab 08 evidence gate can read. Windows PowerShell 5.1's <code>&gt;</code> redirection writes UTF-16 instead.</p>
+<p>Run it again for a depth Image topic after discovering the real name. Record the depth encoding and units from the official annotator/reference; do not infer metric units from the numeric range alone.</p>
+<h2 id="step-4-validate-geometry-and-frame-semantics">Step 4 — validate geometry and frame semantics</h2>
+<p>For <code>sensor_msgs/Image</code>, the optical-frame convention is:</p>
+<pre><code class="language-text">+x → image right
++y → image down
++z → forward through the image plane
+</code></pre>
+<p>Check:</p>
+<ol>
+<li>Image and associated CameraInfo use the same <code>frame_id</code> (the probe checks this).</li>
+<li>Image width/height match CameraInfo width/height (the probe checks this).</li>
+<li>CameraInfo intrinsic matrix corresponds to the current resolution (the probe checks plausibility; you check the values).</li>
+<li>TF places a stationary camera under the world frame, or a robot-mounted camera under the intended robot link; record which mounting contract you chose.</li>
+<li>A known object moved right/left in the scene moves consistently in the image.</li>
+<li>A known-distance target produces plausible depth before noise is added.</li>
+</ol>
+<h2 id="step-5-measure-cadence-and-capacity">Step 5 — measure cadence and capacity</h2>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/rgb/image_raw
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic bw /camera_1/rgb/image_raw
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/rgb/camera_info</code></pre><div class="callout warning"><strong>Isaac Sim 6.0:</strong> Camera Helper <code>frameSkipCount</code> is deprecated. Camera scheduling uses the prim’s <code>omni:sensor:tickRate</code>. Low wall rate can still come from rendering, resolution, GPU load, serialization, transport, or backpressure.</div><div class="table-wrap"><table><caption>One-variable experiment</caption><thead><tr><th>Change one</th><th>Keep fixed</th><th>Observe</th></tr></thead><tbody><tr><td>halve resolution</td><td>scene, pose, tick rate</td><td>bandwidth, wall rate, GPU load</td></tr><tr><td>halve tick rate</td><td>resolution, scene</td><td>stamp interval and delivery</td></tr><tr><td>disable depth helper</td><td>RGB configuration</td><td>capacity change</td></tr><tr><td>pause/resume</td><td>all settings</td><td>timestamp/lifecycle</td></tr></tbody></table></div></section>
-
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation</p><h2>Move from missing topic to physical meaning</h2></div><div class="debug-flow"><div><strong>Bridge/helper</strong><span>topic exists?</span></div><b>→</b><div><strong>Render/tick</strong><span>samples arrive?</span></div><b>→</b><div><strong>Schema</strong><span>shape + encoding?</span></div><b>→</b><div><strong>Geometry</strong><span>Info + TF?</span></div><b>→</b><div><strong>Capacity</strong><span>rate + bandwidth?</span></div><b>→</b><div><strong>Evidence</strong><span>controlled test?</span></div></div><div class="gate"><strong>Lab 04 gate:</strong> RGB or depth probe passes, CameraInfo/TF agree, timestamps follow simulation time, and rate/bandwidth are measured.</div></section>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Evidence</p><h2>Save perception contracts, not pretty images alone</h2></div><ul class="evidence-list"><li>camera/render/helper graph</li><li>topic/type/QoS table</li><li>RGB and depth probe JSON</li><li>CameraInfo + optical TF check</li><li>rate and bandwidth rows</li><li>controlled comparison</li></ul><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA · configuration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Windows Jazzy/Pixi + Zenoh</a></h3></article><article class="card"><span class="status-badge">NVIDIA upstream</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">Isaac Sim ROS Workspaces</a></h3></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera.html">ROS 2 Cameras</a></h3></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_camera_publishing.html">Publishing Camera Data</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-03-cmd-vel-watchdog.html"><span>Previous</span><strong>← Lab 03 · Control</strong></a><a href="lab-05-rosbag-validation.html"><span>Next after gate</span><strong>Lab 05 · Record + replay →</strong></a></nav></main><footer><p>Pixels become useful only after frame, time, shape, and capacity agree.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /camera_1/rgb/camera_info
+</code></pre>
+<p>Collect at least 30 samples. In Isaac Sim 6.0, Camera Helper <code>frameSkipCount</code> is deprecated. Camera scheduling uses the camera prim’s <code>omni:sensor:tickRate</code>; do not “fix” a rate by changing only a legacy field.</p>
+<p>Wall-arrival rate may be below requested sensor rate when rendering, image size, GPU workload, serialization, transport, or subscriber backpressure is the capacity bottleneck.</p>
+<h2 id="step-6-controlled-isolation-experiment">Step 6 — controlled isolation experiment</h2>
+<p>Change one variable at a time and restore it after measurement:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Experiment</th>
+<th>Keep fixed</th>
+<th>Observe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>halve resolution</td>
+<td>scene, camera pose, tick rate</td>
+<td>bandwidth, wall rate, GPU load</td>
+</tr>
+<tr>
+<td>halve tick rate</td>
+<td>resolution and scene</td>
+<td>message rate and timestamp interval</td>
+</tr>
+<tr>
+<td>disable depth helper</td>
+<td>RGB configuration</td>
+<td>GPU/transport capacity</td>
+</tr>
+<tr>
+<td>pause/resume</td>
+<td>graph and sensor settings</td>
+<td>timestamp/lifecycle behavior</td>
+</tr>
+</tbody>
+</table></div>
+<p>Do not combine these changes; otherwise you cannot attribute the result.</p>
+<h2 id="debugging-decisions">Debugging decisions</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;Topic missing&quot;] --&gt; B[&quot;Bridge → helper → render product → camera prim&quot;]
+    C[&quot;Topic exists, no samples&quot;] --&gt; D[&quot;Play → sensor tick → QoS → rendering&quot;]
+    E[&quot;Samples malformed&quot;] --&gt; F[&quot;type → encoding → width/height → step → payload&quot;]
+    G[&quot;Geometry wrong&quot;] --&gt; H[&quot;CameraInfo → optical frame → TF → extrinsic&quot;]
+    I[&quot;Rate low&quot;] --&gt; J[&quot;resolution → tick rate → GPU → bandwidth → backpressure&quot;]
+</pre>
+<h2 id="evidence-to-save">Evidence to save</h2>
+<ul>
+<li>camera prim and render-product/helper screenshot;</li>
+<li>discovered topic/type/QoS table;</li>
+<li>RGB and depth probe JSON;</li>
+<li>CameraInfo and optical-frame/TF check;</li>
+<li>rate and bandwidth samples;</li>
+<li>controlled resolution or tick-rate comparison;</li>
+<li>one malformed/missing/slow-data diagnosis.</li>
+</ul>
+<h2 id="gate">Gate</h2>
+<p>Continue to Lab 05 only when RGB or depth payload validation passes, CameraInfo and TF agree, timestamps follow simulation time, and the achieved rate/bandwidth are measured rather than assumed.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-04-camera-depth.md">lab-04-camera-depth.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

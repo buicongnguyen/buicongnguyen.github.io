@@ -48,10 +48,10 @@ For each field record units, nominal value, lower/upper source, application loca
 
 ## Step 2 — generate deterministic stratified scenarios
 
+Use the session variables from [Shared startup](ros2-labs.md#shared-startup):
+
 ```powershell
-$Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
-C:\isaacsim-6.0.1\python.bat "$Assets\robustness_scenarios.py" generate `
-  "$Assets\fixtures\robustness_bounds.json" `
+python "$Assets\robustness_scenarios.py" generate "$Assets\fixtures\robustness_bounds.json" `
   --count 32 --seed 20260803 --output "$Run\scenarios.json"
 ```
 
@@ -95,17 +95,33 @@ Write one results row per scenario:
 scenario_id,success,position_error,yaw_error,stop_distance,failure_reason
 ```
 
-Missing rows are failures of experimental completeness, not silently excluded data.
+`success` must be `1`/`0` (or `true`/`false`); a fractional value is rejected rather than rounded. Missing rows are failures of experimental completeness, not silently excluded data: they count against the pass rate.
 
 ## Step 5 — evaluate completeness and pass rate
 
 ```powershell
-C:\isaacsim-6.0.1\python.bat "$Assets\robustness_scenarios.py" evaluate `
-  "$Run\scenarios.json" "$Run\results.csv" `
-  --minimum-pass-rate 0.90 --output "$Run\robustness_report.json"
+python "$Assets\robustness_scenarios.py" evaluate "$Run\scenarios.json" "$Run\results.csv" `
+  --minimum-pass-rate 0.90 --require-lower-bound --output "$Run\robustness.json"
 ```
 
-Report pass rate, missing/extra IDs, worst scenarios, failure clusters, and sensitivity plots. Overall pass rate alone can hide a complete failure at one physically important corner.
+The report contains:
+- the pass rate, with a Wilson 95% interval;
+- missing, extra, and duplicate IDs;
+- every failed scenario with its parameters and `failure_reason`;
+- `weakest_bins`, the pass rate in each quarter of every parameter's range, weakest first.
+
+Overall pass rate alone can hide a complete failure at one physically important corner. The bins show where the failures cluster.
+
+`--require-lower-bound` gates on the lower end of the Wilson interval instead of the point estimate. 29/32 passes looks like 90.6%, but the data only support "at least about 76%".
+
+To rehearse, evaluate the committed example results against the committed bounds (same seed and count as above):
+
+```powershell
+python "$Assets\robustness_scenarios.py" evaluate "$Run\scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85
+python "$Assets\robustness_scenarios.py" evaluate "$Run\scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85 --require-lower-bound
+```
+
+The example's 28/32 (87.5%) passes the point-estimate gate. Its Wilson lower bound of 0.72 fails the second command, and the first weakest bin shows half the lowest-friction quarter failing.
 
 ## Step 6 — use held-out scenarios
 

@@ -1,44 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A reproducible native-Windows Isaac Sim 6.0.1 GUI lab that publishes simulation time through ROS 2 Jazzy and Zenoh.">
-  <meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html">
-  <title>Isaac Sim GUI Clock Test | Robotics Simulation Engineering</title>
-  <link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="gui-clock-test.css?v=20260803-1"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="This lab proves that real simulation data crosses every required boundary on this PC:">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from isaac-sim-gui-clock-test.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html">
+<title>Reproduce the Isaac Sim GUI → ROS 2 Clock Test on Windows | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to the GUI lab</a>
-  <header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a><nav aria-label="GUI lab navigation"><a href="ros2-labs.html">Ten labs</a><a href="index.html">Course</a><a href="ros2-dual-mode.html">ROS modes</a><a href="#preflight">Preflight</a><a href="#terminals">Terminals</a><a href="#graph">Graph</a><a href="#prove">Prove</a><a href="#debug">Debug</a></nav></header>
-  <main id="main">
-    <section class="hero dual-hero" aria-labelledby="lab-title"><div><p class="eyebrow">Lab 01 · native Windows · observable evidence</p><h1 id="lab-title">Reproduce Isaac Sim GUI → ROS 2 Clock</h1><p class="lede">Build the smallest complete simulator-to-ROS pipeline in the GUI, observe every boundary, and save evidence another engineer can reproduce. This uses Windows Isaac Sim 6.0.1, Windows ROS 2 Jazzy, Pixi, and Zenoh—never WSL 2.</p><div class="hero-actions"><a class="button" href="#preflight">Start the lab</a><a class="button secondary" href="isaac-sim-gui-clock-test.md">Read Markdown</a><a class="button secondary" href="ros2-labs.html">Ten-lab map</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Topic</dt><dd><code>/clock</code></dd></div><div><dt>Type</dt><dd><code>Clock</code></dd></div><div><dt>Source</dt><dd>Simulation time</dd></div><div><dt>Behavior</dt><dd>Advances on Play</dd></div><div><dt>Transport</dt><dd>Zenoh</dd></div><div><dt>OS</dt><dd>Windows only</dd></div></dl></aside></section>
-    <nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html" aria-current="page"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-
-    <section class="section"><div class="section-heading"><p class="eyebrow">Big picture</p><h2>One signal crosses six contracts</h2><p class="section-note">Do not treat “the ROS bridge” as one black box. Inspect the first boundary that fails.</p></div><div class="data-pipeline" role="img" aria-label="Simulation clock data path"><div><span>1</span><strong>Timeline</strong><small>Play owns lifecycle</small></div><b>→</b><div><span>2</span><strong>Tick</strong><small>Executes each frame</small></div><b>→</b><div><span>3</span><strong>Time reader</strong><small>Simulation timestamp</small></div><b>→</b><div><span>4</span><strong>Publisher</strong><small>Clock message</small></div><b>→</b><div><span>5</span><strong>Zenoh</strong><small>Discovery + transport</small></div><b>→</b><div><span>6</span><strong>ROS CLI</strong><small>Observe + measure</small></div></div><div class="callout"><strong>Why time first?</strong> Nodes with <code>use_sim_time=true</code> align timers, TF, sensor stamps, bags, and controllers to simulation rather than wall time.</div></section>
-
-    <section id="preflight" class="section"><div class="section-heading"><p class="eyebrow">Gate 0</p><h2>Prove environment identity first</h2></div><div class="table-wrap"><table><caption>Known contract for this PC</caption><tbody><tr><th>Simulator</th><td><code>C:\isaacsim-6.0.1</code></td></tr><tr><th>ROS workspace</th><td><code>C:\IsaacSim-ros_workspaces\jazzy_ws</code></td></tr><tr><th>ROS / RMW / domain</th><td>Jazzy / <code>rmw_zenoh_cpp</code> / 0</td></tr><tr><th>Launcher</th><td><code>Start-IsaacRosJazzy.ps1</code></td></tr><tr><th>WSL</th><td>Closed and unused</td></tr></tbody></table></div><pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify</code></pre><div class="gate"><strong>Continue only after:</strong> <code>PASS: Jazzy, Zenoh, and NVIDIA custom interfaces load in a clean process.</code></div><p class="section-note">The launcher removes conflicting Miniconda and Cognex DLL paths only in its child process. It changes nothing globally.</p></section>
-
-    <section id="terminals" class="section"><div class="section-heading"><p class="eyebrow">Launch sequence</p><h2>Router → simulator → observer</h2><p class="section-note">Open three fresh PowerShell windows and set <code>$Launcher</code> separately in each.</p></div><div class="terminal-sequence"><article><span>Terminal 1</span><strong>Zenoh router</strong><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File $Launcher zenoh</code></pre><small>Leave running.</small></article><article><span>Terminal 2</span><strong>Isaac Sim GUI</strong><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File $Launcher sim</code></pre><small>Wait for a responsive GUI.</small></article><article><span>Terminal 3</span><strong>ROS observer</strong><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File $Launcher ros2 topic list</code></pre><small>Observe without owning simulation.</small></article></div><div class="sequence-strip" role="img" aria-label="Three-terminal sequence"><div><strong>T1 Zenoh</strong><span>ready</span></div><b>→</b><div><strong>T2 Isaac</strong><span>bridge loads</span></div><b>→</b><div><strong>GUI graph</strong><span>publisher exists</span></div><b>→</b><div><strong>Play</strong><span>ticks execute</span></div><b>→</b><div><strong>T3 CLI</strong><span>message observed</span></div></div><div class="callout warning"><strong>Avoid mixed runtimes:</strong> do not invoke <code>C:\isaacsim-6.0.1\python.bat</code> from inside Pixi; it previously produced a CUDA/Torch <code>c10_cuda.dll</code> conflict here.</div></section>
-
-    <section id="graph" class="section"><div class="section-heading"><p class="eyebrow">GUI construction</p><h2>Create and understand the Clock Action Graph</h2></div><ol class="ordered-checks"><li>Choose <strong>Tools → Robotics → ROS 2 OmniGraphs → Clock</strong>.</li><li>Use graph path <code>/ROS2Clock</code> unless it already exists, then confirm.</li><li>If needed, open <strong>Window → Graph Editors → Action Graph</strong>.</li><li>Select <code>/ROS2Clock</code> and inspect its functional connections.</li><li>If the ROS menu is missing, enable <code>isaacsim.ros2.bridge</code> in <strong>Window → Extensions</strong> and restart through the launcher.</li></ol><div class="graph-board" role="img" aria-label="Clock Action Graph architecture"><div class="graph-node"><span>Execution</span><strong>On Playback Tick</strong><small>each rendered playback frame</small></div><div class="graph-arrow">exec →</div><div class="graph-node"><span>Data source</span><strong>Isaac Read Simulation Time</strong><small>monotonic timestamp</small></div><div class="graph-arrow">time →</div><div class="graph-node publish"><span>Bridge</span><strong>ROS 2 Publish Clock</strong><small><code>/clock</code></small></div><div class="graph-context"><span>context ↑</span><strong>ROS 2 Context</strong><small>domain 0</small></div></div><p class="section-note">Visual placement can differ. Playback owns execution, simulation time owns the value, context owns ROS identity, and the publisher owns <code>/clock</code>. <strong>On Playback Tick</strong> follows playback/render ticks; use <strong>On Physics Step</strong> when the contract must execute once per physics step. Use simulation time—not system time.</p></section>
-
-    <section id="prove" class="section"><div class="section-heading"><p class="eyebrow">Acceptance test</p><h2>Play, inspect, measure, challenge lifecycle</h2></div><p>Press <strong>Play</strong>, then run:</p><pre class="local-command"><code>pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="isaac-sim-gui-clock-test.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from isaac-sim-gui-clock-test.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="reproduce-the-isaac-sim-gui-ros-2-clock-test-on-windows">Reproduce the Isaac Sim GUI → ROS 2 Clock Test on Windows</h1>
+<p>This lab proves that real simulation data crosses every required boundary on this PC:</p>
+<pre><code class="language-text">Isaac Sim timeline → OmniGraph tick → simulation-time reader
+→ ROS 2 Clock publisher → rmw_zenoh_cpp → Zenoh router → ROS 2 Jazzy CLI
+</code></pre>
+<p>It does <strong>not</strong> use WSL 2. Keep WSL closed so a second ROS graph cannot confuse the result.</p>
+<ul>
+<li>Ten-lab learning path: <a href="ros2-labs.html">Isaac Sim + ROS 2 Labs 01–10</a></li>
+<li>Next after this gate: <a href="lab-02-joint-states-tf.html">Lab 02 — Joint States, TF, and Odometry</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_clock.html">NVIDIA ROS 2 Clock tutorial</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">NVIDIA Windows/Pixi setup</a></li>
+<li><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">NVIDIA Isaac Sim ROS Workspaces</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html">NVIDIA Isaac Sim 6.0.1 ROS 2 tutorial index</a></li>
+<li><a href="https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html">ROS 2 topic inspection</a></li>
+</ul>
+<h2 id="what-this-test-proves">What this test proves</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>What it proves</th>
+<th>What it does not prove</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verify</code> passes</td>
+<td>Jazzy, Zenoh, NVIDIA messages, and paths load</td>
+<td>Isaac is publishing</td>
+</tr>
+<tr>
+<td>Zenoh stays running</td>
+<td>Discovery/transport service exists</td>
+<td>Publisher and subscriber agree</td>
+</tr>
+<tr>
+<td><code>/clock</code> appears</td>
+<td>Graph discovery reached the publisher</td>
+<td>Time advances</td>
+</tr>
+<tr>
+<td><code>/clock</code> increases</td>
+<td>Timeline, graph, bridge, transport, and CLI work</td>
+<td>Robot control, sensors, or sim-to-real</td>
+</tr>
+<tr>
+<td><code>ros2 topic hz /clock</code> is stable</td>
+<td>Continuous measurable delivery</td>
+<td>Rate equals physics frequency</td>
+</tr>
+</tbody>
+</table></div>
+<p>Simulation time is the first useful integration signal. ROS nodes with <code>use_sim_time=true</code> synchronize timers, TF queries, sensor stamps, bags, and controllers to the simulator instead of wall time.</p>
+<h2 id="known-machine-contract">Known machine contract</h2>
+<pre><code class="language-yaml">operating_system: Windows 11
+uses_wsl: false
+isaac_sim: 6.0.1 pip package inside the Pixi workspace (verify prints its path)
+isaac_sim_package_path: C:\isaacsim-6.0.1
+ros_distribution: jazzy
+workspace: C:\IsaacSim-ros_workspaces\jazzy_ws
+rmw_implementation: rmw_zenoh_cpp
+ros_domain_id: 0
+launcher: robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
+</code></pre>
+<p>Use the launcher for every command. It removes conflicting Conda-family and Cognex DLL directories only from its own process and children; it does not change the machine globally.</p>
+<h2 id="before-opening-three-terminals">Before opening three terminals</h2>
+<ol>
+<li>Save other Isaac Sim work.</li>
+<li>Close old Isaac Sim, Kit, Pixi, ROS, and <code>rmw_zenohd</code> processes.</li>
+<li>Do not source Conda, a global ROS install, or a WSL workspace.</li>
+<li>Confirm NVIDIA's EULA has already been accepted.</li>
+<li>Open three fresh <strong>PowerShell</strong> windows.</li>
+</ol>
+<p>In each terminal, set the four session variables (<code>$Repo</code>, <code>$Launcher</code>, <code>$Assets</code>, <code>$Run</code>) from <a href="ros2-labs.html#shared-startup">Shared startup</a>.</p>
+<h2 id="step-0-environment-preflight">Step 0 — environment preflight</h2>
+<p>In Terminal 3:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+</code></pre>
+<p>Continue only when the final line is:</p>
+<pre><code class="language-text">PASS: Jazzy, Zenoh (domain 0), and NVIDIA custom interfaces load in a clean process.
+</code></pre>
+<p><code>verify</code> fails if the distribution, RMW, or domain differ from the contract. It also prints the Isaac Sim package that the <code>sim</code> action runs, which is the pip install inside the Pixi environment rather than <code>C:\isaacsim-6.0.1</code>. Copy that path into your evidence.</p>
+<p>Debug environment identity before simulator, discovery, graph, or message data.</p>
+<h2 id="step-1-terminal-1-start-zenoh">Step 1 — Terminal 1: start Zenoh</h2>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh
+</code></pre>
+<p>Leave it running. Zenoh is the routing/discovery layer selected by the Pixi Jazzy workspace.</p>
+<h2 id="step-2-terminal-2-start-isaac-sim">Step 2 — Terminal 2: start Isaac Sim</h2>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim
+</code></pre>
+<p>Wait until the GUI is responsive. Do not launch <code>C:\isaacsim-6.0.1\python.bat</code> from inside Pixi: that mixes Python/CUDA/Torch runtimes and previously caused a <code>c10_cuda.dll</code> conflict on this PC.</p>
+<p>If ROS 2 menus are absent, open <strong>Window → Extensions</strong>, search for <code>isaacsim.ros2.bridge</code>, enable it, and restart through the launcher.</p>
+<h2 id="step-3-create-the-clock-action-graph">Step 3 — create the Clock Action Graph</h2>
+<ol>
+<li>Choose <strong>Tools → Robotics → ROS 2 OmniGraphs → Clock</strong>.</li>
+<li>Use graph path <code>/ROS2Clock</code> unless it already exists.</li>
+<li>Confirm the dialog.</li>
+<li>Open <strong>Window → Graph Editors → Action Graph</strong> if the graph is not visible.</li>
+<li>Select <code>/ROS2Clock</code> in the Stage tree and inspect it.</li>
+</ol>
+<pre class="mermaid">flowchart LR
+    Tick[&quot;On Playback Tick&quot;] --&gt;|execution| Read[&quot;Isaac Read Simulation Time&quot;]
+    Tick --&gt;|execution| Pub[&quot;ROS 2 Publish Clock&quot;]
+    Ctx[&quot;ROS 2 Context&lt;br/&gt;domain 0&quot;] --&gt;|context| Pub
+    Read --&gt;|simulation timestamp| Pub
+    Pub --&gt; Topic[&quot;/clock&lt;br/&gt;rosgraph_msgs/msg/Clock&quot;]
+</pre>
+<p>The visual layout can differ, but the contracts must exist:</p>
+<ul>
+<li>playback tick owns execution;</li>
+<li>ROS 2 Context owns the domain/environment;</li>
+<li>Isaac Read Simulation Time owns the timestamp;</li>
+<li>ROS 2 Publish Clock writes <code>/clock</code>.</li>
+</ul>
+<p>Keep <strong>simulation time</strong>, not system time. System time could make transport look healthy while hiding a broken simulator-time contract.</p>
+<h2 id="step-4-play-and-inspect-from-terminal-3">Step 4 — Play and inspect from Terminal 3</h2>
+<p>Press <strong>Play</strong>, then run:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic type /clock
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /clock --verbose
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /clock --once
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /clock</code></pre><div class="table-wrap"><table><caption>Evidence and interpretation</caption><thead><tr><th>Check</th><th>Expected</th><th>Meaning</th></tr></thead><tbody><tr><td>List</td><td><code>/clock</code></td><td>Discovery reached publisher</td></tr><tr><td>Type</td><td><code>rosgraph_msgs/msg/Clock</code></td><td>Schema agrees</td></tr><tr><td>Echo twice</td><td>Second value larger</td><td>Simulation advances</td></tr><tr><td>Pause</td><td>Progression stops</td><td>Timeline owns execution</td></tr><tr><td>Resume</td><td>Progression returns</td><td>Lifecycle recovers</td></tr><tr><td>Rate</td><td>Stable samples</td><td>Continuous delivery</td></tr></tbody></table></div><div class="state-machine compact-state"><div class="state neutral"><span>S0</span><strong>Stopped</strong><small>No ticks</small></div><div class="transition"><strong>Play</strong><span>start</span></div><div class="state active"><span>S1</span><strong>Publishing</strong><small>advancing</small></div><div class="transition"><strong>Pause</strong><span>hold</span></div><div class="state choice"><span>S2</span><strong>Paused</strong><small>no progression</small></div><div class="transition"><strong>Resume</strong><span>continue</span></div><div class="state verify"><span>S3</span><strong>Publishing</strong><small>advancing</small></div></div><div class="gate"><strong>Pass:</strong> topic exists, type is correct, timestamps increase only during Play, rate is measurable, and processes shut down cleanly.</div></section>
+</code></pre>
+<p>Expected essentials:</p>
+<pre><code class="language-text">/clock
+/parameter_events
+/rosout
 
-    <section class="section"><div class="section-heading"><p class="eyebrow">Portfolio evidence</p><h2>Save more than a topic list</h2></div><div class="step-grid"><article class="run-step"><span>1</span><div><h3>Stage</h3><p>Save <code>projects\ros2_clock\ros2_clock.usd</code>.</p></div></article><article class="run-step"><span>2</span><div><h3>Graph image</h3><p>Capture visible nodes and connections.</p></div></article><article class="run-step"><span>3</span><div><h3>Identity</h3><p>Record simulator, workspace commit, ROS, RMW, domain, and commands.</p></div></article><article class="run-step"><span>4</span><div><h3>Measurements</h3><p>Save samples, QoS/publisher info, and rate.</p></div></article></div><div class="callout"><strong>Automated baseline already passed:</strong> NVIDIA’s bounded standalone clock example ran with Pixi Python, exited cleanly, and a Windows Jazzy CLI received <code>0 s + 66,666,666 ns</code>. This lab adds saved GUI and lifecycle evidence.</div></section>
-
-    <section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation logic</p><h2>Stop at the first broken contract</h2></div><div class="debug-flow"><div><strong>1 · Identity</strong><span><code>verify</code>?</span></div><b>→</b><div><strong>2 · Transport</strong><span>Zenoh alive?</span></div><b>→</b><div><strong>3 · Bridge</strong><span>ROS menu?</span></div><b>→</b><div><strong>4 · Graph</strong><span><code>/clock</code>?</span></div><b>→</b><div><strong>5 · Lifecycle</strong><span>advancing?</span></div><b>→</b><div><strong>6 · Quality</strong><span>stable rate?</span></div></div><div class="table-wrap"><table><caption>Symptom → first layer</caption><thead><tr><th>Symptom</th><th>Inspect</th><th>Action</th></tr></thead><tbody><tr><td>DLL or <code>rclpy</code> error</td><td>Environment</td><td>Fresh shell; launcher</td></tr><tr><td>Zenoh exits</td><td>Transport</td><td>Read first error; stop stale router</td></tr><tr><td>ROS menu absent</td><td>Bridge</td><td>Enable bridge; restart</td></tr><tr><td>Only system topics</td><td>Graph</td><td>Create Clock; Play</td></tr><tr><td>Echo waits</td><td>Timeline/tick/QoS</td><td>Inspect Play and verbose info</td></tr><tr><td>Values repeat</td><td>Time source</td><td>Use simulation time</td></tr></tbody></table></div></section>
-
-    <section class="section"><div class="section-heading"><p class="eyebrow">Primary sources</p><h2>Read next</h2></div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_clock.html">ROS 2 Clock</a></h3><p>Graph nodes, shortcut, simulation time, subscriber exercise, and <code>use_sim_time</code>.</p></article><article class="card"><span class="status-badge">NVIDIA · configuration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Windows Jazzy/Pixi + Zenoh</a></h3><p>Authoritative native Windows workspace, build, launch, and middleware route.</p></article><article class="card"><span class="status-badge">NVIDIA upstream</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">Isaac Sim ROS Workspaces</a></h3><p>Pixi configuration, packages, tasks, and custom interfaces used by the labs.</p></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/ros2_landing_page.html">ROS 2 tutorial index</a></h3><p>Official route to the remaining simulator/ROS exercises.</p></article><article class="card"><span class="status-badge">ROS 2 Jazzy</span><h3><a href="https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html">Understanding Topics</a></h3><p>CLI inspection and publisher/subscriber data model.</p></article></div></section>
-    <nav class="lesson-nav"><a href="ros2-labs.html"><span>Learning path</span><strong>← Ten-lab map</strong></a><a href="lab-02-joint-states-tf.html"><span>Next after gate</span><strong>Lab 02 · State + TF →</strong></a></nav>
-  </main>
-  <footer><p>Identity first. Transport second. Graph third. Data last.</p><div class="footer-links"><a href="ros2-labs.html">Ten labs</a><a href="index.html">Course</a><a href="ros2-dual-mode.html">ROS switch guide</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script>
+rosgraph_msgs/msg/Clock
+</code></pre>
+<p>A valid sample resembles:</p>
+<pre><code class="language-yaml">clock:
+  sec: 0
+  nanosec: 66666666
+---
+</code></pre>
+<p>Run the one-message command several times. Time must increase while Play is active. Then measure continuity:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /clock
+</code></pre>
+<p>Collect at least 20 messages, press <code>Ctrl+C</code>, and record average, min, max, standard deviation, and sample count. Do not assume ROS publication rate equals physics frequency; graph ticks, rendering, workload, and real-time factor affect wall-clock arrival.</p>
+<p><code>On Playback Tick</code> follows application/render updates. If a later experiment needs messages aligned to the physics-step rate, NVIDIA recommends <code>On Physics Step</code>; make that trigger change deliberately and record it rather than assuming the two rates are equal.</p>
+<h2 id="step-5-prove-lifecycle-behavior">Step 5 — prove lifecycle behavior</h2>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Stopped
+    Stopped --&gt; Playing: Play
+    Playing --&gt; Paused: Pause
+    Paused --&gt; Playing: Resume
+    Playing --&gt; Stopped: Stop
+</pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>GUI state</th>
+<th>Expected <code>/clock</code> behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Play</td>
+<td>Samples arrive and values increase</td>
+</tr>
+<tr>
+<td>Pause</td>
+<td>Publication/value progression stops</td>
+</tr>
+<tr>
+<td>Resume</td>
+<td>Progression resumes</td>
+</tr>
+<tr>
+<td>Stop</td>
+<td>Graph execution stops</td>
+</tr>
+<tr>
+<td>Play again</td>
+<td>Time resumes; reset depends on <code>resetOnStop</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The time reader defaults to monotonic time across stop/replay to prevent backward jumps. Set <code>resetOnStop=true</code> only when an experiment requires episode time to restart and all consumers tolerate the jump.</p>
+<h2 id="step-6-save-evidence">Step 6 — save evidence</h2>
+<p>Save the stage as <code>$Run\ros2_clock.usd</code>, and save beside it:</p>
+<ul>
+<li><code>verify</code> output, including the Pixi Isaac Sim package path, and the launch command;</li>
+<li>workspace Git commit;</li>
+<li>ROS distribution, RMW, and domain ID;</li>
+<li>screenshot of the Clock Action Graph;</li>
+<li>topic list, type, and verbose info;</li>
+<li>two increasing clock samples;</li>
+<li>measured clock rate;</li>
+<li>warnings and clean-shutdown result.</li>
+</ul>
+<h2 id="debug-the-first-broken-boundary">Debug the first broken boundary</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;verify&quot;] --&gt; B{&quot;PASS?&quot;}
+    B --&gt;|No| C[&quot;Fix PATH / Pixi / workspace identity&quot;]
+    B --&gt;|Yes| D[&quot;Start Zenoh&quot;]
+    D --&gt; E{&quot;Router alive?&quot;}
+    E --&gt;|No| F[&quot;Inspect process/log error&quot;]
+    E --&gt;|Yes| G[&quot;Start Isaac through launcher&quot;]
+    G --&gt; H{&quot;Clock menu exists?&quot;}
+    H --&gt;|No| I[&quot;Enable ROS 2 bridge and restart&quot;]
+    H --&gt;|Yes| J[&quot;Create graph and Play&quot;]
+    J --&gt; K{&quot;/clock exists?&quot;}
+    K --&gt;|No| L[&quot;Check context, domain, RMW, execution&quot;]
+    K --&gt;|Yes| M{&quot;Values increase?&quot;}
+    M --&gt;|No| N[&quot;Check timeline, tick, time source&quot;]
+    M --&gt;|Yes| O[&quot;Measure and save evidence&quot;]
+</pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First layer</th>
+<th>Correction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_rclpy_pybind11</code> or DLL error</td>
+<td>Environment</td>
+<td>Close shell; use launcher</td>
+</tr>
+<tr>
+<td>Zenoh exits</td>
+<td>Transport</td>
+<td>Read first error; stop stale router</td>
+</tr>
+<tr>
+<td>ROS menu missing</td>
+<td>Bridge</td>
+<td>Enable <code>isaacsim.ros2.bridge</code>; restart</td>
+</tr>
+<tr>
+<td>Only system topics appear</td>
+<td>Publisher graph</td>
+<td>Create Clock graph; Play</td>
+</tr>
+<tr>
+<td><code>/clock</code> exists but echo waits</td>
+<td>Execution/QoS</td>
+<td>Check timeline, tick, publisher, QoS</td>
+</tr>
+<tr>
+<td>Values repeat/freeze</td>
+<td>Time source/lifecycle</td>
+<td>Use simulation time; confirm Play</td>
+</tr>
+<tr>
+<td>Unexpected topics</td>
+<td>Isolation</td>
+<td>Stop other Isaac/ROS/WSL sessions</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="clean-shutdown">Clean shutdown</h2>
+<ol>
+<li>Stop the timeline.</li>
+<li>Save the USD and evidence.</li>
+<li>Close Isaac Sim and wait for Terminal 2 to return.</li>
+<li>Press <code>Ctrl+C</code> in Terminal 1.</li>
+<li>Close all three terminals.</li>
+</ol>
+<p>The lab passes only when <code>/clock</code> is discovered, has type <code>rosgraph_msgs/msg/Clock</code>, produces increasing simulation timestamps during Play, reacts correctly to Pause/Stop, and shuts down cleanly.</p>
+<h2 id="verified-automated-fallback-on-this-pc">Verified automated fallback on this PC</h2>
+<p>NVIDIA's bounded standalone clock example was already tested with the consistent Pixi Python runtime. It exited cleanly and a separate Windows Jazzy CLI received:</p>
+<pre><code class="language-yaml">clock:
+  sec: 0
+  nanosec: 66666666
+---
+</code></pre>
+<p>That proves the runtime and bridge. The GUI lab adds the saved Action Graph, lifecycle observations, screenshot, and rate evidence needed for a portfolio-quality reproduction.</p>
+<h2 id="next-lesson">Next lesson</h2>
+<p>After this lab’s gate passes, continue to <a href="lab-02-joint-states-tf.html">Lab 02 — TurtleBot Joint States, TF, and Odometry</a>. Do not skip the Clock gate: every later state, command, image, and bag depends on explicit simulation-time ownership.</p>
+<p class="chapter-source">This chapter is generated from <a href="isaac-sim-gui-clock-test.md">isaac-sim-gui-clock-test.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 {
+  "description": "Calibrate on a straight-line stop from 0.3 m/s; validate on a turning stop. Written before any sweep row was collected.",
   "targets": {
     "stop_distance": 0.42,
     "yaw_error": 0.03,
@@ -13,5 +14,15 @@
     "stop_distance": 1.0,
     "yaw_error": 1.0,
     "settling_time": 0.5
+  },
+  "baseline": {
+    "friction": 0.5,
+    "damping": 0.10,
+    "mass_scale": 1.0
+  },
+  "holdout_targets": {
+    "stop_distance": 0.30,
+    "yaw_error": 0.06,
+    "settling_time": 0.9
   }
 }

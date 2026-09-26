@@ -1,0 +1,97 @@
+/* Prose layout for lab chapters generated from Markdown by scripts/build_lab_pages.py.
+   Colors come from the course.css tokens, so light and dark themes follow automatically. */
+
+.lab-chapter {
+  padding: 28px 0 56px;
+}
+
+.lab-chapter > * {
+  max-width: 860px;
+}
+
+.lab-chapter > .table-wrap,
+.lab-chapter > pre {
+  max-width: 1000px;
+}
+
+.lab-chapter h1 {
+  margin-bottom: 18px;
+  font-size: clamp(32px, 4.4vw, 52px);
+}
+
+.lab-chapter h2 {
+  margin-top: 46px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: clamp(23px, 2.6vw, 30px);
+  scroll-margin-top: 16px;
+}
+
+.lab-chapter h3 {
+  margin-top: 28px;
+  scroll-margin-top: 16px;
+}
+
+.lab-chapter p,
+.lab-chapter li {
+  font-size: 17px;
+}
+
+.lab-chapter ul,
+.lab-chapter ol {
+  padding-left: 1.4em;
+}
+
+.lab-chapter li + li {
+  margin-top: 4px;
+}
+
+.lab-chapter a {
+  color: var(--accent-strong);
+}
+
+.lab-chapter .table-wrap {
+  margin: 16px 0;
+}
+
+.lab-chapter table {
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.lab-chapter th,
+.lab-chapter td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.lab-chapter th {
+  background: var(--panel-strong);
+}
+
+.lab-chapter pre {
+  margin: 14px 0 18px;
+}
+
+.lab-chapter pre.mermaid {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  text-align: center;
+}
+
+.lab-chapter .chapter-source {
+  margin-top: 40px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .lab-chapter p,
+  .lab-chapter li {
+    font-size: 16px;
+  }
+}

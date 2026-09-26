@@ -1,60 +1,84 @@
 (function () {
   "use strict";
 
+  // The book spine: reading order is the array order, and chapter numbers are derived
+  // from it, so inserting a page never needs manual renumbering. Every page that loads
+  // this script must appear here (scripts/check_site.py enforces it).
   const chapters = [
     {
       title: "Start here",
       items: [
-        ["01", "Learning dashboard", "robotics-simulation-engineer/dashboard.html"],
-        ["02", "Entry diagnostic", "robotics-simulation-engineer/diagnostic.html"]
+        ["Learning dashboard", "robotics-simulation-engineer/dashboard.html"],
+        ["Entry diagnostic", "robotics-simulation-engineer/diagnostic.html"]
       ]
     },
     {
       title: "Robotics simulation",
       items: [
-        ["03", "Course and modules", "robotics-simulation-engineer/index.html"],
-        ["04", "Architecture and debugging", "robotics-simulation-engineer/architecture.html"],
-        ["05", "Reasoning and code flow", "robotics-simulation-engineer/reasoning.html"],
-        ["06", "ROS 2 dual-mode setup", "robotics-simulation-engineer/ros2-dual-mode.html"],
-        ["07", "Isaac Sim practical labs 01–10", "robotics-simulation-engineer/ros2-labs.html"],
-        ["08", "Deep resource route", "robotics-simulation-engineer/resources.html"],
-        ["09", "Assessment and mastery", "robotics-simulation-engineer/practice.html"],
-        ["10", "External course catalog", "robotics-simulation-engineer/course-catalog.html"],
-        ["11", "Executable labs", "labs/index.html"]
+        ["Course and modules", "robotics-simulation-engineer/index.html"],
+        ["Architecture and debugging", "robotics-simulation-engineer/architecture.html"],
+        ["Reasoning and code flow", "robotics-simulation-engineer/reasoning.html"],
+        ["ROS 2 dual-mode setup", "robotics-simulation-engineer/ros2-dual-mode.html"]
+      ]
+    },
+    {
+      title: "Isaac Sim practical labs",
+      items: [
+        ["Ten-lab path and shared startup", "robotics-simulation-engineer/ros2-labs.html"],
+        ["Lab 01 · Simulation clock", "robotics-simulation-engineer/isaac-sim-gui-clock-test.html"],
+        ["Lab 02 · Joint states and TF", "robotics-simulation-engineer/lab-02-joint-states-tf.html"],
+        ["Lab 03 · Command watchdog", "robotics-simulation-engineer/lab-03-cmd-vel-watchdog.html"],
+        ["Lab 04 · Camera contracts", "robotics-simulation-engineer/lab-04-camera-depth.html"],
+        ["Lab 05 · Record and replay", "robotics-simulation-engineer/lab-05-rosbag-validation.html"],
+        ["Lab 06 · Model audit", "robotics-simulation-engineer/lab-06-urdf-model-audit.html"],
+        ["Lab 07 · Physics identification", "robotics-simulation-engineer/lab-07-physics-identification.html"],
+        ["Lab 08 · Regression CI", "robotics-simulation-engineer/lab-08-regression-ci.html"],
+        ["Lab 09 · Performance profiling", "robotics-simulation-engineer/lab-09-performance-profiling.html"],
+        ["Lab 10 · Robustness", "robotics-simulation-engineer/lab-10-domain-randomization.html"]
+      ]
+    },
+    {
+      title: "Practice and reference",
+      items: [
+        ["Executable coding labs", "labs/index.html"],
+        ["Assessment and mastery", "robotics-simulation-engineer/practice.html"],
+        ["Deep resource route", "robotics-simulation-engineer/resources.html"],
+        ["External course catalog", "robotics-simulation-engineer/course-catalog.html"]
       ]
     },
     {
       title: "NPU engineering",
       items: [
-        ["12", "Three-course map", "npu-courses/index.html"],
-        ["13", "Architecture and memory", "npu-courses/architecture.html"],
-        ["14", "Compiler IR and lowering", "npu-courses/compiler.html"],
-        ["15", "Quantization and runtime", "npu-courses/deployment.html"],
-        ["16", "NPU reference and practice", "npu-practice.html"]
+        ["Three-course map", "npu-courses/index.html"],
+        ["Architecture and memory", "npu-courses/architecture.html"],
+        ["Compiler IR and lowering", "npu-courses/compiler.html"],
+        ["Quantization and runtime", "npu-courses/deployment.html"],
+        ["NPU reference and practice", "npu-practice.html"]
       ]
     },
     {
       title: "Core systems practice",
       items: [
-        ["17", "Practice library", "interview-practice.html"],
-        ["18", "Deep learning", "deep-learning-practice.html"],
-        ["19", "Operating systems", "os-practice.html"],
-        ["20", "Embedded systems", "embedded-practice.html"]
+        ["Practice library", "interview-practice.html"],
+        ["Deep learning", "deep-learning-practice.html"],
+        ["Operating systems", "os-practice.html"],
+        ["Embedded systems", "embedded-practice.html"]
       ]
     }
   ];
   const chapterItems = chapters.flatMap((chapter) =>
-    chapter.items.map((item) => ({
-      number: item[0],
-      title: item[1],
-      path: item[2],
-      chapter: chapter.title
-    }))
+    chapter.items.map((item) => ({ title: item[0], path: item[1], chapter: chapter.title }))
   );
+  chapterItems.forEach((item, index) => { item.number = String(index + 1).padStart(2, "0"); });
+  const numberByPath = new Map(chapterItems.map((item) => [item.path, item.number]));
+
+  // This script lives at the site root, so its own URL locates every chapter at any depth
+  // (GitHub Pages or a local file:// checkout) without a list of known folders.
+  const scriptUrl = document.currentScript ? document.currentScript.src : window.location.href;
+  const siteRoot = new URL(".", scriptUrl);
 
   function rootPrefix() {
-    const path = window.location.pathname.replace(/\\/g, "/");
-    return /\/(robotics-simulation-engineer|npu-courses|labs)\//.test(path) ? "../" : "";
+    return siteRoot.href;
   }
 
   function normalizedPath(value) {
@@ -133,7 +157,7 @@
   searchWrap.className = "book-search";
   searchWrap.innerHTML = `
     <label for="book-search-input">Find a chapter</label>
-    <input id="book-search-input" type="search" placeholder="Search 18 chapters" autocomplete="off">
+    <input id="book-search-input" type="search" placeholder="Search ${chapterItems.length} chapters" autocomplete="off">
     <p class="book-search__status" aria-live="polite"></p>
   `;
   sidebar.appendChild(searchWrap);
@@ -153,7 +177,8 @@
 
     const list = document.createElement("ol");
     list.className = "book-chapter__list";
-    chapter.items.forEach(([number, title, path]) => {
+    chapter.items.forEach(([title, path]) => {
+      const number = numberByPath.get(path);
       const item = document.createElement("li");
       item.dataset.bookSearch = `${number} ${title} ${chapter.title}`.toLowerCase();
       const anchor = document.createElement("a");

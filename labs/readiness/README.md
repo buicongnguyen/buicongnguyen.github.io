@@ -1,6 +1,6 @@
 # Robotics Simulation Readiness Lab
 
-Run these tasks before Module 1. Retain the command output, calculation, diagram, or contract named by each gate.
+Run these tasks before Module 0. Retain the command output, calculation, diagram, or contract named by each gate.
 
 ## Python, NumPy, and pytest
 

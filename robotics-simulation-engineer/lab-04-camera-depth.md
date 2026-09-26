@@ -43,8 +43,9 @@ If building manually, add a camera to the robot, then use the ROS 2 camera publi
 
 ## Step 2 — discover actual topic names and types
 
+Use the session variables from [Shared startup](ros2-labs.md#shared-startup).
+
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t | Select-String -Pattern "camera|image|depth|point"
 ```
 
@@ -63,21 +64,24 @@ Expected uncompressed image type: `sensor_msgs/msg/Image`.
 ## Step 3 — run a bounded payload probe
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "$Assets\camera_probe.py" --topic /camera_1/rgb/image_raw --camera-info /camera_1/rgb/camera_info --samples 5 --timeout 15 --output "$Run\camera_probe.json"
 ```
 
-The JSON report must show:
+The JSON report must show `ok: true`, which requires:
 
 ```text
-ok: true
-width > 0
-height > 0
-step > 0
-payload_bytes >= step * height
-non-empty encoding
-non-empty optical frame_id
-five timestamps strictly increase in simulation time
+width, height, step > 0
+payload_bytes == step * height            (sensor_msgs/Image defines the exact size)
+step >= width * bytes_per_pixel           (for known encodings such as rgb8, 32FC1)
+non-empty encoding and optical frame_id
+geometry and frame identical across samples
+five header stamps strictly increase
+CameraInfo: same frame_id, width, height; fx, fy > 0; principal point inside the image
 ```
+
+The probe checks that stamps increase, not which clock produced them. To confirm simulation time, compare `first_stamp_ns` with a `/clock` sample taken at the same moment.
+
+`--output` writes UTF-8 JSON, which the Lab 08 evidence gate can read. Windows PowerShell 5.1's `>` redirection writes UTF-16 instead.
 
 Run it again for a depth Image topic after discovering the real name. Record the depth encoding and units from the official annotator/reference; do not infer metric units from the numeric range alone.
 
@@ -93,9 +97,9 @@ For `sensor_msgs/Image`, the optical-frame convention is:
 
 Check:
 
-1. Image and associated CameraInfo use the same `frame_id`.
-2. Image width/height match CameraInfo width/height.
-3. CameraInfo intrinsic matrix corresponds to the current resolution.
+1. Image and associated CameraInfo use the same `frame_id` (the probe checks this).
+2. Image width/height match CameraInfo width/height (the probe checks this).
+3. CameraInfo intrinsic matrix corresponds to the current resolution (the probe checks plausibility; you check the values).
 4. TF places a stationary camera under the world frame, or a robot-mounted camera under the intended robot link; record which mounting contract you chose.
 5. A known object moved right/left in the scene moves consistently in the image.
 6. A known-distance target produces plausible depth before noise is added.

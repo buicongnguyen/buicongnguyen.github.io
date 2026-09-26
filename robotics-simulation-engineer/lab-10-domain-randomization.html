@@ -1,15 +1,166 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Isaac Sim domain randomization and simulation-only robustness lab with justified ranges, seeded stratified scenarios, held-out cases, and honest sim-to-real claims."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-10-domain-randomization.html"><title>Lab 10 · Domain Randomization and Robustness</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 10</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim Practical Labs</span></a><nav aria-label="Lab 10 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#bounds">Bounds</a><a href="#generate">Generate</a><a href="#run">Run</a><a href="#evaluate">Evaluate</a><a href="#claim">Claims</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 10 · uncertainty · coverage · honest transfer boundary</p><h1>Build a Reproducible Robustness Envelope</h1><p class="lede">Derive parameter ranges from evidence, generate seeded stratified scenarios, preserve every outcome, challenge unseen cases, and state exactly what simulation can—and cannot—prove without hardware.</p><div class="hero-actions"><a class="button" href="#bounds">Start Lab 10</a><a class="button secondary" href="lab-10-domain-randomization.md">Read Markdown</a><a class="button secondary" href="lab-assets/robustness_scenarios.py">Download scenario tool</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Bounds</dt><dd>provenance</dd></div><div><dt>Seed</dt><dd>recorded</dd></div><div><dt>Coverage</dt><dd>stratified</dd></div><div><dt>Rows</dt><dd>complete</dd></div><div><dt>Holdout</dt><dd>frozen</dd></div><div><dt>Claim</dt><dd>bounded</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html" aria-current="page"><span>10</span><strong>Robustness</strong></a></nav>
-<section class="section"><div class="section-heading"><p class="eyebrow">Reasoning boundary</p><h2>Calibrate nominal first; randomize justified uncertainty second</h2></div><div class="logic-chain"><div><strong>Nominal fit</strong><small>Lab 07</small></div><b>→</b><div><strong>Evidence bounds</strong><small>tolerance · repeatability</small></div><b>→</b><div><strong>Seeded scenarios</strong><small>development + holdout</small></div><b>→</b><div><strong>Bounded claim</strong><small>pre-hardware only</small></div></div></section>
-<section id="bounds" class="section"><div class="section-heading"><p class="eyebrow">Step 1</p><h2>Give every range a source</h2></div><div class="table-wrap"><table><thead><tr><th>Source</th><th>Meaning</th></tr></thead><tbody><tr><td>repeatability</td><td>process/observation uncertainty</td></tr><tr><td>datasheet tolerance</td><td>manufacturing variation</td></tr><tr><td>calibrated confidence</td><td>identification ambiguity</td></tr><tr><td>stress range</td><td>failure discovery—not realism</td></tr></tbody></table></div><p>For every bound record units, nominal, source, application prim/attribute, and whether it supports realism or only a stress test.</p></section>
-<section id="generate" class="section"><div class="section-heading"><p class="eyebrow">Step 2</p><h2>Generate exact stratified scenarios</h2></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat "$Assets\robustness_scenarios.py" generate `
- "$Assets\fixtures\robustness_bounds.json" --count 32 --seed 20260803 `
- --output "$Run\scenarios.json"</code></pre><p>One shuffled point from each stratum of each dimension improves marginal coverage over unrelated uniform draws. The saved manifest is the experiment—not merely the seed.</p></section>
-<section id="run" class="section"><div class="section-heading"><p class="eyebrow">Steps 3–4</p><h2>One reset owner applies one scenario</h2></div><div class="data-pipeline"><div><span>1</span><strong>Manifest</strong><small>ID + parameters</small></div><b>→</b><div><span>2</span><strong>Reset owner</strong><small>pose + state</small></div><b>→</b><div><span>3</span><strong>USD/PhysX</strong><small>apply once</small></div><b>→</b><div><span>4</span><strong>Episode</strong><small>fixed task</small></div><b>→</b><div><span>5</span><strong>Writer</strong><small>metrics + reason</small></div></div><div class="callout warning"><strong>API migration:</strong> the old <code>isaacsim.replicator.domain_randomization</code> extension is deprecated in 6.0. Check the installed experimental domain-randomization API before copying older Isaac Gym code.</div><p>Define success before running: goal error, yaw error, collision count, watchdog violations, and all earlier time/frame/schema gates.</p></section>
-<section id="evaluate" class="section"><div class="section-heading"><p class="eyebrow">Steps 5–6</p><h2>Fail missing rows and preserve holdout integrity</h2></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat "$Assets\robustness_scenarios.py" evaluate `
- "$Run\scenarios.json" "$Run\results.csv" `
- --minimum-pass-rate 0.90 --output "$Run\robustness_report.json"</code></pre><div class="contract-grid"><article class="contract-card"><h3>Completeness</h3><p>no missing or extra scenario IDs</p></article><article class="contract-card"><h3>Failure surface</h3><p>worst cases and clustered parameters</p></article><article class="contract-card"><h3>Holdout</h3><p>new seeds/corners after design freeze</p></article></div></section>
-<section id="claim" class="section"><div class="section-heading"><p class="eyebrow">Final boundary</p><h2>Say exactly what the evidence supports</h2></div><div class="table-wrap"><table><thead><tr><th>You may claim</th><th>You may not claim</th></tr></thead><tbody><tr><td>seeded simulation robustness</td><td>physical transfer success</td></tr><tr><td>sensitivity and failure envelope</td><td>measured real friction/noise</td></tr><tr><td>pre-hardware test readiness</td><td>hardware safety/reliability</td></tr></tbody></table></div><div class="gate"><strong>Gate:</strong> scenarios regenerate exactly, every outcome is present, held-out decisions stayed frozen, and the claim stops at simulation evidence.</div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/replicator_tutorials/tutorial_replicator_isaac_randomizers.html">Replicator randomization</a></h3></article><article class="card"><span class="status-badge">Migration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/py/source/deprecated/isaacsim.replicator.domain_randomization/docs/index.html">6.0 deprecation notice</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-09-performance-profiling.html"><span>Previous</span><strong>← Lab 09 · Performance</strong></a><a href="ros2-labs.html"><span>Path complete</span><strong>Review all ten gates →</strong></a></nav></main><footer><p>Randomize evidence-backed uncertainty. Keep the physical claim honest.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="test sensitivity to justified uncertainty and produce an honest pre-hardware robustness claim.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-10-domain-randomization.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-10-domain-randomization.html">
+<title>Lab 10 — Domain Randomization and Sim-to-Real Reasoning Without Hardware | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-10-domain-randomization.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-10-domain-randomization.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-10-domain-randomization-and-sim-to-real-reasoning-without-hardware">Lab 10 — Domain Randomization and Sim-to-Real Reasoning Without Hardware</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 09 establishes a correct, calibrated, and measurable nominal pipeline.</li>
+<li><strong>Goal:</strong> test sensitivity to justified uncertainty and produce an honest pre-hardware robustness claim.</li>
+<li>
+<p><strong>Pass:</strong> every range has provenance, scenarios are seeded and cover the space, results are complete, held-out cases are evaluated, and claims stop at simulation evidence.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/replicator_tutorials/tutorial_replicator_isaac_randomizers.html">NVIDIA Replicator randomization snippets</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/py/source/deprecated/isaacsim.replicator.domain_randomization/docs/index.html">NVIDIA current domain-randomization API notice</a></li>
+<li>Scenario tool: <a href="lab-assets/robustness_scenarios.py">lab-assets/robustness_scenarios.py</a></li>
+</ul>
+<h2 id="calibration-uncertainty-and-stress-testing-are-different">Calibration, uncertainty, and stress testing are different</h2>
+<pre class="mermaid">flowchart LR
+    Nominal[&quot;Lab 07 nominal fit&quot;] --&gt; Bounds[&quot;Evidence-backed bounds&quot;]
+    Bounds --&gt; Train[&quot;development scenarios&quot;]
+    Bounds --&gt; Holdout[&quot;unseen seeds/corners&quot;]
+    Train --&gt; Evaluate[&quot;robustness metrics&quot;]
+    Holdout --&gt; Evaluate
+    Evaluate --&gt; Claim[&quot;pre-hardware risk statement&quot;]
+</pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Range source</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>measured repeatability</td>
+<td>observation/process uncertainty</td>
+</tr>
+<tr>
+<td>component tolerance/datasheet</td>
+<td>manufacturing uncertainty</td>
+</tr>
+<tr>
+<td>literature or vendor model</td>
+<td>documented prior</td>
+</tr>
+<tr>
+<td>calibrated confidence region</td>
+<td>identification uncertainty</td>
+</tr>
+<tr>
+<td>deliberate stress range</td>
+<td>failure discovery, not realism claim</td>
+</tr>
+</tbody>
+</table></div>
+<p>Never use randomization to hide an incorrect nominal model.</p>
+<h2 id="step-1-write-the-uncertainty-contract">Step 1 — write the uncertainty contract</h2>
+<p>Start with the supplied example and replace each bound with justified values:</p>
+<pre><code class="language-json">{
+  &quot;dynamic_friction&quot;: [0.55, 0.85],
+  &quot;joint_damping_scale&quot;: [0.8, 1.2],
+  &quot;mass_scale&quot;: [0.9, 1.1],
+  &quot;sensor_latency_ms&quot;: [0.0, 40.0]
+}
+</code></pre>
+<p>For each field record units, nominal value, lower/upper source, application location, and whether it is calibration uncertainty or stress testing.</p>
+<h2 id="step-2-generate-deterministic-stratified-scenarios">Step 2 — generate deterministic stratified scenarios</h2>
+<p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>:</p>
+<pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; generate &quot;$Assets\fixtures\robustness_bounds.json&quot; `
+  --count 32 --seed 20260803 --output &quot;$Run\scenarios.json&quot;
+</code></pre>
+<p>The generator uses one shuffled sample from every stratum of every dimension. This provides better marginal coverage than unrelated uniform draws at the same count. The seed, bounds, and exact samples are saved.</p>
+<h2 id="step-3-apply-one-scenario-at-episode-reset">Step 3 — apply one scenario at episode reset</h2>
+<p>Use USD/PhysX APIs or Replicator to apply the manifest values before the episode begins. Keep one ownership point:</p>
+<pre class="mermaid">sequenceDiagram
+    participant M as Scenario manifest
+    participant R as Reset owner
+    participant P as USD/PhysX parameters
+    participant S as Simulation episode
+    participant W as Result writer
+    M-&gt;&gt;R: scenario_id + values
+    R-&gt;&gt;P: apply once before stepping
+    R-&gt;&gt;S: reset pose/state and run
+    S-&gt;&gt;W: metrics + success + failure reason
+    W--&gt;&gt;M: preserve scenario_id
+</pre>
+<p>The older <code>isaacsim.replicator.domain_randomization</code> extension is deprecated in Isaac Sim 6.0 in favor of <code>isaacsim.replicator.experimental.domain_randomization</code>. Check the installed API before copying older Isaac Gym examples.</p>
+<h2 id="step-4-define-success-before-running">Step 4 — define success before running</h2>
+<p>Example task contract:</p>
+<pre><code class="language-text">reach goal without collision
+final position error &lt;= 0.15 m
+final yaw error &lt;= 0.10 rad
+watchdog violations == 0
+all timestamps/frames/contracts pass
+</code></pre>
+<p>Write one results row per scenario:</p>
+<pre><code class="language-csv">scenario_id,success,position_error,yaw_error,stop_distance,failure_reason
+</code></pre>
+<p><code>success</code> must be <code>1</code>/<code>0</code> (or <code>true</code>/<code>false</code>); a fractional value is rejected rather than rounded. Missing rows are failures of experimental completeness, not silently excluded data: they count against the pass rate.</p>
+<h2 id="step-5-evaluate-completeness-and-pass-rate">Step 5 — evaluate completeness and pass rate</h2>
+<pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\scenarios.json&quot; &quot;$Run\results.csv&quot; `
+  --minimum-pass-rate 0.90 --require-lower-bound --output &quot;$Run\robustness.json&quot;
+</code></pre>
+<p>The report contains:
+- the pass rate, with a Wilson 95% interval;
+- missing, extra, and duplicate IDs;
+- every failed scenario with its parameters and <code>failure_reason</code>;
+- <code>weakest_bins</code>, the pass rate in each quarter of every parameter's range, weakest first.</p>
+<p>Overall pass rate alone can hide a complete failure at one physically important corner. The bins show where the failures cluster.</p>
+<p><code>--require-lower-bound</code> gates on the lower end of the Wilson interval instead of the point estimate. 29/32 passes looks like 90.6%, but the data only support "at least about 76%".</p>
+<p>To rehearse, evaluate the committed example results against the committed bounds (same seed and count as above):</p>
+<pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85
+python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85 --require-lower-bound
+</code></pre>
+<p>The example's 28/32 (87.5%) passes the point-estimate gate. Its Wilson lower bound of 0.72 fails the second command, and the first weakest bin shows half the lowest-friction quarter failing.</p>
+<h2 id="step-6-use-held-out-scenarios">Step 6 — use held-out scenarios</h2>
+<p>Freeze all design decisions, then evaluate:</p>
+<ul>
+<li>new seeds inside the same justified bounds;</li>
+<li>selected corners and coupled adverse cases;</li>
+<li>one stress band just outside the claimed operating range.</li>
+</ul>
+<p>Do not adjust the controller after seeing held-out results and still call them held out.</p>
+<h2 id="decision-logic">Decision logic</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;Failure found&quot;] --&gt; B{&quot;Nominal case fails?&quot;}
+    B --&gt;|Yes| C[&quot;Return to model/control correctness&quot;]
+    B --&gt;|No| D{&quot;Range has evidence?&quot;}
+    D --&gt;|No| E[&quot;Relabel as stress test or justify bound&quot;]
+    D --&gt;|Yes| F{&quot;Failure clustered by parameter?&quot;}
+    F --&gt;|Yes| G[&quot;improve design or narrow supported envelope&quot;]
+    F --&gt;|No| H[&quot;increase coverage and inspect interactions&quot;]
+</pre>
+<h2 id="what-you-may-claim-without-a-robot">What you may claim without a robot</h2>
+<p>You may claim seeded simulation robustness, sensitivity analysis, reproducible uncertainty coverage, identified failure envelopes, and pre-hardware test readiness. You may not claim physical transfer success, calibrated real-world friction/noise, hardware safety, or deployment reliability.</p>
+<h2 id="evidence-and-final-gate">Evidence and final gate</h2>
+<p>Save range-provenance table, bounds JSON, scenario manifest, exact simulator/config hashes, every result row, robustness report, held-out report, worst-case reproductions, and the bounded claim paragraph.</p>
+<p><strong>Gate:</strong> another engineer can regenerate the exact scenarios, reproduce completeness/pass-rate calculations, inspect failures, and understand precisely what remains unverified without hardware.</p>
+<p>Return to the <a href="ros2-labs.html">ten-lab map</a> and assemble the portfolio evidence packet.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-10-domain-randomization.md">lab-10-domain-randomization.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

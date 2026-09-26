@@ -307,8 +307,12 @@
         const preEntries = groupCards.map(function (card) { return pretestResults[card.dataset.questionId]; }).filter(function (entry) {
           return entry && entry.checked !== false;
         });
-        const prePercent = preEntries.length ? Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / preEntries.length * 100) : 0;
-        score.appendChild(make("span", "", "Change from pre-test: " + (percent - prePercent >= 0 ? "+" : "") + (percent - prePercent) + " points"));
+        // Both tests are scored over every question in the group, so answering one easy
+        // question cannot show as 100%; an unanswered question counts as not yet correct.
+        const prePercent = Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / groupCards.length * 100);
+        const postPercent = Math.round(groupCorrect / groupCards.length * 100);
+        const change = postPercent - prePercent;
+        score.appendChild(make("span", "", "Change from pre-test: " + (change >= 0 ? "+" : "") + change + " points (" + prePercent + "% → " + postPercent + "% of all questions)"));
       }
       objectiveScores.appendChild(score);
     });
@@ -342,23 +346,42 @@
     document.querySelectorAll(".question-card").forEach(function (card) { card.open = false; });
   });
 
+  // Redraw every card from the active result set after a mode switch.
+  function syncCards() {
+    const cards = new Map(Array.from(root.querySelectorAll(".question-card")).map(function (card) {
+      return [card.dataset.questionId, card];
+    }));
+    groups.forEach(function (group) {
+      group.questions.forEach(function (question, index) {
+        const id = questionId(group, index);
+        const card = cards.get(id);
+        if (!card) return;
+        card.querySelectorAll('input[type="radio"]').forEach(function (radio) { radio.checked = false; });
+        clearVisualResult(card);
+        card.open = false;
+        const saved = results[id];
+        if (saved && Number.isInteger(saved.selected)) {
+          const radio = card.querySelector('input[value="' + saved.selected + '"]');
+          if (radio) radio.checked = true;
+          if (saved.checked !== false) applyResult(card, group, question, saved.selected);
+        }
+      });
+    });
+  }
+
   function startAssessment(mode) {
-    if (Object.keys(results).length) {
-      try {
-        const history = readHistory();
-        history[assessmentMode] = { savedAt: Date.now(), results: results };
-        localStorage.setItem(historyKey, JSON.stringify(history));
-      } catch (_error) { /* assessment remains usable without history */ }
-    }
+    const history = readHistory();
+    if (Object.keys(results).length) history[assessmentMode] = { savedAt: Date.now(), results: results };
+    try {
+      localStorage.setItem(historyKey, JSON.stringify(history));
+    } catch (_error) { /* assessment remains usable without history */ }
     assessmentMode = mode;
     try { localStorage.setItem(modeKey, mode); } catch (_error) { /* ignore */ }
-    results = {};
+    // A pre-test or post-test always starts blank, but practice answers and their
+    // 1/3/7-day review schedule come back when practice resumes.
+    results = mode === "practice" && history.practice ? history.practice.results : {};
     saveResults();
-    document.querySelectorAll(".question-card").forEach(function (card) {
-      card.querySelectorAll('input[type="radio"]').forEach(function (radio) { radio.checked = false; });
-      clearVisualResult(card);
-      card.open = false;
-    });
+    syncCards();
     category.value = "all";
     search.value = "";
     filterQuestions();
@@ -366,6 +389,7 @@
 
   document.getElementById("start-pretest").addEventListener("click", function () { startAssessment("pre-test"); });
   document.getElementById("start-posttest").addEventListener("click", function () { startAssessment("post-test"); });
+  document.getElementById("resume-practice").addEventListener("click", function () { startAssessment("practice"); });
   document.getElementById("retry-weak").addEventListener("click", function () {
     const weak = new Set(groups.filter(function (group) {
       const groupResults = group.questions.map(function (_q, index) { return results[questionId(group, index)]; }).filter(Boolean);
@@ -380,6 +404,8 @@
     updateStats();
   });
   document.getElementById("review-due").addEventListener("click", function () {
+    // The review schedule belongs to practice answers, not to a test in progress.
+    if (assessmentMode !== "practice") startAssessment("practice");
     const now = Date.now();
     document.querySelectorAll(".question-card").forEach(function (card) {
       const result = results[card.dataset.questionId];

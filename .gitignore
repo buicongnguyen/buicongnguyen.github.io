@@ -1,3 +1,6 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Lab evidence folders (bags, reports, screenshots) are produced per attempt
+runs/

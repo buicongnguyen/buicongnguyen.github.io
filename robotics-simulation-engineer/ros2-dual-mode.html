@@ -13,7 +13,7 @@
   <title>Isaac Sim Dual ROS 2 Mode Guide | Robotics Simulation Engineering</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
   <link rel="stylesheet" href="ros2-dual-mode.css?v=20260802-1">
-  <link rel="stylesheet" href="../book-layout.css?v=20260730-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260926-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to dual-mode guide</a>
@@ -105,13 +105,16 @@ Set-Location C:\IsaacSim-ros_workspaces\jazzy_ws</code></pre>
       <pre class="local-command"><code>[target.win.activation]
 scripts = ["install\\setup.bat"]
 env = { isaac_sim_package_path = "C:\\isaacsim-6.0.1", PATH = "%isaac_sim_package_path%\\kit\\python\\lib;%PATH%" }</code></pre>
-      <pre class="local-command"><code>Set-Location C:\IsaacSim-ros_workspaces\jazzy_ws
+      <pre class="local-command"><code>$Repo = "C:\path\to\your\clone"   # see ros2-labs.html#shared-startup
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+Set-Location C:\IsaacSim-ros_workspaces\jazzy_ws
 git submodule update --init --recursive
 pixi install
-pixi run build</code></pre>
+# Build through the launcher so Conda/vendor DLL directories are removed from PATH first
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher build</code></pre>
       <h3>This PC: start through the clean launcher</h3>
       <p>The inherited Miniconda and Cognex VisionPro DLL directories break <code>rclpy</code>. The launcher removes them only for its child process; it does not uninstall or globally modify either product.</p>
-      <pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+      <pre class="local-command"><code>$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 
 # First interactive GPU/runtime check: read and accept NVIDIA's EULA yourself
@@ -119,11 +122,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher check</code></pre>
       <h3>Normal launch sequence</h3>
       <p class="section-note">For exact GUI clicks, graph-node reasoning, lifecycle checks, expected output, and portfolio evidence, follow the <a href="isaac-sim-gui-clock-test.html"><strong>illustrated GUI Clock lab</strong></a>.</p>
       <div class="terminal-sequence" role="group" aria-label="Three terminal Windows launch sequence">
-        <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+        <article><span>Terminal 1</span><strong>Discovery</strong><pre><code>$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh</code></pre><small>Keep running.</small></article>
-        <article><span>Terminal 2</span><strong>Simulator</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+        <article><span>Terminal 2</span><strong>Simulator</strong><pre><code>$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim</code></pre><small>Add the ROS clock graph and press Play.</small></article>
-        <article><span>Terminal 3</span><strong>Proof</strong><pre><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+        <article><span>Terminal 3</span><strong>Proof</strong><pre><code>$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /clock</code></pre><small>Expect <code>/clock</code>, <code>/parameter_events</code>, and <code>/rosout</code>.</small></article>
       </div>
@@ -148,6 +151,8 @@ ros2 doctor --report
 cd ~
 git clone --recurse-submodules https://github.com/isaac-sim/IsaacSim-ros_workspaces.git
 cd ~/IsaacSim-ros_workspaces/humble_ws
+sudo rosdep init   # once per machine; skip if it reports an existing sources list
+rosdep update
 rosdep install -i --from-path src --rosdistro humble -y
 colcon build --symlink-install</code></pre>
       <h3>Launch Windows Isaac Sim with its bundled Humble backend</h3>
@@ -171,13 +176,11 @@ ros2 daemon start
 ros2 topic list
 ros2 topic echo /clock</code></pre>
       <h3>Network only after identity passes</h3>
-      <ol class="ordered-checks"><li>Confirm <code>/clock</code> exists inside Isaac Sim and the timeline is playing.</li><li>Confirm both sides use Humble, Fast DDS, and domain 22.</li><li>Record WSL IP with <code>hostname -I</code> and Windows IPv4 with <code>ipconfig /all</code>.</li><li>If discovery fails, apply NVIDIA’s administrator port-forwarding rules for 7400, 7410, and 9387.</li><li>Recheck after WSL receives a new address.</li></ol>
-      <pre class="local-command"><code># Administrator PowerShell — only if discovery fails
-$Windows_IP = "&lt;WINDOWS_IPV4&gt;"
-$WSL2_IP = "&lt;WSL2_IPV4&gt;"
-netsh interface portproxy add v4tov4 listenport=7400 listenaddress=$Windows_IP connectport=7400 connectaddress=$WSL2_IP
-netsh interface portproxy add v4tov4 listenport=7410 listenaddress=$Windows_IP connectport=7410 connectaddress=$WSL2_IP
-netsh interface portproxy add v4tov4 listenport=9387 listenaddress=$Windows_IP connectport=9387 connectaddress=$WSL2_IP</code></pre>
+      <ol class="ordered-checks"><li>Confirm <code>/clock</code> exists inside Isaac Sim and the timeline is playing.</li><li>Confirm both sides use Humble, Fast DDS, and domain 22.</li><li>Record WSL IP with <code>hostname -I</code> and Windows IPv4 with <code>ipconfig /all</code>.</li><li>If discovery fails, switch WSL to mirrored networking (below), run <code>wsl --shutdown</code>, and retest.</li><li>With the default NAT networking, recheck after WSL receives a new address.</li></ol>
+      <pre class="local-command"><code># %UserProfile%\.wslconfig  (Windows 11 22H2 or later), then: wsl --shutdown
+[wsl2]
+networkingMode=mirrored</code></pre>
+      <p><strong>Why not a port proxy:</strong> <code>netsh interface portproxy</code> forwards TCP only, while Fast DDS discovers peers and, by default, sends data over UDP. The RTPS ports also depend on the domain: multicast discovery uses <code>7400 + 250·d</code> and unicast uses <code>7410 + 250·d + 2·p</code>. For <code>ROS_DOMAIN_ID=22</code> that is 12900 and 12910+, not 7400/7410. Mirrored networking puts WSL on the Windows interfaces, including multicast. If it is unavailable, configure a Fast DDS TCP transport profile on both sides and forward only that TCP port.</p>
       <div class="gate"><strong>Mode A gate:</strong> Isaac loads Humble/Fast DDS, WSL reports the same domain and RMW, <code>/clock</code> advances, and a WSL subscriber receives a known-rate stream without stale timestamps.</div>
     </section>
 
@@ -215,7 +218,7 @@ netsh interface portproxy add v4tov4 listenport=9387 listenaddress=$Windows_IP c
         <details><summary>6 · Commands arrive but the robot does not move</summary><p>Check type, freshness, controller ownership, joint ordering, units, limits, saturation, drive mode, and actuator input.</p></details>
       </div>
       <div class="table-wrap"><table><caption>Fast symptom-to-layer map</caption><thead><tr><th>Symptom</th><th>First layer</th><th>First measurement</th></tr></thead><tbody>
-        <tr><td><code>ros2</code> missing</td><td>Activation</td><td><code>pixi run ros2 --help</code> or <code>which ros2</code></td></tr><tr><td>No topics</td><td>Bridge/discovery</td><td>Bridge log, router, distro/RMW/domain</td></tr>
+        <tr><td><code>ros2</code> missing</td><td>Activation</td><td><code>pwsh -File $Launcher ros2 --help</code> or <code>Get-Command ros2</code></td></tr><tr><td>No topics</td><td>Bridge/discovery</td><td>Bridge log, router, distro/RMW/domain</td></tr>
         <tr><td>Frozen <code>/clock</code></td><td>Lifecycle</td><td>Timeline Play and graph tick</td></tr><tr><td>Invisible only in WSL</td><td>Network</td><td>IPs, rules, firewall, Fast DDS identity</td></tr>
         <tr><td>TF extrapolation</td><td>Time/frame</td><td>Clock, header time, buffer, frame tree</td></tr><tr><td>Jazzy package missing</td><td>Workspace</td><td>Submodules, install, build, activation</td></tr>
       </tbody></table></div>
@@ -252,6 +255,6 @@ netsh interface portproxy add v4tov4 listenport=9387 listenaddress=$Windows_IP c
     </section>
   </main>
   <footer><p>One ROS contract per process. Identity first, transport second, data third.</p><div class="footer-links"><a href="index.html">Course</a><a href="architecture.html">Architecture</a><a href="reasoning.html">Reasoning</a><a href="resources.html">Resources</a><a href="#main">Back to top</a></div></footer>
-  <script src="../book-layout.js?v=20260803-3"></script>
+  <script src="../book-layout.js?v=20260926-1"></script>
 </body>
 </html>

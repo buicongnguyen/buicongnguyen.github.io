@@ -30,8 +30,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run robotics lab contract tests
-        run: python -m unittest discover -s robotics-simulation-engineer/lab-assets/tests -v
+      - name: Install check dependencies
+        run: python -m pip install -r requirements-learning.txt
+
+      # Lab tools, every exercise in both directions, generated pages, links, and book spine.
+      - name: Run repository checks
+        run: python scripts/check_all.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

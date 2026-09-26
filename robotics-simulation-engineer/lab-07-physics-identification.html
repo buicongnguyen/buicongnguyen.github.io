@@ -1,14 +1,150 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Isaac Sim physics parameter identification lab using repeatability, controlled sweeps, declared scoring, and held-out validation."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-07-physics-identification.html"><title>Lab 07 · Physics Parameter Identification</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 07</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim Practical Labs</span></a><nav aria-label="Lab 07 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#contract">Contract</a><a href="#repeat">Repeat</a><a href="#sweep">Sweep</a><a href="#holdout">Holdout</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 07 · calibration · causal experiments</p><h1>Identify Physics Parameters from Controlled Responses</h1><p class="lede">Measure repeatability, sweep one parameter family, rank raw rows with a declared loss, and challenge the candidate on an episode that was not used for calibration.</p><div class="hero-actions"><a class="button" href="#contract">Start Lab 07</a><a class="button secondary" href="lab-07-physics-identification.md">Read Markdown</a><a class="button secondary" href="lab-assets/score_parameter_sweep.py">Download scorer</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Baseline</dt><dd>5 repeats</dd></div><div><dt>Sweep</dt><dd>controlled</dd></div><div><dt>Loss</dt><dd>predeclared</dd></div><div><dt>Rows</dt><dd>preserved</dd></div><div><dt>Holdout</dt><dd>improves</dd></div><div><dt>Ambiguity</dt><dd>reported</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html" aria-current="page"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-<section class="section"><div class="section-heading"><p class="eyebrow">Identification flow</p><h2>Nominal fit before uncertainty ranges</h2></div><div class="logic-chain"><div><strong>Fixed experiment</strong><small>scene · reset · command</small></div><b>→</b><div><strong>Repeatability</strong><small>variance floor</small></div><b>→</b><div><strong>Controlled sweep</strong><small>one family</small></div><b>→</b><div><strong>Held-out proof</strong><small>unseen behavior</small></div></div></section>
-<section id="contract" class="section"><div class="section-heading"><p class="eyebrow">Step 1</p><h2>Freeze inputs and predeclare outputs</h2></div><div class="contract-grid"><article class="contract-card"><h3>Inputs</h3><p>stage hash, pose/reset, timestep, command, build</p></article><article class="contract-card"><h3>Metrics</h3><p>stop distance, yaw error, settling time, wheel response</p></article><article class="contract-card"><h3>Threshold</h3><p>improvement must exceed repeat variability</p></article></div><div class="callout"><strong>Contact ownership:</strong> record both materials and their friction, restitution, compliant-contact, and combine modes.</div></section>
-<section id="repeat" class="section"><div class="section-heading"><p class="eyebrow">Step 2</p><h2>Measure the noise floor first</h2></div><ol class="ordered-checks"><li>Run the identical baseline at least five times.</li><li>Compute mean, standard deviation, min, and max.</li><li>Separate simulation-stamp metrics from wall-arrival metrics.</li><li>If variation exceeds the expected improvement, repair reset/timing before tuning.</li></ol></section>
-<section id="sweep" class="section"><div class="section-heading"><p class="eyebrow">Steps 3–5</p><h2>Sweep, preserve raw rows, and rank</h2></div><div class="table-wrap"><table><caption>First causal parameter family</caption><tbody><tr><th>Stopping distance</th><td>dynamic friction or drive damping</td><td>hold mass/command/timestep</td></tr><tr><th>Yaw response</th><td>wheel radius/separation or asymmetry</td><td>hold controller mapping</td></tr><tr><th>Overshoot</th><td>drive stiffness/damping</td><td>hold payload/timestep</td></tr><tr><th>Impact bounce</th><td>restitution/compliance</td><td>hold collision geometry</td></tr></tbody></table></div><pre class="local-command"><code>$Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
-C:\isaacsim-6.0.1\python.bat "$Assets\score_parameter_sweep.py" `
- "$Assets\fixtures\physics_sweep.csv" "$Assets\fixtures\physics_targets.json" `
- --output "$Assets\fixtures\physics_fit_report.json"</code></pre><p><code>score = Σ weight × |observed − target| / scale</code>. Write target, scale, and weight before viewing the sweep.</p></section>
-<section id="holdout" class="section"><div class="section-heading"><p class="eyebrow">Step 6</p><h2>Challenge a different episode</h2></div><div class="command-grid"><article><h3>Calibration</h3><p>forward stop, nominal payload, one speed</p></article><article><h3>Held out</h3><p>turning stop, declared payload, or second speed</p></article></div><div class="gate"><strong>Gate:</strong> the chosen nominal parameters improve held-out error beyond repeat variability and do not break earlier contracts. Equal fits are reported as non-identifiable.</div></section>
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation</p><h2>When baseline variation is high</h2></div><div class="debug-flow"><div><strong>Initial state</strong><span>identical?</span></div><b>→</b><div><strong>Command</strong><span>same sim time?</span></div><b>→</b><div><strong>Observation</strong><span>same metric?</span></div><b>→</b><div><strong>Workload</strong><span>RTF stable?</span></div><b>→</b><div><strong>Parameter</strong><span>identifiable?</span></div><b>→</b><div><strong>Holdout</strong><span>improves?</span></div></div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/physics/simulation_fundamentals.html">Physics fundamentals</a></h3></article><article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/robot_simulation/robot_simulation_tips.html">Robot simulation tips</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-06-urdf-model-audit.html"><span>Previous</span><strong>← Lab 06 · Model</strong></a><a href="lab-08-regression-ci.html"><span>Next after gate</span><strong>Lab 08 · Regression + CI →</strong></a></nav></main><footer><p>Calibrate deliberately. Validate elsewhere.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="estimate a defensible nominal parameter set from controlled simulation response data.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-07-physics-identification.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-07-physics-identification.html">
+<title>Lab 07 — Physics Parameter Identification | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-07-physics-identification.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-07-physics-identification.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-07-physics-parameter-identification">Lab 07 — Physics Parameter Identification</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 06 model audit passes.</li>
+<li><strong>Goal:</strong> estimate a defensible nominal parameter set from controlled simulation response data.</li>
+<li>
+<p><strong>Pass:</strong> repeatability is measured, one parameter family is swept at a time, a declared score selects a candidate, and the candidate improves held-out behavior.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/physics/simulation_fundamentals.html">NVIDIA Physics Simulation Fundamentals</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.0/robot_simulation/robot_simulation_tips.html">NVIDIA Robot Simulation Tips</a></li>
+<li>Scorer: <a href="lab-assets/score_parameter_sweep.py">lab-assets/score_parameter_sweep.py</a></li>
+</ul>
+<h2 id="identification-is-not-random-tuning">Identification is not random tuning</h2>
+<pre class="mermaid">flowchart LR
+    Contract[&quot;Fixed scene + command&quot;] --&gt; Repeat[&quot;Repeat baseline&quot;]
+    Repeat --&gt; Noise[&quot;Measure run variance&quot;]
+    Noise --&gt; Sweep[&quot;Sweep one family&quot;]
+    Sweep --&gt; Score[&quot;Score raw rows&quot;]
+    Score --&gt; Holdout[&quot;Validate unseen episode&quot;]
+</pre>
+<p>Parameter identification asks which values explain specified observations. Random tuning asks which values look acceptable once. Only the first supports review and later uncertainty bounds.</p>
+<h2 id="step-1-declare-one-experiment">Step 1 — declare one experiment</h2>
+<p>Use the Lab 03 TurtleBot response or a Lab 06 joint step. Freeze:</p>
+<ul>
+<li>USD stage and source hash;</li>
+<li>initial pose and reset method;</li>
+<li>physics step, render rate, and real-time mode;</li>
+<li>command waveform and duration;</li>
+<li>sensor/topic sampling method;</li>
+<li>GPU/driver/simulator build;</li>
+<li>metrics and acceptance thresholds.</li>
+</ul>
+<p>Example outputs:</p>
+<pre><code class="language-text">stop_distance      [m]
+yaw_error          [rad]
+settling_time      [s]
+peak_wheel_speed   [rad/s]
+</code></pre>
+<p>Use these exact names as CSV columns and contract keys; units live in the contract description, not in the column names.</p>
+<h2 id="step-2-measure-repeatability-before-changing-parameters">Step 2 — measure repeatability before changing parameters</h2>
+<p>Run the identical baseline at least five times. Compute mean, standard deviation, min, and max. If the between-run range is larger than the improvement you hope to measure, fix reset, timing, or observation first.</p>
+<pre class="mermaid">flowchart TD
+    A[&quot;Baseline variation high&quot;] --&gt; B{&quot;Initial state identical?&quot;}
+    B --&gt;|No| C[&quot;Reset stage/state deterministically&quot;]
+    B --&gt;|Yes| D{&quot;Command and sampling share sim time?&quot;}
+    D --&gt;|No| E[&quot;Fix timing ownership&quot;]
+    D --&gt;|Yes| F{&quot;Rendering/CPU load changes RTF?&quot;}
+    F --&gt;|Yes| G[&quot;Separate sim-stamp metrics from wall metrics&quot;]
+</pre>
+<h2 id="step-3-choose-identifiable-parameter-families">Step 3 — choose identifiable parameter families</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom/metric</th>
+<th>First parameter family</th>
+<th>Confounders to hold fixed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stopping distance</td>
+<td>dynamic friction, drive damping</td>
+<td>mass, command, timestep</td>
+</tr>
+<tr>
+<td>yaw response</td>
+<td>wheel radius/separation, friction asymmetry</td>
+<td>controller mapping</td>
+</tr>
+<tr>
+<td>settling/overshoot</td>
+<td>drive stiffness/damping</td>
+<td>payload, timestep</td>
+</tr>
+<tr>
+<td>impact bounce</td>
+<td>restitution/compliant contact</td>
+<td>collision geometry</td>
+</tr>
+<tr>
+<td>penetration/jitter</td>
+<td>timestep/solver iterations</td>
+<td>collider and inertia validity</td>
+</tr>
+</tbody>
+</table></div>
+<p>Contact behavior combines both contacting materials. Record static/dynamic friction, restitution, compliant-contact settings, and combine modes on both surfaces.</p>
+<h2 id="step-4-produce-raw-sweep-rows">Step 4 — produce raw sweep rows</h2>
+<p>Use the provided CSV schema:</p>
+<pre><code class="language-csv">scenario_id,friction,damping,mass_scale,repeat,stop_distance,yaw_error,settling_time
+</code></pre>
+<p>A <em>candidate</em> is one combination of parameter values. Every column that is not <code>scenario_id</code>, <code>repeat</code>, <code>notes</code>, or a metric counts as a parameter. Change one parameter family per sweep, and run every candidate at least three times. Keep every raw row, not only the best-looking run.</p>
+<p>The scorer enforces both rules:
+- It rejects a sweep in which more than one parameter column varies, unless you declare those columns as one family with <code>--family</code>.
+- It rejects any candidate with fewer than <code>--min-repeats</code> runs (default 3).</p>
+<p>The shipped <code>fixtures/physics_sweep.csv</code> sweeps friction at 0.5, 0.7, and 0.9 with damping and mass fixed, three runs each.</p>
+<h2 id="step-5-rank-using-a-declared-contract">Step 5 — rank using a declared contract</h2>
+<pre><code class="language-powershell">python &quot;$Assets\score_parameter_sweep.py&quot; &quot;$Assets\fixtures\physics_sweep.csv&quot; &quot;$Assets\fixtures\physics_targets.json&quot; `
+  --family friction --holdout &quot;$Assets\fixtures\physics_holdout.csv&quot; --output &quot;$Run\physics_fit.json&quot;
+</code></pre>
+<p>Each run is scored as a weighted sum of absolute normalized errors:</p>
+<pre><code class="language-text">score = Σ weight_i × |observed_i - target_i| / scale_i
+</code></pre>
+<p>Candidates are ranked by their <strong>mean</strong> score over repeats, never by their luckiest single run. The report gives each candidate's mean, standard deviation, and standard error. It sets <code>identifiable: false</code> when another candidate is within two standard errors of the difference, and lists those candidates under <code>indistinguishable_from_selected</code>.</p>
+<p>Write the targets, normalization scales, weights, pre-calibration <code>baseline</code>, and <code>holdout_targets</code> into the contract before looking at results. Otherwise the scoring rule can be tuned to select a preferred answer. Use <code>--calibration-only</code> while exploring; it reports a ranking but cannot pass the gate.</p>
+<h2 id="step-6-challenge-the-candidate-on-a-held-out-episode">Step 6 — challenge the candidate on a held-out episode</h2>
+<p>Do not validate with the same command used for calibration. Examples:</p>
+<ul>
+<li>calibrate on forward stop; validate on turning stop;</li>
+<li>calibrate with nominal payload; validate with a declared payload change;</li>
+<li>calibrate at one speed; validate at a second safe speed.</li>
+</ul>
+<p>Run both the selected candidate and the contract's <code>baseline</code> parameters on the held-out episode, at least three times each, and pass the rows with <code>--holdout</code>. The held-out score uses <code>holdout_targets</code>.</p>
+<p>The report's <code>holdout.ok</code> is true only when the baseline's mean held-out score exceeds the selected candidate's by more than two standard errors of the difference (<code>improvement &gt; two_standard_errors</code>). If several parameter sets fit equally well, report non-identifiability rather than inventing precision.</p>
+<p>On the shipped fixtures, friction 0.7 is selected (mean 0.40, SE 0.03). On the held-out turning stop it improves on the 0.5 baseline by 3.29 against a noise band of 0.25.</p>
+<h2 id="evidence-and-gate">Evidence and gate</h2>
+<p>Save experiment contract, baseline repetitions, raw sweep CSV, <code>$Run\physics_fit.json</code>, parameter provenance, held-out rows, and an explanation of remaining ambiguity.</p>
+<p><strong>Gate:</strong> proceed only when a nominal configuration improves held-out error beyond repeat variability without breaking Labs 01–06 contracts.</p>
+<p>Next: <a href="lab-08-regression-ci.html">Lab 08 — Regression and CI</a>.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-07-physics-identification.md">lab-07-physics-identification.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

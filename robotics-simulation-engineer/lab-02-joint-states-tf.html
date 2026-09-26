@@ -1,30 +1,206 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Step-by-step Isaac Sim 6.0.1 lab for TurtleBot joint states, TF, and odometry through Windows ROS 2 Jazzy and Zenoh."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-02-joint-states-tf.html"><title>Lab 02 · Joint States, TF, and Odometry</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 02</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a><nav aria-label="Lab 02 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#setup">Setup</a><a href="#graph">Graph</a><a href="#inspect">Inspect</a><a href="#invariants">Invariants</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 02 · robot truth · frames before control</p><h1>TurtleBot Joint States, TF, and Odometry</h1><p class="lede">Extend the trusted simulation clock into articulated state, a connected transform tree, and odometry. Learn to separate internal robot truth, ROS schema, frame ownership, and timestamp meaning.</p><div class="hero-actions"><a class="button" href="#setup">Start Lab 02</a><a class="button secondary" href="lab-02-joint-states-tf.md">Read Markdown</a><a class="button secondary" href="ros2-labs.html">Lab map</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>State</dt><dd>valid arrays</dd></div><div><dt>TF</dt><dd>connected + acyclic</dd></div><div><dt>Odom</dt><dd>odom → base_link</dd></div><div><dt>Time</dt><dd>monotonic</dd></div><div><dt>Mode</dt><dd>Windows Jazzy</dd></div><div><dt>Next</dt><dd>safe control</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html" aria-current="page"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Architecture</p><h2>Read once, publish with explicit schema and frame ownership</h2></div><div class="logic-chain"><div><strong>Articulation</strong><small>links + DOFs</small></div><b>→</b><div><strong>Isaac readers</strong><small>joint + transform + odom</small></div><b>→</b><div><strong>ROS publishers</strong><small>schema + context + time</small></div><b>→</b><div><strong>Consumers</strong><small>state + TF + validation</small></div></div><div class="callout"><strong>Why after Clock?</strong> Joint positions without a timestamp cannot align with commands or images. TF without time cannot answer where a frame was when a measurement was acquired.</div></section>
-
-<section id="setup" class="section"><div class="section-heading"><p class="eyebrow">Steps 1–2</p><h2>Start the contract and open the reference scene</h2></div><pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
-# Terminal 1: ... -File $Launcher zenoh
-# Terminal 2: ... -File $Launcher sim
-# Terminal 3: ... -File $Launcher ros2 topic list</code></pre><ol class="ordered-checks"><li>Require Lab 01’s advancing <code>/clock</code>.</li><li>In Content Browser open <strong>Isaac Sim → Samples → ROS2 → Scenario → turtlebot_tutorial.usd</strong>.</li><li>Wait for assets/shaders, inspect the Stage tree, then press Play.</li><li>Do not add duplicate publishers; inspect the sample’s Action Graphs first.</li><li>Record the actual robot and articulation-root prim paths.</li></ol><div class="gate"><strong>Setup gate:</strong> one Zenoh router, one Isaac process, one Clock owner, and the TurtleBot articulation visible.</div></section>
-
-<section id="graph" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Use the Isaac Sim 6.0 source → publisher pattern</h2><p class="section-note">New graphs separate data acquisition from ROS publication. Do not copy deprecated direct-prim wiring from older tutorials.</p></div><div class="contract-grid"><article class="contract-card"><h3>Joint state</h3><p><strong>Isaac Read Joint State</strong> → <strong>ROS2 Publish Joint State</strong></p><small>Connect execution, names, position, velocity, effort, DOF types, scale, and sensor time.</small></article><article class="contract-card"><h3>Transform tree</h3><p><strong>Isaac Compute Transform Tree</strong> → <strong>ROS2 Publish Transform Tree</strong></p><small>Connect execution, parent/child frames, translations, and orientations.</small></article><article class="contract-card"><h3>Odometry</h3><p><strong>Isaac Compute Odometry</strong> → <strong>ROS2 Publish Odometry</strong></p><small>Declare chassis, <code>odom</code>, <code>base_link</code>, pose, and full 3D velocity.</small></article></div><div class="callout warning"><strong>Prim-path rule:</strong> robot-wide state graphs belong at the robot root. NVIDIA documents <code>/World/tb3_burger_processed</code> for the shipped scene; verify your actual Stage instead of blindly copying it.</div></section>
-
-<section id="inspect" class="section"><div class="section-heading"><p class="eyebrow">Step 4</p><h2>Inspect type, sample, publisher, and rate</h2></div><pre class="local-command"><code>pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="connect an articulated robot’s internal state to ROS schemas and frames.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-02-joint-states-tf.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-02-joint-states-tf.html">
+<title>Lab 02 — TurtleBot Joint States, TF, and Odometry | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-02-joint-states-tf.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-02-joint-states-tf.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-02-turtlebot-joint-states-tf-and-odometry">Lab 02 — TurtleBot Joint States, TF, and Odometry</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 01 passes and <code>/clock</code> advances.</li>
+<li><strong>Goal:</strong> connect an articulated robot’s internal state to ROS schemas and frames.</li>
+<li>
+<p><strong>Pass:</strong> joint arrays are structurally valid, TF is connected and acyclic, timestamps advance in simulation time, and odometry uses the declared <code>odom → base_link</code> relationship.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">NVIDIA Windows Jazzy/Pixi + Zenoh configuration</a></li>
+<li><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">NVIDIA Isaac Sim ROS Workspaces</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_tf.html">NVIDIA TF and odometry tutorial</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/migration_guides/isaac_sim_6_0/ros2_omnigraph_migration.html">Isaac Sim 6.0 OmniGraph migration</a></li>
+</ul>
+<h2 id="why-this-comes-after-clock">Why this comes after <code>/clock</code></h2>
+<p>Joint positions without a trustworthy timestamp cannot be aligned with commands or images. TF without a timestamp cannot answer “where was this frame when the measurement was acquired?” Lab 02 therefore extends the Clock contract rather than starting a separate system.</p>
+<pre class="mermaid">flowchart LR
+    Art[&quot;TurtleBot articulation&quot;] --&gt; Read[&quot;Isaac Read Joint State&quot;]
+    Read --&gt; Joint[&quot;ROS 2 Publish Joint State&quot;] --&gt; JS[&quot;/joint_states&quot;]
+    Art --&gt; Compute[&quot;Isaac Compute Transform Tree&quot;]
+    Compute --&gt; PubTF[&quot;ROS 2 Publish Transform Tree&quot;] --&gt; TF[&quot;/tf + /tf_static&quot;]
+    Art --&gt; Odom[&quot;Isaac Compute Odometry&quot;] --&gt; PubO[&quot;ROS 2 Publish Odometry&quot;] --&gt; OT[&quot;/odom&quot;]
+    Odom --&gt; RawTF[&quot;ROS 2 Publish Raw Transform Tree&quot;] --&gt; OTF[&quot;odom → base_link&quot;]
+    Clock[&quot;simulation timestamp&quot;] --&gt; Joint
+    Clock --&gt; PubTF
+    Clock --&gt; PubO
+</pre>
+<h2 id="step-1-start-the-known-windows-contract">Step 1 — start the known Windows contract</h2>
+<p>Use the three-terminal sequence and session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>. In Terminal 3:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
+</code></pre>
+<p>Do not continue if environment identity or <code>/clock</code> fails.</p>
+<h2 id="step-2-open-the-fast-track-turtlebot-scene">Step 2 — open the fast-track TurtleBot scene</h2>
+<p>In Isaac Sim Content Browser open:</p>
+<pre><code class="language-text">Isaac Sim &gt; Samples &gt; ROS2 &gt; Scenario &gt; turtlebot_tutorial.usd
+</code></pre>
+<p>Wait for assets and shaders to finish loading. Press Play. If this sample is unavailable, complete NVIDIA's URDF Import: TurtleBot tutorial and use the imported robot; record the actual robot and articulation-root prim paths.</p>
+<p>Do not add duplicate publishers if the sample already contains them. First inspect its Action Graphs and Stage tree.</p>
+<h2 id="step-3-understand-the-isaac-sim-60-graph">Step 3 — understand the Isaac Sim 6.0 graph</h2>
+<p>Isaac Sim 6.0 separates data acquisition from ROS publication. Older tutorials may show direct <code>targetPrim</code> inputs; for new graphs use:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Source node</th>
+<th>ROS publisher</th>
+<th>Required connections</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Isaac Read Joint State</td>
+<td>ROS2 Publish Joint State</td>
+<td><code>execOut</code>, names, positions, velocities, efforts, DOF types, scale, sensor time</td>
+</tr>
+<tr>
+<td>Isaac Compute Transform Tree</td>
+<td>ROS2 Publish Transform Tree</td>
+<td>execution, parent/child frames, translations, orientations</td>
+</tr>
+<tr>
+<td>Isaac Compute Odometry</td>
+<td>ROS2 Publish Odometry</td>
+<td>pose and full 3D linear/angular velocity; set <code>odomFrameId=odom</code> and <code>chassisFrameId=base_link</code></td>
+</tr>
+<tr>
+<td>Isaac Compute Odometry</td>
+<td>ROS2 Publish Raw Transform Tree</td>
+<td>translation/orientation for the dynamic <code>odom → base_link</code> transform</td>
+</tr>
+</tbody>
+</table></div>
+<p>Feed Isaac Read Simulation Time into every publisher timestamp. The odometry message does not create the corresponding TF edge by itself; the Raw Transform Tree publisher owns that edge.</p>
+<p>Robot-wide state graphs belong at the robot root. For the shipped processed TurtleBot, NVIDIA documents the main robot prim as <code>/World/tb3_burger_processed</code> and the articulation root under <code>Geometry/base_footprint/base_link</code>. Verify the actual stage before copying a path.</p>
+<h2 id="step-4-inspect-the-ros-contract">Step 4 — inspect the ROS contract</h2>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list -t
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /joint_states --once
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf --once
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf_static --once
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /tf_static --once  # only when a static publisher is configured
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /odom --once
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_states --verbose
+</code></pre>
+<p>Then measure publisher identity and rates:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic info /joint_states --verbose
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /joint_states
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /odom</code></pre><p class="section-note">Collect at least 20 samples for each rate. Topic existence is discovery evidence; sample structure and frame/time behavior are the gate.</p></section>
-
-<section id="invariants" class="section"><div class="section-heading"><p class="eyebrow">Steps 5–6</p><h2>Apply invariants and challenge lifecycle</h2></div><div class="table-wrap"><table><caption>Contracts that must remain true</caption><thead><tr><th>Boundary</th><th>Invariant</th><th>Failure meaning</th></tr></thead><tbody><tr><td>Joint arrays</td><td><code>len(name)==len(position)</code>; optional velocity/effort are empty or same length</td><td>source/publisher wiring or articulation selection</td></tr><tr><td>Joint identity</td><td>unique names; finite values; stable ordering</td><td>model naming or corrupted state</td></tr><tr><td>TF ownership</td><td>one parent per child; no cycles</td><td>duplicate or incorrect publisher</td></tr><tr><td>TF semantics</td><td>dynamic <code>odom→base_link</code>; fixed mounts static</td><td>wrong static flag/frame source</td></tr><tr><td>Time</td><td>stamps do not move backward in one episode</td><td>mixed clock/reset ownership</td></tr></tbody></table></div><ol class="ordered-checks"><li>Capture one sample while playing.</li><li>Pause; bounded echoes wait because graph execution stops.</li><li>Resume; timestamps continue.</li><li>Optionally run <code>ros2 run tf2_tools view_frames</code> if installed.</li></ol></section>
-
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation</p><h2>Find the first wrong owner</h2></div><div class="debug-flow"><div><strong>Articulation</strong><span>right root?</span></div><b>→</b><div><strong>Source node</strong><span>valid arrays?</span></div><b>→</b><div><strong>Publisher</strong><span>context + execution?</span></div><b>→</b><div><strong>TF owner</strong><span>one parent?</span></div><b>→</b><div><strong>Time/rate</strong><span>monotonic + measured?</span></div><b>→</b><div><strong>Evidence</strong><span>saved?</span></div></div><div class="table-wrap"><table><caption>Fast symptom map</caption><tbody><tr><th>Names but empty positions</th><td>wrong articulation/DOF source</td></tr><tr><th>Array lengths differ</th><td>partial Isaac 6.0 source-to-publisher wiring</td></tr><tr><th>Two TF parents</th><td>duplicate publisher ownership</td></tr><tr><th>TF extrapolation</th><td>mixed or stale time</td></tr><tr><th>Odom moves incorrectly</th><td>chassis prim, units, frame, or slip</td></tr></tbody></table></div><div class="callout"><strong>Correct dynamic chain:</strong> <code>Isaac Compute Odometry</code> feeds both <code>ROS2 Publish Odometry</code> and <code>ROS2 Publish Raw Transform Tree</code>, producing the dynamic <code>odom → base_link</code> edge. A separate <code>/tf_static</code> stream is required only when you deliberately configure a static transform publisher.</div><div class="gate"><strong>Lab 02 gate:</strong> <code>/clock</code>, <code>/joint_states</code>, <code>/tf</code>, and <code>/odom</code> are observable; arrays are valid; TF is connected/acyclic; odom/base frames are consistent. Require <code>/tf_static</code> only when this stage owns static transforms.</div></section>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Evidence</p><h2>Save what an interviewer can inspect</h2></div><ul class="evidence-list"><li>robot/articulation prim paths</li><li>graph boundary screenshot</li><li>JointState array-length table</li><li>TF tree with static/dynamic labels</li><li>topic/type/QoS/publisher report</li><li>rate and timestamp measurements</li></ul><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA · configuration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Windows Jazzy/Pixi + Zenoh</a></h3></article><article class="card"><span class="status-badge">NVIDIA upstream</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">Isaac Sim ROS Workspaces</a></h3></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_tf.html">TF and Odometry</a></h3></article><article class="card"><span class="status-badge">Migration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/migration_guides/isaac_sim_6_0/ros2_omnigraph_migration.html">6.0 OmniGraph changes</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="isaac-sim-gui-clock-test.html"><span>Previous</span><strong>← Lab 01 · Clock</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>Next after gate</span><strong>Lab 03 · Control + watchdog →</strong></a></nav></main><footer><p>Frames and time before commands.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic hz /odom
+</code></pre>
+<p>Collect at least 20 messages for each rate command.</p>
+<h2 id="step-5-apply-the-invariants">Step 5 — apply the invariants</h2>
+<p>For one JointState sample:</p>
+<pre><code class="language-text">len(name) == len(position)
+velocity is empty OR len(velocity) == len(name)
+effort is empty OR len(effort) == len(name)
+joint names are unique
+all numeric values are finite
+header timestamp does not move backward inside one episode
+</code></pre>
+<p>For TF:</p>
+<pre><code class="language-text">each child has one parent
+no cycles
+frame names are stable
+odom → base_link is dynamic
+sensor mounting transforms have one declared owner; use /tf_static when deliberately configured as static
+</code></pre>
+<p>Optional if <code>tf2_tools</code> is present:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 run tf2_tools view_frames
+</code></pre>
+<h2 id="step-6-lifecycle-experiment">Step 6 — lifecycle experiment</h2>
+<ol>
+<li>Record one joint and odometry sample while playing.</li>
+<li>Pause Isaac Sim; bounded echoes should wait because no new samples execute.</li>
+<li>Resume; timestamps and values continue.</li>
+<li>Drive the robot later in Lab 03 and verify wheel joints and odometry change together.</li>
+</ol>
+<h2 id="debugging-decision">Debugging decision</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;No /joint_states&quot;] --&gt; B{&quot;Source node reads the articulation?&quot;}
+    B --&gt;|No| C[&quot;Fix articulation-root prim and Play state&quot;]
+    B --&gt;|Yes| D[&quot;Check publisher execution, context, topic, QoS&quot;]
+    E[&quot;TF missing links&quot;] --&gt; F{&quot;Compute Transform Tree target is robot root?&quot;}
+    F --&gt;|No| G[&quot;Move target to robot root / expand targets&quot;]
+    F --&gt;|Yes| H[&quot;Check nameOverride, duplicate children, static flag&quot;]
+    I[&quot;Odom looks wrong&quot;] --&gt; J[&quot;Check chassis prim, odom/base frames, units, wheel slip&quot;]
+</pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First boundary</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Names but empty positions</td>
+<td>source schema</td>
+<td>wrong articulation/DOF source</td>
+</tr>
+<tr>
+<td>Array lengths differ</td>
+<td>source-to-publisher wiring</td>
+<td>partially connected 6.0 graph</td>
+</tr>
+<tr>
+<td>TF has two parents for one child</td>
+<td>ownership</td>
+<td>duplicate TF publisher</td>
+</tr>
+<tr>
+<td>TF extrapolation</td>
+<td>time</td>
+<td>mixed wall/simulation time or stale consumer</td>
+</tr>
+<tr>
+<td>Odom moves while robot does not</td>
+<td>frame/source</td>
+<td>wrong chassis prim or ground-truth misuse</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="evidence-to-save">Evidence to save</h2>
+<ul>
+<li>robot and articulation-root prim paths;</li>
+<li>screenshot of joint, TF, and odometry graph boundaries;</li>
+<li>one complete JointState sample and array-length table;</li>
+<li>TF diagram with dynamic/static labels;</li>
+<li>topic type/QoS/publisher information;</li>
+<li>rate measurements in simulation time and wall arrival time;</li>
+<li>one diagnosed failure and correction.</li>
+</ul>
+<h2 id="machine-check">Machine check</h2>
+<p>Lab 05 records this episode and re-runs every invariant above offline. <code>bag_contract_check.py</code> reports on two contracts:
+- <code>joint_states</code>: array lengths, unique names, finite values, stable order, and stamps that never move backward;
+- <code>tf</code>: one parent per child, no cycles, one root, and the required <code>odom → base_link</code> edge.</p>
+<p>Keep this page's manual checks as the first diagnosis, and the bag report as the reproducible evidence.</p>
+<h2 id="gate">Gate</h2>
+<p>Continue to Lab 03 only when <code>/clock</code>, <code>/joint_states</code>, <code>/tf</code>, and <code>/odom</code> are observable; joint arrays satisfy the invariants; TF is connected/acyclic; and both <code>/odom</code> and the dynamic <code>odom → base_link</code> edge use consistent frames. Require <code>/tf_static</code> only if this stage deliberately contains a static TF publisher.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-02-joint-states-tf.md">lab-02-joint-states-tf.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

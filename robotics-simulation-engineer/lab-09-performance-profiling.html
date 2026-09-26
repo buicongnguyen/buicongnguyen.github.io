@@ -1,14 +1,182 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Isaac Sim performance lab covering benchmark contracts, RTF, Tracy CPU/GPU profiling, controlled optimization, and scaling evidence."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-09-performance-profiling.html"><title>Lab 09 · Performance Profiling and Scaling</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 09</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim Practical Labs</span></a><nav aria-label="Lab 09 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#metrics">Metrics</a><a href="#baseline">Baseline</a><a href="#tracy">Tracy</a><a href="#change">Optimize</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 09 · measure · profile · optimize</p><h1>Find and Improve One Real Bottleneck</h1><p class="lede">Freeze the workload, warm it up, measure repeated RTF/FPS rows, use Tracy to locate ownership, change one variable, and rerun every correctness gate.</p><div class="hero-actions"><a class="button" href="#metrics">Start Lab 09</a><a class="button secondary" href="lab-09-performance-profiling.md">Read Markdown</a><a class="button secondary" href="lab-assets/benchmark_summary.py">Download analyzer</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Runs</dt><dd>5+</dd></div><div><dt>Warmup</dt><dd>separate</dd></div><div><dt>Trace</dt><dd>owned</dd></div><div><dt>Change</dt><dd>one</dd></div><div><dt>Gain</dt><dd>&gt; variance</dd></div><div><dt>Contracts</dt><dd>green</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html" aria-current="page"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-<section id="metrics" class="section"><div class="section-heading"><p class="eyebrow">Metric contract</p><h2>Rate, throughput, and latency are not interchangeable</h2></div><div class="table-wrap"><table><thead><tr><th>Metric</th><th>Meaning</th><th>Common confusion</th></tr></thead><tbody><tr><td>RTF</td><td>sim seconds / wall seconds</td><td>configured timestep</td></tr><tr><td>simulation FPS</td><td>steps / wall second</td><td>render FPS</td></tr><tr><td>topic rate</td><td>arrivals / wall second</td><td>sensor-stamp cadence</td></tr><tr><td>latency</td><td>event to observed result</td><td>throughput</td></tr><tr><td>VRAM peak</td><td>maximum allocation</td><td>GPU utilization</td></tr></tbody></table></div></section>
-<section id="baseline" class="section"><div class="section-heading"><p class="eyebrow">Steps 1–2</p><h2>Freeze, warm, repeat, summarize</h2></div><div class="logic-chain"><div><strong>Frozen workload</strong><small>stage · sensors · actors</small></div><b>→</b><div><strong>Warmup</strong><small>shader + assets</small></div><b>→</b><div><strong>5+ runs</strong><small>raw CSV</small></div><b>→</b><div><strong>Distribution</strong><small>median · p05 · p95</small></div></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
- "$Assets\fixtures\benchmark_runs.csv" `
- --output "$Assets\fixtures\benchmark_baseline.json"</code></pre><p>Record stage hash, sensor rates/resolutions, robot count, timestep, rendering, ROS publishers, GUI/headless mode, warm-up, duration, driver, and background workload.</p></section>
-<section id="tracy" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Use Tracy to assign ownership</h2></div><div class="contract-grid"><article class="contract-card"><h3>Timeline/physics</h3><p>contacts, articulation step, solver and waits</p></article><article class="contract-card"><h3>Compute graphs</h3><p>OmniGraph and Python execution</p></article><article class="contract-card"><h3>Rendering/GPU</h3><p>render products, RTX sensors, resolution</p></article></div><p>Enable <code>omni.kit.profiler.tracy</code>, collect a short steady trace, then disable profiling for final timings because capture adds overhead.</p></section>
-<section id="change" class="section"><div class="section-heading"><p class="eyebrow">Steps 4–5</p><h2>Change one bottleneck and preserve the workload contract</h2></div><div class="table-wrap"><table><tbody><tr><th>Rendering</th><td>one resolution or render product</td><td>camera contract still passes</td></tr><tr><th>RTX sensor</th><td>justified <code>omni:sensor:tickRate</code></td><td>temporal requirement retained</td></tr><tr><th>Physics</th><td>simplify collider</td><td>contact outcome within tolerance</td></tr><tr><th>ROS</th><td>disable unused publisher</td><td>consumer contract updated</td></tr><tr><th>Python</th><td>batch/remove per-frame allocation</td><td>equivalent outputs</td></tr></tbody></table></div><pre class="local-command"><code>C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
- "$Run\optimized.csv" --baseline "$Assets\fixtures\benchmark_baseline.json" `
- --max-rtf-regression 0.05 --output "$Run\optimized_report.json"</code></pre></section>
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Bottleneck decision</p><h2>Follow the longest measured owner</h2></div><div class="debug-flow"><div><strong>Rendering?</strong><span>products · RTX</span></div><b>→</b><div><strong>Physics?</strong><span>contacts · waits</span></div><b>→</b><div><strong>Compute?</strong><span>nodes · Python</span></div><b>→</b><div><strong>Transport?</strong><span>ROS · disk</span></div><b>→</b><div><strong>Repeat</strong><span>same contract</span></div><b>→</b><div><strong>Gates</strong><span>still green?</span></div></div><div class="gate"><strong>Gate:</strong> improvement exceeds run variability, the workload reduction is explicit, and Labs 01–08 remain green.</div><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/utilities/debugging/profiling_performance.html">Profiling with Tracy</a></h3></article><article class="card"><span class="status-badge">NVIDIA</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/reference_material/sim_performance_optimization_handbook.html">Performance handbook</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-08-regression-ci.html"><span>Previous</span><strong>← Lab 08 · CI</strong></a><a href="lab-10-domain-randomization.html"><span>Next after gate</span><strong>Lab 10 · Robustness →</strong></a></nav></main><footer><p>Profile first. Change one owner. Recheck correctness.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="locate a measured bottleneck, change one variable, and demonstrate improvement without sacrificing correctness.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-09-performance-profiling.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-09-performance-profiling.html">
+<title>Lab 09 — Performance Profiling and Scaling | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-09-performance-profiling.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-09-performance-profiling.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-09-performance-profiling-and-scaling">Lab 09 — Performance Profiling and Scaling</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 08 regression gates are green.</li>
+<li><strong>Goal:</strong> locate a measured bottleneck, change one variable, and demonstrate improvement without sacrificing correctness.</li>
+<li>
+<p><strong>Pass:</strong> repeated baselines, a Tracy trace, a bottleneck hypothesis, controlled before/after rows, and unchanged functional gates.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/utilities/debugging/profiling_performance.html">NVIDIA Tracy profiling guide</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/reference_material/sim_performance_optimization_handbook.html">NVIDIA Performance Optimization Handbook</a></li>
+<li>Analyzer: <a href="lab-assets/benchmark_summary.py">lab-assets/benchmark_summary.py</a></li>
+</ul>
+<h2 id="define-the-metrics-before-optimizing">Define the metrics before optimizing</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula/meaning</th>
+<th>Do not confuse with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>simulation FPS</td>
+<td>simulated steps per wall second</td>
+<td>render FPS</td>
+</tr>
+<tr>
+<td>render FPS</td>
+<td>rendered frames per wall second</td>
+<td>physics rate</td>
+</tr>
+<tr>
+<td>RTF</td>
+<td>simulated seconds / wall seconds</td>
+<td>configured timestep</td>
+</tr>
+<tr>
+<td>topic rate</td>
+<td>messages received per wall second</td>
+<td>sensor timestamp cadence</td>
+</tr>
+<tr>
+<td>latency</td>
+<td>command/event to observed result</td>
+<td>throughput</td>
+</tr>
+<tr>
+<td>VRAM peak</td>
+<td>maximum allocated GPU memory</td>
+<td>GPU utilization</td>
+</tr>
+</tbody>
+</table></div>
+<pre class="mermaid">flowchart LR
+    Workload[&quot;Frozen workload&quot;] --&gt; Warmup[&quot;Warm shader/cache&quot;]
+    Warmup --&gt; Repeats[&quot;5+ measured runs&quot;]
+    Repeats --&gt; Trace[&quot;Tracy CPU/GPU trace&quot;]
+    Trace --&gt; Change[&quot;One optimization&quot;]
+    Change --&gt; Compare[&quot;Repeat + functional gates&quot;]
+</pre>
+<h2 id="step-1-freeze-a-benchmark-contract">Step 1 — freeze a benchmark contract</h2>
+<p>Record stage hash, sensor resolutions/rates, number of robots, physics timestep, rendering mode, ROS publishers, headless/GUI mode, warm-up duration, measured duration, and power/background-process conditions.</p>
+<p>Warm up shaders and assets before timing. Separate startup time from steady-state throughput.</p>
+<h2 id="step-2-collect-repeated-rows">Step 2 — collect repeated rows</h2>
+<p>Use this schema:</p>
+<pre><code class="language-csv">run,sim_seconds,wall_seconds,frames,gpu_memory_mb,notes
+</code></pre>
+<p><code>frames</code> counts application update frames, so the report's <code>fps</code> is app-update FPS, not the physics step rate. RTF is the primary metric.</p>
+<p>Capture at least five baseline rows. Then summarize them, and declare the workload identity you froze in Step 1:</p>
+<pre><code class="language-powershell">$Workload = @(&quot;--workload&quot;, &quot;scene=turtlebot_tutorial.usd&quot;, &quot;--workload&quot;, &quot;robots=1&quot;, &quot;--workload&quot;, &quot;physics_dt=1/60&quot;, &quot;--workload&quot;, &quot;mode=headless&quot;)
+python &quot;$Assets\benchmark_summary.py&quot; &quot;$Run\baseline.csv&quot; @Workload --output &quot;$Run\benchmark_baseline.json&quot;
+</code></pre>
+<p>To rehearse before you have your own rows, use <code>$Assets\fixtures\benchmark_runs.csv</code> in place of <code>$Run\baseline.csv</code>.</p>
+<p>The report includes median, 5th/95th percentiles, and RTF coefficient of variation. High variation means the benchmark is not stable enough for a small optimization claim.</p>
+<h2 id="step-3-use-tracy-to-identify-ownership">Step 3 — use Tracy to identify ownership</h2>
+<p>Enable <code>omni.kit.profiler.tracy</code>, launch/connect the bundled Tracy UI, collect a short steady-state trace, then stop capture. Inspect:</p>
+<ul>
+<li><strong>Timeline Update / physics:</strong> collision count, solver work, articulation stepping;</li>
+<li><strong>Compute Graphs:</strong> OmniGraph and Python-node execution;</li>
+<li><strong>Rendering:</strong> render products, RTX sensors, resolution;</li>
+<li><strong>thread waiting:</strong> the worker/GPU task that owns the critical wait.</li>
+</ul>
+<p>Profiling adds overhead. Use it to identify the bottleneck, then disable it for final timing.</p>
+<h2 id="step-4-choose-one-controlled-optimization">Step 4 — choose one controlled optimization</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Bottleneck</th>
+<th>Candidate change</th>
+<th>Required invariant</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rendering</td>
+<td>reduce one render-product resolution</td>
+<td>camera schema/frame still valid</td>
+</tr>
+<tr>
+<td>RTX sensor</td>
+<td>lower justified <code>omni:sensor:tickRate</code></td>
+<td>required temporal coverage retained</td>
+</tr>
+<tr>
+<td>physics</td>
+<td>simplify colliders</td>
+<td>contact outcome remains within tolerance</td>
+</tr>
+<tr>
+<td>excessive USD writes</td>
+<td>evaluate Fabric/headless workflow</td>
+<td>saved-state/evidence semantics declared</td>
+</tr>
+<tr>
+<td>ROS bandwidth</td>
+<td>disable unused publisher or compress deliberately</td>
+<td>consumer contract updated</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>batch work/remove per-frame allocation</td>
+<td>outputs numerically equivalent</td>
+</tr>
+</tbody>
+</table></div>
+<p>Never change resolution, tick rate, collider complexity, and environment count together.</p>
+<h2 id="step-5-compare-against-a-stored-baseline">Step 5 — compare against a stored baseline</h2>
+<p>Record the optimized runs with the same schema into <code>$Run\optimized.csv</code>, or rehearse with <code>$Assets\fixtures\benchmark_optimized.csv</code>, and compare them against the stored baseline:</p>
+<pre><code class="language-powershell">python &quot;$Assets\benchmark_summary.py&quot; &quot;$Run\optimized.csv&quot; @Workload `
+  --baseline &quot;$Run\benchmark_baseline.json&quot; --max-rtf-regression 0.05 --claim-improvement `
+  --output &quot;$Run\performance.json&quot;
+</code></pre>
+<p>The comparison is refused if the workload identity differs from the baseline, because a faster run on a smaller workload is not a speedup.</p>
+<p><code>--claim-improvement</code> passes only if the median RTF rose <em>and</em> a one-sided exact Mann–Whitney permutation test gives p &lt; 0.05. With five runs on each side, the smallest achievable p is 1/252 ≈ 0.004, which requires every optimized run to beat every baseline run. The shipped rehearsal fixtures give +9.7% RTF at p = 0.004.</p>
+<p>Without the flag, the tool acts as a regression gate: it fails only if the median RTF drops by more than <code>--max-rtf-regression</code>.</p>
+<p>For an intended speedup, explain why the new median improved and why p05/p95 and correctness remained acceptable. For scaling, test environment or robot counts geometrically (1, 2, 4, 8…) until RTF, VRAM, or latency violates the declared gate.</p>
+<h2 id="bottleneck-decision-logic">Bottleneck decision logic</h2>
+<pre class="mermaid">flowchart TD
+    A[&quot;RTF below target&quot;] --&gt; B{&quot;Tracy rendering dominates?&quot;}
+    B --&gt;|Yes| C[&quot;render products, resolution, tick rate&quot;]
+    B --&gt;|No| D{&quot;Physics/wait dominates?&quot;}
+    D --&gt;|Yes| E[&quot;contacts, colliders, solver, actors&quot;]
+    D --&gt;|No| F{&quot;Compute graph/Python dominates?&quot;}
+    F --&gt;|Yes| G[&quot;node frequency, batching, allocation&quot;]
+    F --&gt;|No| H[&quot;transport, I/O, measurement error&quot;]
+</pre>
+<h2 id="evidence-and-gate">Evidence and gate</h2>
+<p>Save contract, warm-up rule, raw CSVs, summary JSONs, Tracy trace/screenshot, bottleneck hypothesis, exact change, and rerun of Labs 01–08 gates.</p>
+<p><strong>Gate:</strong> one measured bottleneck is improved beyond run variability, with no hidden workload reduction and no failed functional contract.</p>
+<p>Next: <a href="lab-10-domain-randomization.html">Lab 10 — Robustness and transfer reasoning</a>.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-09-performance-profiling.md">lab-09-performance-profiling.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

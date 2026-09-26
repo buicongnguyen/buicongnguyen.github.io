@@ -36,24 +36,24 @@ Friction cannot repair a disconnected tree. Damping cannot repair a wrong joint 
 
 ## Step 1 — run the offline gate
 
-Use the supplied known-good fixture first:
+Use the supplied known-good fixture first. The auditor uses only the Python standard library, so any Python 3.10+ works, and reports go to this attempt's run folder, never into `fixtures/`:
 
 ```powershell
-$Root = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer"
-C:\isaacsim-6.0.1\python.bat "$Root\lab-assets\urdf_audit.py" `
-  "$Root\lab-assets\fixtures\valid_robot.urdf" `
-  --output "$Root\lab-assets\fixtures\valid_robot_report.json"
+python "$Assets\urdf_audit.py" "$Assets\fixtures\valid_robot.urdf" --output "$Run\model_audit.json"
 ```
 
 The auditor checks:
 
 - exactly one root link and a connected acyclic link graph;
 - one parent joint per child;
-- valid parent/child references and unique names;
-- finite positive mass and a positive-definite inertia matrix;
+- valid parent/child references and unique names, and mimic targets that exist;
+- finite positive mass;
+- a physically realizable inertia tensor: positive principal moments that also satisfy the triangle inequality (each moment ≤ the sum of the other two, with 0.1% allowance for rounded published values). Positive-definite alone is not enough. For example, `diag(1, 1, 3)` is positive-definite but no rigid body has it;
 - required limits for revolute/prismatic joints;
-- positive effort/velocity limits;
+- positive effort/velocity limits and non-zero joint axes;
 - declared collision and inertial blocks.
+
+It also cross-checks each link's inertia against its collision shape. When a link has one box, cylinder, or sphere collider sharing the inertial frame, a moment that differs by more than 25% from a uniform solid of the same mass is reported as a review warning. That catches values typed onto the wrong axis.
 
 Warnings are review items, not automatic proof of failure. For example, a deliberately massless frame may be fixed into a parent, but that decision must be recorded.
 
@@ -64,9 +64,13 @@ Copy the fixture and change one invariant at a time:
 1. Set a mass to zero.
 2. Make a joint child reference an unknown link.
 3. Make `ixx` negative.
-4. Remove one collision block.
+4. Raise the base `izz` to `0.25`, so `ixx + iyy < izz`.
+5. Remove one collision block.
+6. Swap the wheel's `iyy` and `izz`, putting the axial moment on the wrong axis.
 
-The first three must fail; the missing collider is reported for review. Restore the original before continuing. A validator that never fails is not evidence.
+Faults 1–4 must fail. Faults 5 and 6 are reported as review warnings. Restore the original before continuing. A validator that never fails is not evidence. `tests/test_lab_tools.py` encodes each of these faults, so CI proves the auditor can still fail.
+
+Fault 6 is not hypothetical. An earlier version of this fixture had the wheel's axial moment on `iyy` and a 4% error in the base `iyy`, and the earlier auditor passed it because it only checked positive-definiteness.
 
 ## Step 3 — record import choices before clicking Import
 

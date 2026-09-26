@@ -1,6 +1,7 @@
 """Forward fresh Twist commands and publish zero when input becomes stale."""
 
 import argparse
+import math
 import time
 
 import rclpy
@@ -8,6 +9,7 @@ from geometry_msgs.msg import Twist
 from lab_contracts import is_stale
 from rclpy.clock import Clock, ClockType
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
 
 
 class TwistWatchdog(Node):
@@ -54,10 +56,15 @@ def main() -> None:
     parser.add_argument("--timeout", type=float, default=0.5)
     parser.add_argument("--rate", type=float, default=20.0)
     args = parser.parse_args()
-    if args.timeout <= 0.0 or args.rate <= 0.0:
-        parser.error("--timeout and --rate must be positive")
+    # float("nan") parses, and NaN comparisons are always false: reject it so the guard fails closed.
+    if not all(math.isfinite(value) and value > 0.0 for value in (args.timeout, args.rate)):
+        parser.error("--timeout and --rate must be finite and positive")
+    if args.input == args.output:
+        parser.error("--input and --output must be different topics")
 
-    rclpy.init()
+    # rclpy's default SIGINT handler shuts the context down before KeyboardInterrupt
+    # reaches us, which makes the final zero publish below raise "context is invalid".
+    rclpy.init(signal_handler_options=SignalHandlerOptions.NO)
     node = TwistWatchdog(args.input, args.output, args.timeout, args.rate)
     try:
         rclpy.spin(node)
@@ -65,8 +72,9 @@ def main() -> None:
         pass
     finally:
         node.publisher.publish(Twist())
+        node.get_logger().info("Published final zero Twist")
         node.destroy_node()
-        rclpy.shutdown()
+        rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

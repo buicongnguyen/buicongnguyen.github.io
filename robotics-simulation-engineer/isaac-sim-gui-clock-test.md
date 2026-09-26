@@ -10,7 +10,7 @@ Isaac Sim timeline → OmniGraph tick → simulation-time reader
 It does **not** use WSL 2. Keep WSL closed so a second ROS graph cannot confuse the result.
 
 - Live illustrated lab: <https://buicongnguyen.github.io/robotics-simulation-engineer/isaac-sim-gui-clock-test.html>
-- Five-lab learning path: <https://buicongnguyen.github.io/robotics-simulation-engineer/ros2-labs.html>
+- Ten-lab learning path: [Isaac Sim + ROS 2 Labs 01–10](ros2-labs.md)
 - Next after this gate: [Lab 02 — Joint States, TF, and Odometry](lab-02-joint-states-tf.md)
 - [NVIDIA ROS 2 Clock tutorial](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_clock.html)
 - [NVIDIA Windows/Pixi setup](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html)
@@ -35,15 +35,16 @@ Simulation time is the first useful integration signal. ROS nodes with `use_sim_
 ```yaml
 operating_system: Windows 11
 uses_wsl: false
-isaac_sim: C:\isaacsim-6.0.1
+isaac_sim: 6.0.1 pip package inside the Pixi workspace (verify prints its path)
+isaac_sim_package_path: C:\isaacsim-6.0.1
 ros_distribution: jazzy
 workspace: C:\IsaacSim-ros_workspaces\jazzy_ws
 rmw_implementation: rmw_zenoh_cpp
 ros_domain_id: 0
-launcher: C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
+launcher: robotics-simulation-engineer\Start-IsaacRosJazzy.ps1
 ```
 
-Use the launcher for every command. It removes conflicting Miniconda and Cognex DLL directories only from its child process; it does not change the machine globally.
+Use the launcher for every command. It removes conflicting Conda-family and Cognex DLL directories only from its own process and children; it does not change the machine globally.
 
 ## Before opening three terminals
 
@@ -53,11 +54,7 @@ Use the launcher for every command. It removes conflicting Miniconda and Cognex 
 4. Confirm NVIDIA's EULA has already been accepted.
 5. Open three fresh **PowerShell** windows.
 
-Set this in each terminal:
-
-```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-```
+In each terminal, set the four session variables (`$Repo`, `$Launcher`, `$Assets`, `$Run`) from [Shared startup](ros2-labs.md#shared-startup).
 
 ## Step 0 — environment preflight
 
@@ -70,8 +67,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 Continue only when the final line is:
 
 ```text
-PASS: Jazzy, Zenoh, and NVIDIA custom interfaces load in a clean process.
+PASS: Jazzy, Zenoh (domain 0), and NVIDIA custom interfaces load in a clean process.
 ```
+
+`verify` fails if the distribution, RMW, or domain differ from the contract. It also prints the Isaac Sim package that the `sim` action runs, which is the pip install inside the Pixi environment rather than `C:\isaacsim-6.0.1`. Copy that path into your evidence.
 
 Debug environment identity before simulator, discovery, graph, or message data.
 
@@ -182,15 +181,9 @@ The time reader defaults to monotonic time across stop/replay to prevent backwar
 
 ## Step 6 — save evidence
 
-Save the stage as:
+Save the stage as `$Run\ros2_clock.usd`, and save beside it:
 
-```text
-C:\Users\n\source\repos\issac_sim\projects\ros2_clock\ros2_clock.usd
-```
-
-Save beside it:
-
-- simulator version/build and launch command;
+- `verify` output, including the Pixi Isaac Sim package path, and the launch command;
 - workspace Git commit;
 - ROS distribution, RMW, and domain ID;
 - screenshot of the Clock Action Graph;

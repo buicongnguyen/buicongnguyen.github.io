@@ -43,14 +43,16 @@ Use this schema:
 run,sim_seconds,wall_seconds,frames,gpu_memory_mb,notes
 ```
 
-Capture at least five baseline rows. Then summarize:
+`frames` counts application update frames, so the report's `fps` is app-update FPS, not the physics step rate. RTF is the primary metric.
+
+Capture at least five baseline rows. Then summarize them, and declare the workload identity you froze in Step 1:
 
 ```powershell
-$Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
-C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
-  "$Assets\fixtures\benchmark_runs.csv" `
-  --output "$Assets\fixtures\benchmark_baseline.json"
+$Workload = @("--workload", "scene=turtlebot_tutorial.usd", "--workload", "robots=1", "--workload", "physics_dt=1/60", "--workload", "mode=headless")
+python "$Assets\benchmark_summary.py" "$Run\baseline.csv" @Workload --output "$Run\benchmark_baseline.json"
 ```
+
+To rehearse before you have your own rows, use `$Assets\fixtures\benchmark_runs.csv` in place of `$Run\baseline.csv`.
 
 The report includes median, 5th/95th percentiles, and RTF coefficient of variation. High variation means the benchmark is not stable enough for a small optimization claim.
 
@@ -80,13 +82,19 @@ Never change resolution, tick rate, collider complexity, and environment count t
 
 ## Step 5 — compare against a stored baseline
 
+Record the optimized runs with the same schema into `$Run\optimized.csv`, or rehearse with `$Assets\fixtures\benchmark_optimized.csv`, and compare them against the stored baseline:
+
 ```powershell
-C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
-  "$Run\optimized.csv" `
-  --baseline "$Assets\fixtures\benchmark_baseline.json" `
-  --max-rtf-regression 0.05 `
-  --output "$Run\optimized_report.json"
+python "$Assets\benchmark_summary.py" "$Run\optimized.csv" @Workload `
+  --baseline "$Run\benchmark_baseline.json" --max-rtf-regression 0.05 --claim-improvement `
+  --output "$Run\performance.json"
 ```
+
+The comparison is refused if the workload identity differs from the baseline, because a faster run on a smaller workload is not a speedup.
+
+`--claim-improvement` passes only if the median RTF rose *and* a one-sided exact Mann–Whitney permutation test gives p < 0.05. With five runs on each side, the smallest achievable p is 1/252 ≈ 0.004, which requires every optimized run to beat every baseline run. The shipped rehearsal fixtures give +9.7% RTF at p = 0.004.
+
+Without the flag, the tool acts as a regression gate: it fails only if the median RTF drops by more than `--max-rtf-regression`.
 
 For an intended speedup, explain why the new median improved and why p05/p95 and correctness remained acceptable. For scaling, test environment or robot counts geometrically (1, 2, 4, 8…) until RTF, VRAM, or latency violates the declared gate.
 

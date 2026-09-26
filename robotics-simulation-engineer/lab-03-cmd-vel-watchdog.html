@@ -1,31 +1,203 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Step-by-step Isaac Sim TurtleBot Twist control and stale-command watchdog lab on Windows ROS 2 Jazzy."><meta name="theme-color" content="#087968"><link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-03-cmd-vel-watchdog.html"><title>Lab 03 · cmd_vel and Watchdog</title><link rel="stylesheet" href="course.css?v=20260713-2"><link rel="stylesheet" href="ros2-dual-mode.css?v=20260803-2"><link rel="stylesheet" href="ros2-labs.css?v=20260803-3"><link rel="stylesheet" href="../book-layout.css?v=20260730-1"></head>
-<body><a class="skip-link" href="#main">Skip to Lab 03</a><header class="site-header"><a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a><nav aria-label="Lab 03 navigation"><a href="ros2-labs.html">Ten labs</a><a href="#graph">Flow</a><a href="#direct">Direct test</a><a href="#watchdog">Watchdog</a><a href="#measure">Measure</a><a href="#debug">Debug</a></nav></header>
-<main id="main"><section class="hero dual-hero"><div><p class="eyebrow">Lab 03 · commands · controller ownership · safe state</p><h1>Drive TurtleBot with `/cmd_vel` and a Watchdog</h1><p class="lede">Trace body velocity from ROS receipt to wheel actuation, then deliberately remove the command stream and prove a steady-clock watchdog publishes a bounded zero command.</p><div class="hero-actions"><a class="button" href="#graph">Start Lab 03</a><a class="button secondary" href="lab-03-cmd-vel-watchdog.md">Read Markdown</a><a class="button secondary" href="lab-assets/cmd_vel_watchdog.py">Download watchdog</a></div></div><aside class="hero-panel"><p class="eyebrow">Pass condition</p><dl><div><dt>Input</dt><dd>/cmd_vel_raw</dd></div><div><dt>Safe output</dt><dd>/cmd_vel</dd></div><div><dt>Timeout</dt><dd>0.5 s</dd></div><div><dt>Watchdog</dt><dd>20 Hz</dd></div><div><dt>Motion</dt><dd>frame-correct</dd></div><div><dt>Stop</dt><dd>bounded zero</dd></div></dl></aside></section>
-<nav class="lab-progress" aria-label="Lab progress"><a href="isaac-sim-gui-clock-test.html"><span>01</span><strong>Clock</strong></a><a href="lab-02-joint-states-tf.html"><span>02</span><strong>State</strong></a><a href="lab-03-cmd-vel-watchdog.html" aria-current="page"><span>03</span><strong>Control</strong></a><a href="lab-04-camera-depth.html"><span>04</span><strong>Camera</strong></a><a href="lab-05-rosbag-validation.html"><span>05</span><strong>Replay</strong></a><a href="lab-06-urdf-model-audit.html"><span>06</span><strong>Model</strong></a><a href="lab-07-physics-identification.html"><span>07</span><strong>Physics</strong></a><a href="lab-08-regression-ci.html"><span>08</span><strong>CI</strong></a><a href="lab-09-performance-profiling.html"><span>09</span><strong>Profile</strong></a><a href="lab-10-domain-randomization.html"><span>10</span><strong>Robustness</strong></a></nav>
-
-<section id="graph" class="section"><div class="section-heading"><p class="eyebrow">Command architecture</p><h2>Separate requested motion from safe applied command</h2></div><div class="data-pipeline" role="img" aria-label="Twist command data flow"><div><span>1</span><strong>/cmd_vel_raw</strong><small>requested Twist</small></div><b>→</b><div><span>2</span><strong>Watchdog</strong><small>receipt age</small></div><b>→</b><div><span>3</span><strong>/cmd_vel</strong><small>safe Twist</small></div><b>→</b><div><span>4</span><strong>Differential</strong><small>body → wheels</small></div><b>→</b><div><span>5</span><strong>Articulation</strong><small>joint targets</small></div><b>→</b><div><span>6</span><strong>Evidence</strong><small>joint + odom</small></div></div><div class="callout"><strong>Clock decision:</strong> Twist has no header stamp. The supplied watchdog uses monotonic receipt time so safety expiration continues even if simulation time pauses.</div></section>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Steps 1–2</p><h2>Open the same robot and inspect controller wiring</h2></div><ol class="ordered-checks"><li>Start the Lab 01 three-terminal Windows contract.</li><li>Open <strong>Isaac Sim → Samples → ROS2 → Scenario → turtlebot_tutorial.usd</strong>.</li><li>Require <code>/clock</code>, <code>/joint_states</code>, <code>/tf</code>, and <code>/odom</code> before control.</li><li>Inspect the full 6.0 path: ROS2 Subscribe Twist → Scale To/From Stage Unit → Break 3-Vector → Differential Controller → Make Array → Articulation Controller.</li><li>Confirm wheel tokens from actual state: <code>wheel_left_joint</code>, <code>wheel_right_joint</code> for the reference TurtleBot.</li></ol><div class="contract-grid"><article class="contract-card"><h3>Subscriber</h3><p>Topic <code>/cmd_vel</code>, Jazzy context, active graph tick.</p></article><article class="contract-card"><h3>Units + fields</h3><p>Scale stage units, then split linear/angular vectors into the controller inputs.</p></article><article class="contract-card"><h3>Actuation</h3><p>Make Array preserves wheel ordering; the articulation controller owns joint velocity targets.</p></article></div><div class="callout warning"><strong>Latch boundary:</strong> stopping a Twist publisher does not guarantee the Isaac subscriber/controller forgets its last value. The external steady-clock watchdog deliberately publishes zero. It is an educational runtime guard, not a certified hardware safety system.</div></section>
-
-<section id="direct" class="section"><div class="section-heading"><p class="eyebrow">Step 3</p><h2>Prove direct motion before adding safety logic</h2></div><pre class="local-command"><code>$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
-# Forward once
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
-# Explicit zero
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0}, angular: {z: 0.0}}"</code></pre><p>Check wheel velocities and odometry together. If motion direction is wrong, inspect wheel axes/order and body-frame convention before introducing a sign correction.</p></section>
-
-<section id="watchdog" class="section"><div class="section-heading"><p class="eyebrow">Steps 4–5</p><h2>Insert, observe, and expire the watchdog</h2></div><div class="command-grid"><article><h3>Terminal 3 · watchdog</h3><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
- -File $Launcher python `
- "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\cmd_vel_watchdog.py" `
- --input /cmd_vel_raw --output /cmd_vel `
- --timeout 0.5 --rate 20</code></pre></article><article><h3>Terminal 4 · safe output</h3><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
- -File $Launcher ros2 topic echo /cmd_vel</code></pre></article><article><h3>Terminal 5 · fresh input</h3><pre><code>pwsh -NoProfile -ExecutionPolicy Bypass `
- -File $Launcher ros2 topic pub -r 10 `
- /cmd_vel_raw geometry_msgs/msg/Twist `
- "{linear: {x: 0.2}, angular: {z: 0.0}}"</code></pre></article><article><h3>Expiry test</h3><p>Press <code>Ctrl+C</code> only in Terminal 5. Expect zero output within approximately <code>0.5 + 0.05 s</code>.</p></article></div><div class="state-machine compact-state"><div class="state neutral"><span>S0</span><strong>STALE</strong><small>publish zero</small></div><div class="transition"><strong>Receive</strong><span>raw Twist</span></div><div class="state active"><span>S1</span><strong>FRESH</strong><small>forward latest</small></div><div class="transition"><strong>Age</strong><span>≤ 0.5 s</span></div><div class="state verify"><span>S2</span><strong>FRESH</strong><small>keep forwarding</small></div><div class="transition"><strong>Timeout</strong><span>&gt; 0.5 s</span></div><div class="state choice"><span>S3</span><strong>STALE</strong><small>zero at 20 Hz</small></div></div></section>
-
-<section id="measure" class="section"><div class="section-heading"><p class="eyebrow">Step 6</p><h2>Separate software stop latency from physical stopping</h2></div><div class="logic-chain"><div><strong>last raw receipt</strong><small>steady timestamp</small></div><b>→</b><div><strong>safe zero publish</strong><small>watchdog contract</small></div><b>→</b><div><strong>graph execution</strong><small>sim lifecycle</small></div><b>→</b><div><strong>robot at rest</strong><small>dynamics contract</small></div></div><div class="table-wrap"><table><caption>Four required cases</caption><thead><tr><th>Case</th><th>Input</th><th>Expected</th></tr></thead><tbody><tr><td>Forward</td><td><code>x=.2,z=0</code> at 10 Hz</td><td>advance with model-consistent wheel signs</td></tr><tr><td>Turn</td><td><code>x=0,z=.5</code></td><td>yaw changes; differential wheel response</td></tr><tr><td>Stop stream</td><td>publisher terminated</td><td>zero output within bound</td></tr><tr><td>Pause simulator</td><td>no physics ticks</td><td>watchdog still goes stale; safe zero applied when graph resumes</td></tr></tbody></table></div></section>
-
-<section id="debug" class="section"><div class="section-heading"><p class="eyebrow">Isolation</p><h2>Locate command ownership before tuning physics</h2></div><div class="table-wrap"><table><caption>Symptom map</caption><tbody><tr><th>Topic exists; no motion</th><td>subscriber count, Play, execution/context</td></tr><tr><th>Targets change; wheels do not</th><td>articulation prim, tokens, drive mode, limits</td></tr><tr><th>Moves backward</th><td>joint axis, direction, order, body frame</td></tr><tr><th>Never stops</th><td>raw/output separation and subscribed safe topic</td></tr><tr><th>Zero arrives; robot coasts</th><td>damping, friction, gain, drive dynamics</td></tr></tbody></table></div><div class="gate"><strong>Lab 03 gate:</strong> fresh raw commands produce expected motion and loss of raw input produces zero safe output within the declared timeout plus one publish period.</div></section>
-
-<section class="section"><div class="section-heading"><p class="eyebrow">Evidence</p><h2>Save the complete response chain</h2></div><ul class="evidence-list"><li>subscriber/controller graph</li><li>forward/turn/zero transcript</li><li>wheel and odom response</li><li>watchdog parameters/logs</li><li>stale-to-zero measurement</li><li>zero-to-physical-rest measurement</li></ul><div class="reference-grid"><article class="card"><span class="status-badge">NVIDIA · configuration</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">Windows Jazzy/Pixi + Zenoh</a></h3></article><article class="card"><span class="status-badge">NVIDIA upstream</span><h3><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">Isaac Sim ROS Workspaces</a></h3></article><article class="card"><span class="status-badge">NVIDIA 6.0.1</span><h3><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_drive_turtlebot.html">Drive TurtleBot with ROS 2</a></h3></article></div></section>
-<nav class="lesson-nav"><a href="lab-02-joint-states-tf.html"><span>Previous</span><strong>← Lab 02 · State + TF</strong></a><a href="lab-04-camera-depth.html"><span>Next after gate</span><strong>Lab 04 · Camera + depth →</strong></a></nav></main><footer><p>Fresh command, explicit owner, bounded safe state.</p><div class="footer-links"><a href="ros2-labs.html">Ten-lab map</a><a href="#main">Back to top</a></div></footer><script src="../book-layout.js?v=20260803-3"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="trace a velocity command from ROS receipt to wheel actuation, then prove stale input reaches a safe zero command.">
+<meta name="theme-color" content="#087968">
+<meta name="generator" content="scripts/build_lab_pages.py from lab-03-cmd-vel-watchdog.md">
+<link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/lab-03-cmd-vel-watchdog.html">
+<title>Lab 03 — Drive TurtleBot with /cmd_vel and a Watchdog | Robotics Simulation Engineering</title>
+<link rel="stylesheet" href="course.css?v=20260713-3">
+<link rel="stylesheet" href="lab-chapter.css?v=20260926-1">
+<link rel="stylesheet" href="../book-layout.css?v=20260926-1">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the lab</a>
+<header class="site-header">
+<a class="brand" href="ros2-labs.html"><img src="https://avatars.githubusercontent.com/u/72680210?v=4" alt=""><span>Isaac Sim + ROS 2 Labs</span></a>
+<nav aria-label="Lab navigation"><a href="dashboard.html">Dashboard</a><a href="ros2-labs.html">Ten labs</a><a href="lab-03-cmd-vel-watchdog.md">Markdown source</a></nav>
+</header>
+<main id="main" class="lab-chapter">
+<!-- Generated from lab-03-cmd-vel-watchdog.md by scripts/build_lab_pages.py. Edit the Markdown, not this file. -->
+<h1 id="lab-03-drive-turtlebot-with-cmd_vel-and-a-watchdog">Lab 03 — Drive TurtleBot with <code>/cmd_vel</code> and a Watchdog</h1>
+<ul>
+<li><strong>Prerequisite:</strong> Lab 02 state and TF gate passes.</li>
+<li><strong>Goal:</strong> trace a velocity command from ROS receipt to wheel actuation, then prove stale input reaches a safe zero command.</li>
+<li>
+<p><strong>Pass:</strong> fresh commands move the robot in the expected direction and stopping <code>/cmd_vel_raw</code> produces zero <code>/cmd_vel</code> within the declared timeout plus one publish period.</p>
+</li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/installation/install_ros_other_platforms.html">NVIDIA Windows Jazzy/Pixi + Zenoh configuration</a></li>
+<li><a href="https://github.com/isaac-sim/IsaacSim-ros_workspaces">NVIDIA Isaac Sim ROS Workspaces</a></li>
+<li><a href="https://docs.isaacsim.omniverse.nvidia.com/6.0.1/ros2_tutorials/tutorial_ros2_drive_turtlebot.html">NVIDIA Driving TurtleBot with ROS 2</a></li>
+<li>Downloadable watchdog: <a href="lab-assets/cmd_vel_watchdog.py">lab-assets/cmd_vel_watchdog.py</a></li>
+</ul>
+<h2 id="command-data-flow">Command data flow</h2>
+<pre class="mermaid">flowchart LR
+    User[&quot;test publisher&quot;] --&gt; Raw[&quot;/cmd_vel_raw&quot;]
+    Raw --&gt; WD[&quot;receipt-time watchdog&quot;]
+    WD --&gt; Safe[&quot;/cmd_vel&quot;]
+    Safe --&gt; Sub[&quot;ROS2 Subscribe Twist&quot;]
+    Sub --&gt; Diff[&quot;Differential Controller&quot;]
+    Diff --&gt; Art[&quot;Articulation Controller&quot;]
+    Art --&gt; Wheels[&quot;wheel_left_joint&lt;br/&gt;wheel_right_joint&quot;]
+    Wheels --&gt; State[&quot;/joint_states + /odom&quot;]
+</pre>
+<p><code>geometry_msgs/msg/Twist</code> has no header timestamp. The watchdog therefore measures time since local receipt using a monotonic/steady clock. This is deliberate: if simulation time pauses, a safety stop should not wait forever for <code>/clock</code> to advance.</p>
+<h2 id="step-1-open-the-same-robot-scene">Step 1 — open the same robot scene</h2>
+<p>Start Zenoh, Isaac Sim, and the ROS CLI exactly as in Labs 01–02. Open:</p>
+<pre><code class="language-text">Isaac Sim &gt; Samples &gt; ROS2 &gt; Scenario &gt; turtlebot_tutorial.usd
+</code></pre>
+<p>Press Play and confirm <code>/clock</code>, <code>/joint_states</code>, and <code>/odom</code> before testing commands.</p>
+<h2 id="step-2-inspect-the-subscribercontroller-graph">Step 2 — inspect the subscriber/controller graph</h2>
+<p>The functional chain should contain:</p>
+<ol>
+<li>On Playback Tick or equivalent execution owner.</li>
+<li>ROS2 Context using domain 0 from the environment.</li>
+<li>ROS2 Subscribe Twist with topic <code>/cmd_vel</code>.</li>
+<li>Scale To/From Stage Unit converting linear speed into stage units.</li>
+<li>Break 3-Vector extracting linear X and angular Z.</li>
+<li>Differential Controller converting body velocity to left/right wheel velocities.</li>
+<li>Make Array with token values <code>wheel_left_joint</code> and <code>wheel_right_joint</code>.</li>
+<li>Articulation Controller targeting the TurtleBot articulation.</li>
+</ol>
+<p>Record the actual wheel joint names from <code>/joint_states</code>; never assume names when importing a different robot.</p>
+<h2 id="step-3-prove-direct-motion-first">Step 3 — prove direct motion first</h2>
+<p>Use a bounded one-shot forward command:</p>
+<p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>.</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist &quot;{linear: {x: 0.2}, angular: {z: 0.0}}&quot;
+</code></pre>
+<p>The simulator-side controller is ticked every playback frame and retains the subscriber’s last Twist. Therefore “one-shot” limits network publication, not robot motion duration. Send the explicit zero below immediately after observing a short movement.</p>
+<p>Then stop explicitly:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist &quot;{linear: {x: 0.0}, angular: {z: 0.0}}&quot;
+</code></pre>
+<p>Verify <code>/joint_states</code> wheel velocities and <code>/odom</code> change consistently. If the robot moves backward, do not flip commands immediately: first check wheel axes, joint order, drive direction, and body-frame convention.</p>
+<h2 id="step-4-insert-the-watchdog">Step 4 — insert the watchdog</h2>
+<p>Terminal 3 runs the supplied node:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python &quot;$Assets\cmd_vel_watchdog.py&quot; --input /cmd_vel_raw --output /cmd_vel --timeout 0.5 --rate 20
+</code></pre>
+<p>The node refuses a non-finite or non-positive <code>--timeout</code> or <code>--rate</code>. <code>nan</code> parses as a float, and every comparison with NaN is false, so a NaN timeout would never go stale.</p>
+<p>When you stop the node with <code>Ctrl+C</code>, it publishes one final zero Twist. It installs no rclpy signal handler, so the ROS context is still valid for that last publish.</p>
+<p>Terminal 4 observes the safe output:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /cmd_vel
+</code></pre>
+<p>Terminal 5 sends a fresh command stream:</p>
+<pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic pub -r 10 /cmd_vel_raw geometry_msgs/msg/Twist &quot;{linear: {x: 0.2}, angular: {z: 0.0}}&quot;
+</code></pre>
+<p>The robot should move forward. Press <code>Ctrl+C</code> only in Terminal 5. Within approximately <code>0.5 s + 0.05 s</code>, the watchdog must publish zero Twist and the robot must decelerate to rest according to its joint drives and contact physics.</p>
+<h2 id="step-5-exercise-the-watchdog-state-machine">Step 5 — exercise the watchdog state machine</h2>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; STALE
+    STALE --&gt; FRESH: receive /cmd_vel_raw
+    FRESH --&gt; FRESH: command age &lt;= 0.5 s
+    FRESH --&gt; STALE: command age &gt; 0.5 s
+    STALE --&gt; STALE: publish zero Twist at 20 Hz
+</pre>
+<p>Run four cases:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Raw command</th>
+<th>Expected safe output/behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forward</td>
+<td><code>x=0.2, z=0</code> at 10 Hz</td>
+<td>robot advances; wheel signs follow model convention</td>
+</tr>
+<tr>
+<td>Turn</td>
+<td><code>x=0, z=0.5</code> at 10 Hz</td>
+<td>opposite/different wheel speeds; yaw changes</td>
+</tr>
+<tr>
+<td>Stop stream</td>
+<td>publisher terminated</td>
+<td>zero Twist within bound</td>
+</tr>
+<tr>
+<td>Pause simulator</td>
+<td>no physics progression</td>
+<td>watchdog still becomes stale on steady time; zero waits at subscriber until execution resumes</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="step-6-separate-command-receipt-from-physical-response">Step 6 — separate command receipt from physical response</h2>
+<p>Measure these boundaries independently:</p>
+<pre><code class="language-text">t_receive_raw
+t_publish_safe
+t_subscriber_graph_executes
+t_wheel_target_changes
+t_joint_velocity_near_zero
+</code></pre>
+<p>The watchdog uses an explicit steady-clock timer and monotonic receipt timestamps, so its timeout does not depend on <code>/clock</code>. The watchdog gate concerns <code>t_publish_safe - t_last_receive</code>. The robot’s stopping distance additionally depends on actuator dynamics, friction, controller gains, and physics timestep. This is an educational application-level guard, not a certified emergency stop.</p>
+<h2 id="debugging-decisions">Debugging decisions</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First check</th>
+<th>Likely correction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/cmd_vel</code> exists but robot does not move</td>
+<td>subscriber count and Play</td>
+<td>connect subscriber execution/context; press Play</td>
+</tr>
+<tr>
+<td>Targets change but wheels do not</td>
+<td>articulation controller</td>
+<td>target prim, joint tokens, drive mode, limits</td>
+</tr>
+<tr>
+<td>Robot moves backward</td>
+<td>joint convention</td>
+<td>axis/direction/order; do not hide with arbitrary sign flip</td>
+</tr>
+<tr>
+<td>Robot never stops</td>
+<td>watchdog output</td>
+<td>confirm raw/output topics differ and graph subscribes to safe output</td>
+</tr>
+<tr>
+<td>Watchdog stops immediately</td>
+<td>input rate/timeout</td>
+<td>publish faster than timeout; inspect receipt logs</td>
+</tr>
+<tr>
+<td>Zero command arrives but robot coasts</td>
+<td>dynamics</td>
+<td>damping, friction, gain, torque/velocity drive behavior</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="machine-check">Machine check</h2>
+<p>Record <code>/cmd_vel_raw</code> and <code>/cmd_vel</code> in Lab 05. The bag checker's <code>watchdog</code> contract measures the time from the last raw command to the first zero on the safe topic. It fails if that exceeds <code>timeout + 1/rate</code> plus 0.05 s of recorder jitter.</p>
+<p>The ROS integration tests in <code>lab-assets/tests/ros</code> run this node for real, covering fresh → stale → zero and <code>Ctrl+C</code> → final zero.</p>
+<h2 id="evidence-to-save">Evidence to save</h2>
+<ul>
+<li>subscriber/controller graph screenshot;</li>
+<li>direct forward/turn/zero command transcript;</li>
+<li>wheel-joint and odometry response samples;</li>
+<li>watchdog parameters and logs;</li>
+<li>measured stale-to-zero time;</li>
+<li>observed time to physical rest;</li>
+<li>one deliberate wrong-joint or stale-command failure and diagnosis.</li>
+</ul>
+<h2 id="gate">Gate</h2>
+<p>Continue to Lab 04 only when fresh commands produce the expected motion, wheel/odometry evidence agrees, and loss of <code>/cmd_vel_raw</code> reliably produces a zero safe output within the declared bound.</p>
+<p class="chapter-source">This chapter is generated from <a href="lab-03-cmd-vel-watchdog.md">lab-03-cmd-vel-watchdog.md</a>; diagrams render with Mermaid and fall back to their text source.</p>
+</main>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, securityLevel: "strict", theme: dark ? "dark" : "neutral" });
+</script>
+<script src="../book-layout.js?v=20260926-1"></script>
+</body>
+</html>

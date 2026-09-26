@@ -4,11 +4,11 @@ This plan extends the ROS pipeline into the remaining skills expected of a robot
 
 | Lab | Question | Executable artifact | Gate |
 |---|---|---|---|
-| 06 · Robot model audit | Is the imported robot structurally and physically credible? | URDF auditor + USD inspection report | one root, connected graph, valid limits/mass/inertia/colliders |
-| 07 · Physics identification | Which parameters explain a controlled response? | sweep CSV + ranked fit report | repeatability measured; held-out error beats baseline |
-| 08 · Regression and CI | Can contracts fail automatically before deployment? | pure-Python tests + evidence aggregator + Pages CI | planted fault fails; clean fixtures pass |
-| 09 · Performance engineering | Where is time spent and did optimization help? | Tracy trace + benchmark CSV summary | controlled change improves declared metric without contract failure |
-| 10 · Robustness and transfer reasoning | Does the pipeline survive justified uncertainty? | seeded scenario manifest + robustness report | coverage, pass rate, worst cases, and claim boundary recorded |
+| 06 · Robot model audit | Is the imported robot structurally and physically credible? | URDF auditor (graph, realizable inertia, geometry cross-check) + USD inspection report | one root, connected graph, valid limits/mass/inertia/colliders |
+| 07 · Physics identification | Which parameters explain a controlled response? | one-family sweep with ≥3 repeats per candidate + held-out report | selected candidate beats the baseline on held-out data by more than 2 SE |
+| 08 · Regression and CI | Can contracts fail automatically before deployment? | pure-Python tests + evidence aggregator + `scripts/check_all.py` in Pages CI | every planted fault fails; clean fixtures pass |
+| 09 · Performance engineering | Where is time spent and did optimization help? | Tracy trace + benchmark summary with workload identity | same workload; Mann–Whitney p < 0.05; no contract failure |
+| 10 · Robustness and transfer reasoning | Does the pipeline survive justified uncertainty? | seeded Latin-hypercube manifest + robustness report | complete results; Wilson lower bound meets the gate; failure bins reviewed |
 
 ## Dependency logic review
 
@@ -31,7 +31,7 @@ flowchart LR
 - Native Windows Isaac Sim 6.0.1 remains the simulator runtime.
 - ROS exercises continue through the installed Jazzy/Pixi/Zenoh launcher.
 - Offline auditors, scorers, and CI tests use Python standard-library code and run without a GPU.
-- GUI/standalone simulator experiments use the bundled `C:\isaacsim-6.0.1\python.bat` when Isaac APIs are needed.
+- ROS-connected simulator runs use the Isaac Sim pip package inside the Pixi workspace (the launcher's `verify` prints its path). Standalone experiments without ROS may use the bundled `C:\isaacsim-6.0.1\python.bat`; never mix the two runtimes in one process.
 - GPU Isaac Sim tests are documented as local or optional self-hosted-runner jobs; GitHub-hosted Pages CI does not pretend to provide RTX hardware.
 - Isaac Lab is optional future work, not a prerequisite for completing these labs.
 

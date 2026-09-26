@@ -12,7 +12,7 @@
   <link rel="canonical" href="https://buicongnguyen.github.io/robotics-simulation-engineer/">
   <title>Robotics Simulation Engineering Course | Bui Cong Nguyen</title>
   <link rel="stylesheet" href="course.css?v=20260713-2">
-  <link rel="stylesheet" href="../book-layout.css?v=20260730-1">
+  <link rel="stylesheet" href="../book-layout.css?v=20260926-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to course content</a>
@@ -128,7 +128,7 @@
         <article class="card">
           <span class="status-badge gap">First gap</span>
           <h3>Full ROS 2 environment</h3>
-          <p>Isaac bundles Jazzy bridge libraries, but <code>ros2</code> and <code>colcon</code> are not installed. Begin the NVIDIA-supported Windows Jazzy/Pixi route on Day 1 and finish bridge verification by Day 6.</p>
+          <p>Isaac's bundled bridge libraries alone are not a ROS 2 CLI. Jazzy, <code>ros2</code>, <code>colcon</code>, and rosbag come from NVIDIA's Windows Pixi workspace with Zenoh; the launcher's <code>verify</code> step checks them. Start it on Day 1 and finish bridge verification by Day 6.</p>
         </article>
         <article class="card">
           <span class="status-badge gap">Watch memory</span>
@@ -713,7 +713,7 @@ Get-Content .\VERSION
                   <ul class="diagnostic-list">
                     <li><strong>Impact error ≈ one step:</strong> test event/time quantization by reducing <code>dt</code> before changing gravity.</li>
                     <li><strong>Wrong slide threshold:</strong> inspect static/dynamic material assignment, combine mode, incline frame, and residual velocity.</li>
-                    <li><strong>Pendulum period mismatch:</strong> use pivot-to-COM length and quantify amplitude before tuning damping.</li>
+                    <li><strong>Pendulum period mismatch:</strong> compare with the physical-pendulum period <code>T = 2π√(I_pivot / (m·g·d))</code>, where <code>d</code> is the pivot-to-COM distance; <code>L = d</code> holds only for a point-mass bob. Quantify amplitude before tuning damping.</li>
                     <li><strong>Jitter/explosion:</strong> check initial overlap, mass ratio, contact offset, timestep, then solver convergence—one change per rerun.</li>
                     <li><strong>Lower dt changes everything:</strong> remove controllers/sensors from canonical tests and record every rate.</li>
                   </ul>
@@ -1127,7 +1127,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
                   <dl class="compact-definitions">
                     <div><dt>Simulation versus wall time</dt><dd>Physics advances virtual time, normally published on <code>/clock</code>; host wall time must not be mixed into message timestamps.</dd></div>
                     <div><dt>TF and optical frames</dt><dd>TF is a timestamped single-parent transform tree. Camera optical axes differ from body-frame conventions; every measurement names its frame.</dd></div>
-                    <div><dt>QoS compatibility</dt><dd>Reliability, durability, history, and depth determine whether endpoints can communicate—not merely speed or buffering.</dd></div>
+                    <div><dt>QoS compatibility</dt><dd>Reliability, durability, deadline, liveliness, and lease duration must be compatible for endpoints to connect (a best-effort publisher cannot serve a reliable subscriber); history and depth change buffering, not compatibility.</dd></div>
                     <div><dt>Rate, latency, jitter</dt><dd>Messages per simulated second, measurement-to-receipt delay, and delay variation. Physics, render, sensor, control, and ROS rates are distinct.</dd></div>
                     <div><dt>Sensor tick in 6.0</dt><dd>For RTX sensors, use the prim’s <code>omni:sensor:tickRate</code>. A nonzero legacy <code>frameSkipCount</code> is deprecated and can create unexpected cadence.</dd></div>
                     <div><dt>Sensor error model</dt><dd>White noise, fixed bias, drift, dropout, quantization, and latency require separate parameters and statistical checks.</dd></div>
@@ -1136,7 +1136,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
                 <section class="module-panel">
                   <h3>Failure diagnosis</h3>
                   <ul class="diagnostic-list">
-                    <li><strong>No external topic:</strong> compare ROS environment, domain ID, DDS profile/firewall, bridge status, and QoS in both terminals.</li>
+                    <li><strong>No external topic:</strong> compare ROS environment, domain ID, RMW (a reachable Zenoh router, or the DDS profile and firewall), bridge status, and QoS in both terminals.</li>
                     <li><strong>TF looks plausible but data is wrong:</strong> inspect parent, optical/body axes, units, timestamp, and duplicate publishers.</li>
                     <li><strong>Rate mismatch:</strong> separate physics, timeline, render, sensor tick, wall-rate capacity, and queue backpressure.</li>
                     <li><strong>Stale or mixed-time data:</strong> log source acquisition, ROS header, publish, and receipt times; use <code>/clock</code> and TF at the message stamp.</li>
@@ -1150,7 +1150,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
               <ol class="module-labs">
                 <li>
                   <div><strong>Clock, joint state, and TF contract</strong><p>Finish native Windows Jazzy/Pixi setup; publish <code>/clock</code>, <code>/joint_states</code>, <code>/tf</code>, and <code>/tf_static</code> from a documented graph/script.</p></div>
-                  <div><span>Output</span><p>Interface YAML, TF diagram, <code>use_sim_time</code> checks, rate/timestamp rows, and DDS/QoS manifest.</p></div>
+                  <div><span>Output</span><p>Interface YAML, TF diagram, <code>use_sim_time</code> checks, rate/timestamp rows, and RMW/QoS manifest.</p></div>
                   <div><span>Pass condition</span><p>TF is connected/acyclic, stamps are monotonic within an episode, and achieved simulated-time rates meet the predeclared tolerance.</p></div>
                 </li>
                 <li>
@@ -1171,7 +1171,7 @@ assert p[0] + p[1] &gt;= p[2] - tol</code></pre>
 cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples\api\isaacsim.ros2.bridge\clock.py"
 .\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\imu_sensor.py --test
 .\python.bat .\standalone_examples\api\isaacsim.sensors.experimental.physics\contact_sensor.py --test</code></pre>
-                <p>The clock example is headless/bounded and uses bundled <code>rclpy</code>; that is not a full ROS 2 CLI/workspace. This PC still needs Jazzy, <code>ros2</code>, <code>colcon</code>, launch, and rosbag. The experimental IMU/contact examples hard-code GUI mode and require NVIDIA robot assets/network on first use.</p>
+                <p>The clock example is headless/bounded and uses the standalone install's bundled <code>rclpy</code> with Fast DDS, so the course's Zenoh CLI cannot see it; it is not a full ROS 2 CLI/workspace. Jazzy, <code>ros2</code>, <code>colcon</code>, launch, and rosbag come from the Pixi workspace used in Labs 01–05. The experimental IMU/contact examples hard-code GUI mode and require NVIDIA robot assets/network on first use.</p>
               </div>
 
               <div class="module-references">
@@ -1298,108 +1298,6 @@ cmd /d /c "call setup_ros_env.bat &amp;&amp; call python.bat standalone_examples
           </div>
         </article>
 
-        <article id="module-8" class="module">
-          <div class="module-side">
-            <label><input type="checkbox" value="module-8" data-module-check> Module 8</label>
-            <span class="hours">8–14 hours</span>
-          </div>
-          <div class="module-body">
-            <h2>Parallel learning and domain randomization</h2>
-            <p>Use randomization as an uncertainty model, not decoration. The learning extension is optional; a scripted controller can still support rigorous robustness experiments.</p>
-            <div class="module-columns">
-              <div>
-                <h3>Learn</h3>
-                <ul>
-                  <li>Vectorized environments, observation/action spaces, reward, termination, and curriculum.</li>
-                  <li>Policy training versus evaluation seeds and distributions.</li>
-                  <li>Dynamics, actuator, sensor, latency, geometry, and visual randomization.</li>
-                  <li>Separate nominal, identified, training, and held-out robustness distributions.</li>
-                </ul>
-              </div>
-              <div>
-                <h3>Build</h3>
-                <ul>
-                  <li>Define typed distributions with units and validation bounds.</li>
-                  <li>Randomize the two or three most sensitive and defensible parameter families one at a time.</li>
-                  <li>Run a scripted baseline or small policy under nominal and randomized conditions.</li>
-                  <li>Ablate the most influential randomization factors.</li>
-                </ul>
-              </div>
-              <div>
-                <h3>Evidence</h3>
-                <ul>
-                  <li>Typed/unit-aware manifest with range provenance, correlations, validation bounds, and seed/split policy.</li>
-                  <li>Offline sample artifact and tests for physical validity, units, distribution shape, and reproducibility.</li>
-                  <li>Separate nominal, identified, training-range, and held-out tables with confidence intervals and family-by-family ablation.</li>
-                </ul>
-              </div>
-            </div>
-            <div class="module-depth">
-              <div class="module-depth-grid">
-                <section class="module-panel">
-                  <h3>Applied definitions and contracts</h3>
-                  <dl class="compact-definitions">
-                    <div><dt>Vectorized environment</dt><dd>Independent task instances advanced in batches. Verify semantic equivalence to the one-environment task before trusting throughput.</dd></div>
-                    <div><dt>Domain randomization</dt><dd>Sampling declared model/environment uncertainty—not decoration or a substitute for fixing a biased nominal model.</dd></div>
-                    <div><dt>Nominal, identified, training, held out</dt><dd>Best estimate, measurement-derived uncertainty, sampled training distribution, and excluded evaluation variation remain separate in code and reporting.</dd></div>
-                    <div><dt>Correlated parameters</dt><dd>Quantities such as actuator gain/limit or mass/inertia may require joint distributions rather than independent sampling.</dd></div>
-                    <div><dt>Ablation</dt><dd>Remove or isolate one randomization family while keeping the evaluation set fixed to measure its actual influence.</dd></div>
-                  </dl>
-                </section>
-                <section class="module-panel">
-                  <h3>Failure diagnosis</h3>
-                  <ul class="diagnostic-list">
-                    <li><strong>Invalid samples:</strong> catch negative mass/delay, impossible inertia, units errors, and geometry overlap before simulation.</li>
-                    <li><strong>Robust score but poor nominal:</strong> inspect whether broad ranges conceal a wrong model or reward/task loophole.</li>
-                    <li><strong>Held-out gain looks suspicious:</strong> verify scenario/seed/distribution isolation and privileged observations.</li>
-                    <li><strong>Scaling stalls:</strong> profile Python loops, sensors/rendering, cloning, synchronization, and memory—not GPU name alone.</li>
-                    <li><strong>Same seed changes:</strong> record when GPU runtime material updates or parallel ordering alter deterministic expectations.</li>
-                  </ul>
-                </section>
-              </div>
-
-              <h3>Practical lab sequence</h3>
-              <ol class="module-labs">
-                <li>
-                  <div><strong>Distribution design and offline validation</strong><p>Define mass, friction, damping, gain, delay, pose, and sensor-bias distributions with units, bounds, source, and correlations.</p></div>
-                  <div><span>Output</span><p>Manifest, 10,000-sample artifact, histograms, seeded repeat test, and invalid-sample unit tests.</p></div>
-                  <div><span>Pass condition</span><p>No sample violates a declared physical bound; repeated seed recreates the exact sampled parameter manifest.</p></div>
-                </li>
-                <li>
-                  <div><strong>Standalone robustness and ablation</strong><p>Evaluate the scripted baseline one family at a time, then combined, on fixed nominal, training-range, and held-out scenarios.</p></div>
-                  <div><span>Output</span><p>An episode budget justified by target confidence-interval precision, score intervals, failure heatmap, and one row per selected-family ablation.</p></div>
-                  <div><span>Pass condition</span><p>Every range has provenance and every family has an honest measured effect—even when robustness gets worse.</p></div>
-                </li>
-                <li>
-                  <div><strong>Optional Isaac Lab vectorization extension</strong><p>Outside the core 8–14 hours, check RC compatibility and match the single-environment contract at geometric counts as memory allows; zero/random actions pass before training.</p></div>
-                  <div><span>Output</span><p>Pinned Lab commit/runtime manifest, equivalence checks, actual environment counts, steps/s, VRAM/RAM, and optional small policy.</p></div>
-                  <div><span>Pass condition</span><p>Task metrics agree within declared tolerance at tested counts; scale stops at a measured resource/stability limit.</p></div>
-                </li>
-              </ol>
-
-              <div class="module-command">
-                <h3>Installed standalone randomization exercise</h3>
-                <pre><code>Set-Location C:\isaacsim-6.0.1
-.\python.bat .\standalone_examples\api\isaacsim.replicator.experimental.domain_randomization\randomization_demo.py --num-envs 4 --reset-interval 50 --max-frames 200</code></pre>
-                <p>This bounded experimental example hard-codes GUI mode, randomizes gravity, forces, joint state, and poses across clones, and may fetch Franka assets. It does not supply uncertainty provenance, friction/mass/latency ablations, split isolation, or evaluation statistics.</p>
-              </div>
-
-              <div class="module-references">
-                <h3>Just-in-time references</h3>
-                <div class="module-reference-grid">
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html#domain-randomization"><span class="ref-type">Official · physics DR</span><strong>Direct-Workflow Domain Randomization</strong><small>Event-based physics randomization plus action and observation noise.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/policy_deployment/04_reach/reach_policy.html"><span class="ref-type">Official archive · applied example</span><strong>Reach Policy Deployment</strong><small>Historical concrete gain, friction, reset, and deployment randomization. Adapt the experiment pattern and verify all APIs against the pinned current revision.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/features/reproducibility.html"><span class="ref-type">Official · caveat</span><strong>Reproducibility and Determinism</strong><small>Seed and GPU/RTX limitations, including runtime material-update effects.</small></a>
-                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html"><span class="ref-type">Official · optional install</span><strong>Isaac Lab Quickstart</strong><small>Use a separate pinned installation; do not assume the local RC matches current APIs.</small></a>
-                </div>
-              </div>
-              <p class="interview-check"><strong>Interview checkpoint:</strong> With no robot data, how would you justify a friction or actuator-delay range, prevent it from hiding model bias, and design the held-out test?</p>
-            </div>
-            <div class="gate"><strong>Gate:</strong> sampled parameters stay physically valid, evaluation distributions are isolated from training, and the report shows which uncertainties actually change performance.</div>
-            <a class="module-back-link" href="#module-index">Back to module index</a>
-          </div>
-        </article>
-
         <article id="module-7" class="module">
           <div class="module-side">
             <label><input type="checkbox" value="module-7" data-module-check> Module 7</label>
@@ -1502,6 +1400,108 @@ C:\isaacsim-6.0.1\python.bat .\experiments\calibration\evaluate_held_out.py</cod
               <p class="interview-check"><strong>Interview checkpoint:</strong> Friction, damping, and delay combinations fit one trajectory equally well. How do you redesign excitation, analyze identifiability, and avoid presenting an arbitrary fit as truth?</p>
             </div>
             <div class="gate"><strong>Gate:</strong> calibration and validation cases are disjoint, sensitivity supports the fitted subset, held-out change is compared with repeat variability, and the report states exactly what its synthetic, cross-simulator, or physical evidence does—and does not—support.</div>
+            <a class="module-back-link" href="#module-index">Back to module index</a>
+          </div>
+        </article>
+
+        <article id="module-8" class="module">
+          <div class="module-side">
+            <label><input type="checkbox" value="module-8" data-module-check> Module 8</label>
+            <span class="hours">8–14 hours</span>
+          </div>
+          <div class="module-body">
+            <h2>Parallel learning and domain randomization</h2>
+            <p>Use randomization as an uncertainty model, not decoration. The learning extension is optional; a scripted controller can still support rigorous robustness experiments.</p>
+            <div class="module-columns">
+              <div>
+                <h3>Learn</h3>
+                <ul>
+                  <li>Vectorized environments, observation/action spaces, reward, termination, and curriculum.</li>
+                  <li>Policy training versus evaluation seeds and distributions.</li>
+                  <li>Dynamics, actuator, sensor, latency, geometry, and visual randomization.</li>
+                  <li>Separate nominal, identified, training, and held-out robustness distributions.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Build</h3>
+                <ul>
+                  <li>Define typed distributions with units and validation bounds.</li>
+                  <li>Randomize the two or three most sensitive and defensible parameter families one at a time.</li>
+                  <li>Run a scripted baseline or small policy under nominal and randomized conditions.</li>
+                  <li>Ablate the most influential randomization factors.</li>
+                </ul>
+              </div>
+              <div>
+                <h3>Evidence</h3>
+                <ul>
+                  <li>Typed/unit-aware manifest with range provenance, correlations, validation bounds, and seed/split policy.</li>
+                  <li>Offline sample artifact and tests for physical validity, units, distribution shape, and reproducibility.</li>
+                  <li>Separate nominal, identified, training-range, and held-out tables with confidence intervals and family-by-family ablation.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="module-depth">
+              <div class="module-depth-grid">
+                <section class="module-panel">
+                  <h3>Applied definitions and contracts</h3>
+                  <dl class="compact-definitions">
+                    <div><dt>Vectorized environment</dt><dd>Independent task instances advanced in batches. Verify semantic equivalence to the one-environment task before trusting throughput.</dd></div>
+                    <div><dt>Domain randomization</dt><dd>Sampling declared model/environment uncertainty—not decoration or a substitute for fixing a biased nominal model.</dd></div>
+                    <div><dt>Nominal, identified, training, held out</dt><dd>Best estimate, measurement-derived uncertainty, sampled training distribution, and excluded evaluation variation remain separate in code and reporting.</dd></div>
+                    <div><dt>Correlated parameters</dt><dd>Quantities such as actuator gain/limit or mass/inertia may require joint distributions rather than independent sampling.</dd></div>
+                    <div><dt>Ablation</dt><dd>Remove or isolate one randomization family while keeping the evaluation set fixed to measure its actual influence.</dd></div>
+                  </dl>
+                </section>
+                <section class="module-panel">
+                  <h3>Failure diagnosis</h3>
+                  <ul class="diagnostic-list">
+                    <li><strong>Invalid samples:</strong> catch negative mass/delay, impossible inertia, units errors, and geometry overlap before simulation.</li>
+                    <li><strong>Robust score but poor nominal:</strong> inspect whether broad ranges conceal a wrong model or reward/task loophole.</li>
+                    <li><strong>Held-out gain looks suspicious:</strong> verify scenario/seed/distribution isolation and privileged observations.</li>
+                    <li><strong>Scaling stalls:</strong> profile Python loops, sensors/rendering, cloning, synchronization, and memory—not GPU name alone.</li>
+                    <li><strong>Same seed changes:</strong> record when GPU runtime material updates or parallel ordering alter deterministic expectations.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <h3>Practical lab sequence</h3>
+              <ol class="module-labs">
+                <li>
+                  <div><strong>Distribution design and offline validation</strong><p>Define mass, friction, damping, gain, delay, pose, and sensor-bias distributions with units, bounds, source, and correlations.</p></div>
+                  <div><span>Output</span><p>Manifest, 10,000-sample artifact, histograms, seeded repeat test, and invalid-sample unit tests.</p></div>
+                  <div><span>Pass condition</span><p>No sample violates a declared physical bound; repeated seed recreates the exact sampled parameter manifest.</p></div>
+                </li>
+                <li>
+                  <div><strong>Standalone robustness and ablation</strong><p>Evaluate the scripted baseline one family at a time, then combined, on fixed nominal, training-range, and held-out scenarios.</p></div>
+                  <div><span>Output</span><p>An episode budget justified by target confidence-interval precision, score intervals, failure heatmap, and one row per selected-family ablation.</p></div>
+                  <div><span>Pass condition</span><p>Every range has provenance and every family has an honest measured effect—even when robustness gets worse.</p></div>
+                </li>
+                <li>
+                  <div><strong>Optional Isaac Lab vectorization extension</strong><p>Outside the core 8–14 hours, check RC compatibility and match the single-environment contract at geometric counts as memory allows; zero/random actions pass before training.</p></div>
+                  <div><span>Output</span><p>Pinned Lab commit/runtime manifest, equivalence checks, actual environment counts, steps/s, VRAM/RAM, and optional small policy.</p></div>
+                  <div><span>Pass condition</span><p>Task metrics agree within declared tolerance at tested counts; scale stops at a measured resource/stability limit.</p></div>
+                </li>
+              </ol>
+
+              <div class="module-command">
+                <h3>Installed standalone randomization exercise</h3>
+                <pre><code>Set-Location C:\isaacsim-6.0.1
+.\python.bat .\standalone_examples\api\isaacsim.replicator.experimental.domain_randomization\randomization_demo.py --num-envs 4 --reset-interval 50 --max-frames 200</code></pre>
+                <p>This bounded experimental example hard-codes GUI mode, randomizes gravity, forces, joint state, and poses across clones, and may fetch Franka assets. It does not supply uncertainty provenance, friction/mass/latency ablations, split isolation, or evaluation statistics.</p>
+              </div>
+
+              <div class="module-references">
+                <h3>Just-in-time references</h3>
+                <div class="module-reference-grid">
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html#domain-randomization"><span class="ref-type">Official · physics DR</span><strong>Direct-Workflow Domain Randomization</strong><small>Event-based physics randomization plus action and observation noise.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/release/3.0.0-beta2/source/policy_deployment/04_reach/reach_policy.html"><span class="ref-type">Official archive · applied example</span><strong>Reach Policy Deployment</strong><small>Historical concrete gain, friction, reset, and deployment randomization. Adapt the experiment pattern and verify all APIs against the pinned current revision.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/features/reproducibility.html"><span class="ref-type">Official · caveat</span><strong>Reproducibility and Determinism</strong><small>Seed and GPU/RTX limitations, including runtime material-update effects.</small></a>
+                  <a class="module-reference" href="https://isaac-sim.github.io/IsaacLab/main/source/setup/quickstart.html"><span class="ref-type">Official · optional install</span><strong>Isaac Lab Quickstart</strong><small>Use a separate pinned installation; do not assume the local RC matches current APIs.</small></a>
+                </div>
+              </div>
+              <p class="interview-check"><strong>Interview checkpoint:</strong> With no robot data, how would you justify a friction or actuator-delay range, prevent it from hiding model bias, and design the held-out test?</p>
+            </div>
+            <div class="gate"><strong>Gate:</strong> sampled parameters stay physically valid, evaluation distributions are isolated from training, and the report shows which uncertainties actually change performance.</div>
             <a class="module-back-link" href="#module-index">Back to module index</a>
           </div>
         </article>
@@ -1844,7 +1844,7 @@ C:\isaacsim-6.0.1\python.bat .\experiments\calibration\evaluate_held_out.py</cod
       <div class="section-heading">
         <p class="eyebrow">Primary references</p>
         <h2>Use the annotated route, not an endless reading list</h2>
-        <p class="section-note">The separate guide orders the official and university material by dependency and gives each link a read target, extraction task, build artifact, and stop condition. Last reviewed 12 July 2026.</p>
+        <p class="section-note">The separate guide orders the official and university material by dependency and gives each link a read target, extraction task, build artifact, and stop condition. Last reviewed 26 September 2026.</p>
         <div class="card-actions">
           <a class="button" href="resources.html">Open the deep resource route</a>
           <a class="button secondary" href="#fast-track">Return to the 14-day sprint</a>
@@ -1914,6 +1914,6 @@ C:\isaacsim-6.0.1\python.bat .\experiments\calibration\evaluate_held_out.py</cod
   </footer>
 
   <script src="course.js"></script>
-  <script src="../book-layout.js?v=20260803-3"></script>
+  <script src="../book-layout.js?v=20260926-1"></script>
 </body>
 </html>

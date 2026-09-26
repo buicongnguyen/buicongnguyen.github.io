@@ -15,7 +15,7 @@ This is the reproducible native-Windows setup for this workstation. It keeps ROS
 | Item | Installed result |
 |---|---|
 | Isaac Sim | `C:\isaacsim-6.0.1`, build `6.0.1-rc.7+release.42383.32955d8d.gl` |
-| Pixi | `0.75.0` at `C:\Users\n\AppData\Local\pixi\bin\pixi.exe` |
+| Pixi | `0.75.0` at `%LOCALAPPDATA%\pixi\bin\pixi.exe` |
 | NVIDIA workspace | `C:\IsaacSim-ros_workspaces`, commit `dd3eeede7912755996a18f4884285d9f50843f79` |
 | ROS workspace | `C:\IsaacSim-ros_workspaces\jazzy_ws` |
 | ROS / RMW / domain | Jazzy / `rmw_zenoh_cpp` / `0` |
@@ -46,7 +46,7 @@ Pixi owns package resolution and activation. Zenoh owns discovery and transport.
 
 The normal workstation `PATH` contains libraries from Conda, CUDA versions, camera SDKs, and machine-vision software. A dependency isolation test found two independent DLL collisions:
 
-- `C:\Users\n\miniconda3\Library\bin`
+- `%UserProfile%\miniconda3\Library\bin`
 - `C:\Program Files\Cognex\VisionPro\bin`
 
 When either is inherited, `ros2` can fail while importing `_rclpy_pybind11` with “The specified procedure could not be found.” The provided launcher removes those entries only inside the ROS process tree. It does **not** uninstall or globally modify Conda or VisionPro.
@@ -54,7 +54,7 @@ When either is inherited, `ros2` can fail while importing `_rclpy_pybind11` with
 Use this launcher for every native ROS terminal:
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher verify
 ```
 
@@ -100,7 +100,7 @@ pixi run build
 Run the compatibility check interactively:
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher check
 ```
 
@@ -115,7 +115,7 @@ Define the launcher separately in each fresh PowerShell terminal.
 ### Terminal 1 — Zenoh router
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher zenoh
 ```
 
@@ -124,7 +124,7 @@ Leave it running.
 ### Terminal 2 — Isaac Sim
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher sim
 ```
 
@@ -137,7 +137,7 @@ In Isaac Sim:
 ### Terminal 3 — prove the graph
 
 ```powershell
-$Launcher = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
+$Launcher = "$Repo\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1"
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic list
 pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher ros2 topic echo /clock
 ```
@@ -178,7 +178,7 @@ flowchart TD
 | Symptom | First check | Likely correction |
 |---|---|---|
 | `_rclpy_pybind11` procedure missing | Was the clean launcher used? | Remove Conda and Cognex DLL paths for this process |
-| `pixi` not found | Open a new terminal or use its absolute path | `C:\Users\n\AppData\Local\pixi\bin\pixi.exe` |
+| `pixi` not found | Open a new terminal or use its absolute path | `%LOCALAPPDATA%\pixi\bin\pixi.exe` |
 | `install\setup.bat` missing | Did the build complete? | Run the launcher with `build` |
 | Zenoh starts but topics are empty | Bridge and timeline | Start Isaac through `sim`, create Clock graph, press Play |
 | `/clock` exists but freezes | Timeline state | Press Play and verify graph tick ownership |
