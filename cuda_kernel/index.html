@@ -169,6 +169,9 @@
 
     code {
       padding: 0.12rem 0.34rem;
+      /* Joined identifiers such as cudaMallocAsync/cudaFreeAsync may break on narrow phones.
+         break-word (not anywhere) keeps table columns from shrinking identifiers. */
+      overflow-wrap: break-word;
       border-radius: 0.35rem;
       background: rgba(255, 255, 255, 0.08);
       color: #e8f7ff;
@@ -182,6 +185,9 @@
       background: var(--code);
       color: #d9f2ff;
     }
+
+    /* Tables scroll inside this wrapper so a wide table never widens the page. */
+    .table-scroll { overflow-x: auto; }
 
     table {
       width: 100%;
@@ -241,6 +247,89 @@
       font-size: 0.82rem;
     }
 
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0.65rem 0.95rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .action-link.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #061018;
+    }
+
+    .action-link:hover { transform: translateY(-1px); }
+
+    :root[data-site-theme="light"] {
+      --accent: #287a22;
+      --accent-2: #00689d;
+      --warn: #8a5a00;
+      --bad: #a52a2a;
+    }
+
+    :root[data-site-theme="light"] body {
+      background:
+        radial-gradient(circle at top left, rgba(74, 166, 65, 0.14), transparent 32rem),
+        radial-gradient(circle at 85% 10%, rgba(0, 132, 190, 0.12), transparent 30rem),
+        linear-gradient(145deg, #f8fbff 0%, #eef4fa 45%, #e5edf6 100%);
+    }
+
+    :root[data-site-theme="light"] aside {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    :root[data-site-theme="light"] nav a:hover,
+    :root[data-site-theme="light"] .module header,
+    :root[data-site-theme="light"] th {
+      background: rgba(23, 32, 51, 0.06);
+    }
+
+    :root[data-site-theme="light"] .hero,
+    :root[data-site-theme="light"] .card,
+    :root[data-site-theme="light"] .module,
+    :root[data-site-theme="light"] .step,
+    :root[data-site-theme="light"] table {
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    :root[data-site-theme="light"] .hero p,
+    :root[data-site-theme="light"] .card strong,
+    :root[data-site-theme="light"] th,
+    :root[data-site-theme="light"] .checklist label {
+      color: var(--text);
+    }
+
+    :root[data-site-theme="light"] code {
+      background: rgba(23, 32, 51, 0.08);
+      color: #15324a;
+    }
+
+    :root[data-site-theme="light"] pre,
+    :root[data-site-theme="light"] pre code {
+      background: #152333;
+      color: #e9f5ff;
+    }
+
+    :root[data-site-theme="light"] .tag {
+      color: #075985;
+      border-color: rgba(7, 89, 133, 0.3);
+    }
+
     .module {
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -290,6 +379,274 @@
       padding-top: 2rem;
     }
 
+    /* Professional documentation treatment */
+    :root {
+      --bg: #0a0e14;
+      --panel: #111821;
+      --text: #f1f5f9;
+      --muted: #9aa8ba;
+      --line: #263241;
+      --accent: #7bdc70;
+      --accent-2: #72c7f5;
+      --code: #080d13;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      --radius: 12px;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 78% 0%, rgba(68, 134, 173, 0.10), transparent 34rem),
+        linear-gradient(180deg, #0b1017 0%, #090d13 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .layout { grid-template-columns: 18rem minmax(0, 1fr); }
+
+    aside {
+      padding: 2rem 1.5rem;
+      background: rgba(9, 14, 21, 0.96);
+      border-right-color: rgba(148, 163, 184, 0.18);
+    }
+
+    aside h1 {
+      font-size: 1rem;
+      font-weight: 750;
+      letter-spacing: 0.01em;
+    }
+
+    aside p { font-size: 0.82rem; line-height: 1.55; }
+
+    nav { display: grid; gap: 0.15rem; }
+
+    nav a {
+      padding: 0.55rem 0.7rem;
+      border-left: 2px solid transparent;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+
+    nav a:hover {
+      border-left-color: var(--accent);
+      background: rgba(123, 220, 112, 0.07);
+    }
+
+    main {
+      width: min(1120px, 100%);
+      margin-inline: auto;
+      padding: 3.5rem clamp(1.5rem, 4vw, 4.5rem) 6rem;
+    }
+
+    section { margin-bottom: 4.5rem; }
+
+    section:not(.hero) > h2 {
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--line);
+      font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.025em;
+    }
+
+    h3 { letter-spacing: -0.01em; }
+
+    .hero {
+      padding: clamp(2rem, 4vw, 3.5rem);
+      border-color: rgba(123, 220, 112, 0.25);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(21, 34, 31, 0.94), rgba(16, 25, 35, 0.96));
+      box-shadow: var(--shadow);
+    }
+
+    .hero h2 {
+      max-width: 16ch;
+      font-size: clamp(2.5rem, 5vw, 4.25rem);
+      line-height: 1.03;
+      letter-spacing: -0.055em;
+    }
+
+    .hero p { color: #c5d0dd; }
+
+    .eyebrow {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+    }
+
+    .grid { gap: 0.85rem; }
+
+    .card,
+    .module,
+    .step,
+    table {
+      border-color: var(--line);
+      background: rgba(17, 24, 33, 0.82);
+      box-shadow: none;
+    }
+
+    .card { padding: 1.15rem; }
+
+    .module header,
+    th { background: rgba(148, 163, 184, 0.06); }
+
+    th {
+      color: #e7edf5;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    td { font-size: 0.92rem; }
+
+    pre {
+      border-color: #253243;
+      border-radius: 8px;
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .action-link {
+      min-height: 40px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .step { padding: 1.15rem 1.25rem 1.15rem 3.5rem; }
+
+    .step::before {
+      top: 1.2rem;
+      left: 1.15rem;
+      width: 1.45rem;
+      height: 1.45rem;
+      font-size: 0.78rem;
+    }
+
+    .callout {
+      border-radius: 8px;
+      background: rgba(123, 220, 112, 0.07);
+    }
+
+    :root[data-site-theme="light"] {
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #5c6979;
+      --line: #d8e0e9;
+      --accent: #2f7d32;
+      --accent-2: #006b9f;
+    }
+
+    :root[data-site-theme="light"] body {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    :root[data-site-theme="light"] aside {
+      background: rgba(255, 255, 255, 0.96);
+      border-right-color: #d8e0e9;
+    }
+
+    :root[data-site-theme="light"] nav a:hover {
+      background: rgba(47, 125, 50, 0.07);
+    }
+
+    :root[data-site-theme="light"] .hero {
+      background: linear-gradient(145deg, #ffffff, #f2f7f3);
+      box-shadow: 0 16px 45px rgba(30, 48, 74, 0.10);
+    }
+
+    :root[data-site-theme="light"] .card,
+    :root[data-site-theme="light"] .module,
+    :root[data-site-theme="light"] .step,
+    :root[data-site-theme="light"] table {
+      background: #ffffff;
+    }
+
+    .flow-diagram {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1.75rem;
+      margin: 1.5rem 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: flow-step;
+    }
+
+    .flow-diagram li {
+      position: relative;
+      min-height: 9rem;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(17, 24, 33, 0.82);
+    }
+
+    .flow-diagram li::before {
+      counter-increment: flow-step;
+      content: counter(flow-step);
+      display: grid;
+      place-items: center;
+      width: 1.55rem;
+      height: 1.55rem;
+      margin-bottom: 0.75rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #06200a;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .flow-diagram li:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -1.45rem;
+      color: var(--accent-2);
+      font-size: 1.35rem;
+      transform: translateY(-50%);
+    }
+
+    .flow-diagram strong { display: block; margin-bottom: 0.35rem; }
+    .flow-diagram span { color: var(--muted); font-size: 0.87rem; line-height: 1.5; }
+
+    .decision-table td:first-child { width: 18%; font-weight: 700; }
+    .decision-table td:nth-child(2) { width: 28%; }
+    .decision-table .selected { color: var(--accent); font-weight: 700; }
+
+    .benchmark-chart {
+      margin: 1.5rem 0;
+      padding: 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(17, 24, 33, 0.82);
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: minmax(10rem, 1.2fr) minmax(12rem, 3fr) minmax(8rem, auto);
+      align-items: center;
+      gap: 1rem;
+      margin: 0.85rem 0;
+    }
+
+    .chart-track {
+      height: 0.85rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.13);
+    }
+
+    .chart-bar {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+    }
+
+    .chart-row output { color: var(--text); font-variant-numeric: tabular-nums; font-weight: 700; }
+    .chart-caption { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.86rem; }
+
+    :root[data-site-theme="light"] .flow-diagram li,
+    :root[data-site-theme="light"] .benchmark-chart { background: #ffffff; }
+
     @media (max-width: 920px) {
       .layout { display: block; }
       aside { position: static; height: auto; }
@@ -297,7 +654,18 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-      .grid, .grid.two { grid-template-columns: 1fr; }
+      /* minmax(0, 1fr): a bare 1fr track grows to the longest unbroken code line. */
+      .grid, .grid.two { grid-template-columns: minmax(0, 1fr); }
+      .flow-diagram { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+      .flow-diagram li { min-height: auto; }
+      .flow-diagram li:not(:last-child)::after {
+        content: "↓";
+        top: auto;
+        right: 50%;
+        bottom: -1.05rem;
+        transform: translateX(50%);
+      }
+      .chart-row { grid-template-columns: 1fr; gap: 0.35rem; }
     }
   </style>
 </head>
@@ -305,34 +673,37 @@
   <div class="layout">
     <aside>
       <h1>CUDA Kernel Practice</h1>
-      <p>RTX 4080 Super, CUDA 13.1, Windows, vector-search direction.</p>
+      <p>RTX 4080 Super, CUDA 13.3, Windows, vector-search direction.</p>
       <nav aria-label="Page navigation">
         <a href="#overview">Overview</a>
+        <a href="#execution-flow">Execution Flow</a>
+        <a href="#design-decisions">Design Decisions</a>
+        <a href="#project-status">Project Status</a>
+        <a href="#modernization">Modernization Roadmap</a>
         <a href="#environment">Environment</a>
         <a href="#build">Build & Run</a>
         <a href="#mental-model">CUDA Mental Model</a>
         <a href="#modules">Practice Modules</a>
-        <a href="#benchmarks">Current Benchmarks</a>
+        <a href="#benchmarks">Measurements & Method</a>
         <a href="#experiments">Experiments</a>
         <a href="#profiling">Profiling & Debugging</a>
         <a href="#vector-search">Vector Search Path</a>
         <a href="#roadmap">4-Week Roadmap</a>
         <a href="#current-links">Stay Current Links</a>
         <a href="#resources">Resources</a>
-        <a href="#interview">Interview Story</a>
+        <a href="#assessment">Engineering Assessment</a>
       </nav>
     </aside>
 
     <main>
       <section id="overview" class="hero">
         <span class="eyebrow">Hands-on kernel lab</span>
-        <h2>Practice CUDA kernels by building toward vector search.</h2>
+        <h2>CUDA kernel engineering from bandwidth to vector search.</h2>
         <p>
-          This guide turns the <code>cuda_kernel</code> repo into a structured training path:
-          start with memory bandwidth, learn reductions, then move into exact L2 vector search.
-          That sequence is intentionally chosen because vector databases and accelerator libraries
-          are built from the same primitives: move data efficiently, compute distances, reduce or
-          select top candidates, and measure everything honestly.
+          This repository is a compact, reproducible CUDA engineering lab. It starts with a
+          memory-bound vector operation, introduces hierarchical reduction, and applies both ideas
+          to exact L2 vector search. Every executable includes a CPU reference or bounded correctness
+          check and reports GPU timing separately from setup work.
         </p>
         <div class="grid">
           <div class="card">
@@ -348,13 +719,213 @@
             <p class="muted">Build an exact L2 search baseline before moving to ANN-style algorithms.</p>
           </div>
         </div>
+        <div class="actions" aria-label="Project links">
+          <a class="action-link primary" href="https://github.com/buicongnguyen/cuda_kernel">Browse source code</a>
+          <a class="action-link" href="https://github.com/buicongnguyen/cuda_kernel/blob/main/README.md">Build instructions</a>
+          <a class="action-link" href="https://github.com/buicongnguyen/cuda_kernel/blob/main/dnotitia_vector_library_interview_prep.md">Vector-search research notes</a>
+        </div>
+      </section>
+
+      <section id="execution-flow">
+        <h2>Execution Flow</h2>
+        <p>
+          All three executables follow the same host/device lifecycle. Keeping these stages explicit
+          makes it possible to separate correctness, kernel throughput, transfer cost, and final CPU work.
+        </p>
+        <ol class="flow-diagram" aria-label="CUDA program execution flow">
+          <li><strong>Prepare on CPU</strong><span>Allocate host vectors, generate deterministic inputs, and compute or reserve a CPU reference.</span></li>
+          <li><strong>Transfer to GPU</strong><span>Allocate device buffers and copy the required inputs from host memory.</span></li>
+          <li><strong>Warm up & execute</strong><span>Launch once for validation, synchronize, then repeat the kernel inside CUDA-event timing.</span></li>
+          <li><strong>Copy results back</strong><span>Transfer the output or partial results required for host-side validation and selection.</span></li>
+          <li><strong>Validate & report</strong><span>Compare with the CPU result, report numerical error, kernel time, and derived throughput.</span></li>
+        </ol>
+        <div class="callout warn">
+          <strong>Why this flow:</strong> it is intentionally transparent and easy to audit. A production
+          pipeline would overlap transfers and kernels, reuse allocations, batch queries, and keep final
+          selection on the GPU—but those optimizations make the baseline harder to reason about.
+        </div>
+      </section>
+
+      <section id="design-decisions">
+        <h2>Design Decisions & Alternatives</h2>
+        <p>
+          There is no universally best CUDA implementation. The selected option is the best fit for the
+          current learning objective; the production recommendation changes when scale, latency, or
+          maintainability becomes the priority.
+        </p>
+        <div class="table-scroll"><table class="decision-table">
+          <thead>
+            <tr><th>Decision</th><th>Available choices</th><th>Current choice and reason</th><th>Better production direction</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Element traversal</td>
+              <td><strong>3 choices:</strong> one thread per element; grid-stride loop; vectorized loads</td>
+              <td><span class="selected">Grid-stride loop</span> — handles arrays larger than the launch and keeps launch size tunable.</td>
+              <td>Add aligned <code>float4</code> loads only after profiling confirms instruction or transaction overhead.</td>
+            </tr>
+            <tr>
+              <td>Reduction</td>
+              <td><strong>4 choices:</strong> global atomics; shared-memory tree; warp shuffle; CUB</td>
+              <td><span class="selected">Warp shuffle + block partials</span> — exposes warp and block cooperation without global atomic contention.</td>
+              <td><code>cub::DeviceReduce</code> is the maintained baseline; use custom code only with measured evidence.</td>
+            </tr>
+            <tr>
+              <td>L2 work mapping</td>
+              <td><strong>3 choices:</strong> thread per vector; block per vector; tiled/batched matrix formulation</td>
+              <td><span class="selected">Block per vector</span> — threads cooperate across 128 dimensions and reduce one distance clearly.</td>
+              <td>Batched/tiled search improves data reuse; compare with cuVS brute force before custom tuning.</td>
+            </tr>
+            <tr>
+              <td>Top-k selection</td>
+              <td><strong>4 choices:</strong> full CPU sort; CPU partial selection; GPU selection; library index</td>
+              <td><span class="selected">CPU partial selection</span> — simple correctness baseline after GPU distance generation.</td>
+              <td>GPU top-k avoids transferring every distance; cuVS/Faiss is preferable for production search.</td>
+            </tr>
+            <tr>
+              <td>Timing scope</td>
+              <td><strong>3 choices:</strong> kernel-only events; end-to-end wall time; profiler-derived metrics</td>
+              <td><span class="selected">Kernel-only CUDA events</span> — isolates kernel behavior for the first controlled comparison.</td>
+              <td>Report kernel and end-to-end distributions together, then explain the gap with Nsight Systems.</td>
+            </tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="project-status">
+        <h2>Project Status</h2>
+        <p>
+          The repository is an educational performance baseline, not a production vector-search
+          library. The implemented modules are deliberately small enough to audit line by line while
+          still exercising real GPU concerns: launch geometry, memory traffic, warp cooperation,
+          numerical error, and device/host boundaries.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <span class="tag">Implemented</span>
+            <h3>Vector Add</h3>
+            <p class="muted">Grid-stride indexing, explicit transfers, correctness validation, and effective bandwidth.</p>
+            <a href="https://github.com/buicongnguyen/cuda_kernel/blob/main/src/01_vector_add.cu">Read the kernel</a>
+          </article>
+          <article class="card">
+            <span class="tag">Implemented</span>
+            <h3>Dot Product Reduction</h3>
+            <p class="muted">Per-thread accumulation, warp shuffles, shared-memory block reduction, and CPU error comparison.</p>
+            <a href="https://github.com/buicongnguyen/cuda_kernel/blob/main/src/02_dot_product_reduction.cu">Read the kernel</a>
+          </article>
+          <article class="card">
+            <span class="tag">Implemented</span>
+            <h3>Exact L2 Search</h3>
+            <p class="muted">A brute-force vector-search baseline with GPU distance computation and CPU top-k selection.</p>
+            <a href="https://github.com/buicongnguyen/cuda_kernel/blob/main/src/03_l2_distance_search.cu">Read the kernel</a>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Repository boundary:</strong> this project owns runnable kernels, correctness checks,
+          measurements, and controlled experiments. <a href="https://buicongnguyen.github.io/Mercor_cuda/">Mercor_cuda</a>
+          remains the broader study hub for optimization concepts and assessment preparation.
+        </div>
+        <div class="callout warn">
+          <strong>Current maturity:</strong> single-GPU, Windows-focused, fixed synthetic workloads,
+          kernel-only averages, and CPU-side final selection. Production readiness requires portable
+          builds, distribution statistics, end-to-end timing, real datasets, GPU top-k, and library baselines.
+        </div>
+      </section>
+
+      <section id="modernization">
+        <h2>Modernization Roadmap</h2>
+        <p>
+          The current kernels are a useful foundation, but a modern performance portfolio needs
+          library baselines, reproducible measurements, asynchronous execution, and a complete
+          GPU search path. The work below is ordered by value and by what can be measured honestly
+          on the available RTX 4080 Super (<code>sm_89</code>).
+        </p>
+
+        <div class="timeline">
+          <article class="step">
+            <strong>CUDA 13.3 Tile C++ versus SIMT</strong>
+            <p>
+              Add Tile C++ versions of vector add and reduction beside the existing SIMT kernels.
+              Compile with <code>--enable-tile -std=c++20 -arch=sm_89</code>, then compare readability,
+              generated code, and performance. Tile C++ debuted in CUDA 13.3 and supports
+              <code>sm_80</code> and newer hardware.
+            </p>
+            <a href="https://docs.nvidia.com/cuda/cuda-tile-cpp-api-reference/general_principles.html">CUDA Tile C++ general principles</a>
+          </article>
+
+          <article class="step">
+            <strong>CUB and CCCL production baselines</strong>
+            <p>
+              Compare the hand-written reduction with <code>cub::BlockReduce</code>,
+              <code>cub::DeviceReduce</code>, and optionally <code>thrust::reduce</code>. Keep the
+              custom kernel for education, but use maintained library primitives as the performance
+              and correctness reference.
+            </p>
+            <a href="https://nvidia.github.io/cccl/unstable/cub/developer_overview.html">CUB developer overview</a>
+          </article>
+
+          <article class="step">
+            <strong>Complete the exact vector-search pipeline</strong>
+            <p>
+              Add batched queries, cosine similarity, inner product, FP16 storage with FP32
+              accumulation, vectorized loads, shared-memory query caching, and GPU-side top-k.
+              Report recall/correctness against the CPU implementation as well as kernel-only and
+              end-to-end latency.
+            </p>
+          </article>
+
+          <article class="step">
+            <strong>Compare with cuVS</strong>
+            <p>
+              Benchmark the custom exact search against cuVS brute force, then add CAGRA,
+              IVF-Flat, and IVF-PQ comparisons. Record recall@k, p50/p95 latency, throughput,
+              index-build time, and memory use instead of presenting throughput alone.
+            </p>
+            <a href="https://docs.rapids.ai/api/cuvs/stable/cuvs_bench/">cuVS Bench documentation</a>
+          </article>
+
+          <article class="step">
+            <strong>Asynchronous execution and reusable memory</strong>
+            <p>
+              Add pinned host buffers, <code>cudaMemcpyAsync</code>, multiple streams, double
+              buffering, <code>cudaMallocAsync</code>/<code>cudaFreeAsync</code>, and CUDA Graph
+              capture for repeated batches. Measure when launch, allocation, and transfer overhead
+              dominate short kernels.
+            </p>
+            <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html">CUDA C++ Programming Guide</a>
+          </article>
+
+          <article class="step">
+            <strong>Reproducible benchmark engineering</strong>
+            <p>
+              Introduce CMake, automatic architecture detection, warmups, repeated trials,
+              median/p50/p95/standard deviation, JSON or CSV output, and a script that regenerates
+              the website tables. Record the GPU, driver, toolkit, compiler, clocks, build flags,
+              and git commit beside every result.
+            </p>
+          </article>
+        </div>
+
+        <div class="callout">
+          <strong>Optional advanced track:</strong> explore CUTLASS 4 and CuTe DSL for tiled GEMM,
+          mixed precision, and fused operators. CUTLASS 4.6 includes CUDA-native DSL tooling, but
+          NVIDIA currently documents Windows limitations, so use Linux or WSL for this track.
+          <a href="https://docs.nvidia.com/cutlass/latest/overview.html">CUTLASS overview</a>
+        </div>
+
+        <div class="callout warn">
+          <strong>Hardware boundary:</strong> do not claim local benchmarks for Tensor Memory
+          Accelerator, thread-block clusters, Hopper warp-specialized kernels, or Blackwell-only
+          conditional graphs. TMA starts at compute capability 9.0; the RTX 4080 Super is 8.9.
+          These topics can be documented or compile-tested separately until compatible hardware is available.
+        </div>
       </section>
 
       <section id="environment">
         <h2>Environment</h2>
         <div class="grid">
           <div class="card">
-            <div class="stat">13.1</div>
+            <div class="stat">13.3</div>
             <strong>CUDA Toolkit</strong>
             <p class="muted">Detected with <code>nvcc --version</code>.</p>
           </div>
@@ -547,9 +1118,14 @@ where compute-sanitizer</code></pre>
       </section>
 
       <section id="benchmarks">
-        <h2>Current Benchmarks</h2>
-        <p>Measured locally on RTX 4080 Super. Treat these as a baseline, not a finish line.</p>
-        <table>
+        <h2>Measurements & Methodology</h2>
+        <p>
+          Measured locally on July 11, 2026 with an NVIDIA GeForce RTX 4080 Super
+          (<code>sm_89</code>), CUDA Toolkit 13.3, and NVCC flags
+          <code>-std=c++17 -O3 -lineinfo -arch=sm_89</code>. These values
+          establish a machine-specific baseline; they are not cross-platform performance claims.
+        </p>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Example</th>
@@ -563,30 +1139,73 @@ where compute-sanitizer</code></pre>
             <tr>
               <td><code>01_vector_add</code></td>
               <td>16,777,216 elements</td>
-              <td>1.0521 ms</td>
-              <td>191.35 GB/s</td>
+              <td>0.3324 ms</td>
+              <td>605.66 GB/s</td>
               <td>Max error 0</td>
             </tr>
             <tr>
               <td><code>02_dot_product_reduction</code></td>
               <td>16,777,216 elements</td>
-              <td>0.5664 ms</td>
-              <td>236.98 GB/s, 59.25 GFLOP/s</td>
+              <td>0.2055 ms</td>
+              <td>653.21 GB/s, 163.30 GFLOP/s</td>
               <td>Relative error 2.09e-05</td>
             </tr>
             <tr>
               <td><code>03_l2_distance_search</code></td>
               <td>262,144 vectors x 128 dims</td>
-              <td>1.2631 ms</td>
-              <td>207.54M vector comparisons/s</td>
+              <td>0.2690 ms</td>
+              <td>974.52M vector comparisons/s</td>
               <td>Max check error 1.67e-06</td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
+        <div class="benchmark-chart" role="img" aria-label="Measured kernel throughput. Vector add reaches 605.66 gigabytes per second, dot product reaches 653.21 gigabytes per second, and exact L2 search reaches 974.52 million vector comparisons per second. Memory bandwidth and vector comparisons use separate scales and should not be compared directly.">
+          <h3>Measured Throughput</h3>
+          <div class="chart-row">
+            <span>Vector add</span>
+            <span class="chart-track"><span class="chart-bar" style="width: 86.5%"></span></span>
+            <output>605.66 GB/s</output>
+          </div>
+          <div class="chart-row">
+            <span>Dot-product input</span>
+            <span class="chart-track"><span class="chart-bar" style="width: 93.3%"></span></span>
+            <output>653.21 GB/s</output>
+          </div>
+          <div class="chart-row">
+            <span>Exact L2 search</span>
+            <span class="chart-track"><span class="chart-bar" style="width: 97.5%"></span></span>
+            <output>974.52M vectors/s</output>
+          </div>
+          <p class="chart-caption">
+            The first two bars share a 0–700 GB/s visual scale. L2 uses a separate 0–1,000M
+            comparisons/s scale; its bar communicates magnitude within that metric, not superiority over bandwidth.
+          </p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>What is measured</h3>
+            <ul>
+              <li>A correctness launch and device synchronization occur before timing.</li>
+              <li>CUDA events measure repeated kernel launches on the default stream.</li>
+              <li>Vector add and L2 search average 50 iterations; dot product averages 100 iterations.</li>
+              <li>Reported bandwidth is derived from known bytes read and written.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>What is excluded</h3>
+            <ul>
+              <li>Host allocation and input generation.</li>
+              <li>Device allocation and host/device transfers.</li>
+              <li>Final CPU accumulation or top-k selection.</li>
+              <li>Variance, percentiles, power, temperature, and clock stability.</li>
+            </ul>
+          </article>
+        </div>
         <div class="callout warn">
-          <strong>Important:</strong> the reported time is kernel time measured with CUDA events,
-          not full end-to-end time including host allocation, host-device copies, and CPU top-k.
-          For production-style benchmarking, report both.
+          <strong>Interpretation:</strong> the table answers “how fast is the isolated kernel for this
+          fixed workload after setup?” It does not answer “how fast is the complete application?”
+          Future benchmark output should include median, p50/p95, standard deviation, end-to-end
+          latency, device clocks, driver version, compiler flags, and the exact git commit.
         </div>
       </section>
 
@@ -791,7 +1410,7 @@ compute-sanitizer --tool racecheck .\build\02_dot_product_reduction.exe</code></
 
         <section id="current-links">
           <h3>Stay Current Resource Map</h3>
-          <table>
+          <div class="table-scroll"><table>
             <thead>
               <tr>
                 <th>Category</th>
@@ -852,7 +1471,7 @@ compute-sanitizer --tool racecheck .\build\02_dot_product_reduction.exe</code></
                   <a href="https://developer.nvidia.com/blog/enhancing-gpu-accelerated-vector-search-in-faiss-with-nvidia-cuvs/" target="_blank" rel="noreferrer">Faiss with cuVS blog</a>
                 </td>
                 <td>
-                  This is the closest public ecosystem to the Dnotitia vector-library role.
+                  This is the closest public production ecosystem to the kernels explored in this repository.
                   Revisit it regularly for CAGRA, IVF-Flat, IVF-PQ, and GPU index updates.
                 </td>
               </tr>
@@ -932,10 +1551,10 @@ compute-sanitizer --tool racecheck .\build\02_dot_product_reduction.exe</code></
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </section>
 
-        <table>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Resource</th>
@@ -1010,38 +1629,52 @@ compute-sanitizer --tool racecheck .\build\02_dot_product_reduction.exe</code></
               <td>Medium</td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
       </section>
 
-      <section id="interview">
-        <h2>Interview Story</h2>
+      <section id="assessment">
+        <h2>Engineering Assessment</h2>
         <div class="callout">
           <p>
-            A strong Dnotitia-style story: "I implemented CUDA kernels from scratch, starting with
-            bandwidth and reduction baselines, then used those ideas to build an exact L2 vector-search
-            kernel. I measured kernel time with CUDA events, checked correctness against CPU references,
-            and planned next steps for GPU top-k and batched search. My optimization process is:
-            correctness first, baseline second, profiling third, one controlled change at a time."
+            The project demonstrates a sound optimization workflow: define a CPU reference, validate
+            the GPU result, isolate a baseline measurement, identify the dominant resource, change one
+            design variable, and remeasure. Its strongest result is not a single throughput number; it
+            is the traceable progression from a memory-bound primitive to a reduction and then to an
+            exact-search workload with explicit limitations.
           </p>
         </div>
-        <h3>Questions you should be ready to answer</h3>
-        <ul>
-          <li>Why use a grid-stride loop instead of launching exactly one thread per element?</li>
-          <li>What is memory coalescing, and how would you detect poor coalescing?</li>
-          <li>Why can the GPU result differ slightly from the CPU result in a reduction?</li>
-          <li>How would you separate kernel time from end-to-end latency?</li>
-          <li>Why is brute-force exact kNN still useful when ANN algorithms exist?</li>
-          <li>What would you optimize next in the L2 search kernel?</li>
-        </ul>
+        <div class="grid two">
+          <article class="card">
+            <h3>Demonstrated</h3>
+            <ul>
+              <li>Grid-stride indexing and coalesced contiguous access.</li>
+              <li>Warp-shuffle and block-level reduction.</li>
+              <li>CUDA-event timing and derived throughput.</li>
+              <li>CPU/GPU correctness comparison and floating-point error reporting.</li>
+              <li>An exact L2 baseline connected to vector-search terminology.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Not yet demonstrated</h3>
+            <ul>
+              <li>Nsight Compute evidence for the stated bottlenecks.</li>
+              <li>CUB, Thrust, cuBLAS, Faiss, or cuVS comparisons.</li>
+              <li>Batched queries, GPU top-k, asynchronous pipelines, or CUDA Graphs.</li>
+              <li>Portable CMake builds and automated regression tests.</li>
+              <li>Real embedding datasets and recall/latency evaluation.</li>
+            </ul>
+          </article>
+        </div>
       </section>
 
       <footer>
         <p>
-          Last updated: 2026-05-10. This page is designed to live in
-          <code>docs/index.html</code> so it can be served through GitHub Pages later.
+          Last updated: 2026-07-11. This page is served from <code>docs/index.html</code>
+          as the public companion to the runnable CUDA source repository.
         </p>
       </footer>
     </main>
   </div>
+  <script src="./theme-toggle.js"></script>
 </body>
 </html>

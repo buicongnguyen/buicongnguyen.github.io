@@ -72,9 +72,10 @@ pwsh -NoProfile -File .\robotics-simulation-engineer\Start-IsaacRosJazzy.ps1 pyt
 ## Mirrored project pages
 
 The CUDA kernel guide is mirrored from the private sibling checkout at
-`..\Mercor_cuda\docs\index.html` into `cuda_kernel\index.html` because GitHub
-Pages is not enabled for private repos on the current plan. The sync script also
-accepts the legacy sibling name `..\cuda_kernel` or an explicit `-Source` path.
+`..\cuda_kernel\docs\` (the page and the `theme-toggle.js` it loads) into
+`cuda_kernel\` because GitHub Pages is not enabled for private repos on the
+current plan. `..\Mercor_cuda` is a separate project and is not this page's
+source. Pass `-Source <docs folder>` to mirror from another checkout.
 
 Sync it before committing guide updates:
 
