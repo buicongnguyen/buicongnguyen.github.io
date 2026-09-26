@@ -226,10 +226,14 @@
       const selectedIndex = Number(selected.value);
       const correct = applyResult(card, group, question, selectedIndex);
       const previous = results[id] || {};
-      const reviewStage = correct ? Math.min((previous.reviewStage || 0) + 1, 3) : 0;
+      const now = Date.now();
+      // Only a correct answer given when the question is due advances the review
+      // interval; re-checking before then must not skip stages.
+      const due = !previous.nextReview || previous.nextReview <= now;
+      const reviewStage = correct ? (due ? Math.min((previous.reviewStage || 0) + 1, 3) : previous.reviewStage || 1) : 0;
       const delays = [1, 3, 7];
-      const nextReview = correct ? Date.now() + delays[Math.max(0, reviewStage - 1)] * 86400000 : Date.now();
-      results[id] = { selected: selectedIndex, correct: correct, checked: true, mode: assessmentMode, attemptedAt: Date.now(), reviewStage: reviewStage, nextReview: nextReview };
+      const nextReview = correct ? (due ? now + delays[Math.max(0, reviewStage - 1)] * 86400000 : previous.nextReview) : now;
+      results[id] = { selected: selectedIndex, correct: correct, checked: true, mode: assessmentMode, attemptedAt: now, reviewStage: reviewStage, nextReview: nextReview };
       saveResults();
       updateStats();
     });
@@ -307,8 +311,12 @@
         const preEntries = groupCards.map(function (card) { return pretestResults[card.dataset.questionId]; }).filter(function (entry) {
           return entry && entry.checked !== false;
         });
-        const prePercent = preEntries.length ? Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / preEntries.length * 100) : 0;
-        score.appendChild(make("span", "", "Change from pre-test: " + (percent - prePercent >= 0 ? "+" : "") + (percent - prePercent) + " points"));
+        if (!preEntries.length || !entries.length) {
+          score.appendChild(make("span", "", "Change from pre-test: needs answers in both tests"));
+        } else {
+          const prePercent = Math.round(preEntries.filter(function (entry) { return entry.correct; }).length / preEntries.length * 100);
+          score.appendChild(make("span", "", "Change from pre-test: " + (percent - prePercent >= 0 ? "+" : "") + (percent - prePercent) + " points"));
+        }
       }
       objectiveScores.appendChild(score);
     });

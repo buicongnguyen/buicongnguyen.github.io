@@ -184,7 +184,7 @@ body.book-layout {
   color: #fff;
 }
 
-.book-chapter__link[aria-current="page"] {
+.book-chapter__link[aria-current] {
   border-color: #275f94;
   background: #10283f;
   color: #fff;

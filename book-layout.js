@@ -51,6 +51,11 @@
       chapter: chapter.title
     }))
   );
+  // Sub-pages without a chapter entry of their own highlight their parent
+  // chapter and outline their own headings; they keep their own lesson nav.
+  const parentChapterPaths = [
+    [/\/robotics-simulation-engineer\/(isaac-sim-gui-clock-test|lab-\d+-[a-z0-9-]+)\.html$/, "robotics-simulation-engineer/ros2-labs.html"]
+  ];
 
   function rootPrefix() {
     const path = window.location.pathname.replace(/\\/g, "/");
@@ -88,6 +93,8 @@
   const currentItemIndex = chapterItems.findIndex(
     (item) => normalizedPath(prefix + item.path) === currentPath
   );
+  const parentChapter = parentChapterPaths.find(([pattern]) => pattern.test(currentPath));
+  const chapterPath = parentChapter ? normalizedPath(prefix + parentChapter[1]) : currentPath;
   const pageTitle = (document.querySelector("h1") || document.querySelector("title"));
   const readableTitle = pageTitle ? pageTitle.textContent.trim() : "Learning page";
   let currentChapter = "Learning library";
@@ -133,7 +140,7 @@
   searchWrap.className = "book-search";
   searchWrap.innerHTML = `
     <label for="book-search-input">Find a chapter</label>
-    <input id="book-search-input" type="search" placeholder="Search 18 chapters" autocomplete="off">
+    <input id="book-search-input" type="search" placeholder="Search ${chapterItems.length} chapters" autocomplete="off">
     <p class="book-search__status" aria-live="polite"></p>
   `;
   sidebar.appendChild(searchWrap);
@@ -160,8 +167,8 @@
       anchor.className = "book-chapter__link";
       anchor.href = prefix + path;
       anchor.innerHTML = `<span class="book-chapter__number">${number}</span><span>${title}</span>`;
-      if (normalizedPath(anchor.href) === currentPath) {
-        anchor.setAttribute("aria-current", "page");
+      if (normalizedPath(anchor.href) === chapterPath) {
+        anchor.setAttribute("aria-current", chapterPath === currentPath ? "page" : "true");
         activeListItem = item;
         currentChapter = chapter.title;
       }

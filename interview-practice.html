@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Deep learning, operating systems, and embedded systems interview practice questions.">
 <title>Deep Learning, OS, and Embedded Interview Practice</title>
-<link rel="stylesheet" href="book-layout.css?v=20260730-1">
+<link rel="stylesheet" href="book-layout.css?v=20260926-1">
 <style>
   :root { color-scheme: dark; --bg:#101418; --panel:#171d25; --panel2:#1f2732; --ink:#e8edf2; --muted:#a9b6c7; --line:#2b3644; --accent:#55b4ff; --green:#7ee787; --amber:#f2cc60; --code:#0b0f14; }
   * { box-sizing: border-box; }
@@ -239,6 +239,8 @@ function make(tag, className, text) {
   return el;
 }
 
+let totalText = "";
+
 function render() {
   const root = document.getElementById("qa-root");
   let total = 0;
@@ -271,7 +273,8 @@ function render() {
     }
     root.appendChild(sec);
   }
-  document.getElementById("stats").textContent = `${total} questions across ${data.length} interview domains`;
+  totalText = `${total} questions across ${data.length} interview domains`;
+  document.getElementById("stats").textContent = totalText;
 }
 
 function filterCards() {
@@ -288,12 +291,12 @@ function filterCards() {
   document.querySelectorAll("#qa-root > section").forEach((section) => {
     section.classList.toggle("hidden", !section.querySelector(".qa-card:not(.hidden)"));
   });
-  document.getElementById("stats").textContent = q ? `${shown} matching questions` : "90 questions across 3 interview domains";
+  document.getElementById("stats").textContent = q ? `${shown} matching questions` : totalText;
 }
 
 render();
 document.getElementById("search").addEventListener("input", filterCards);
 </script>
-<script src="book-layout.js?v=20260730-1"></script>
+<script src="book-layout.js?v=20260926-1"></script>
 </body>
 </html>
