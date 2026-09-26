@@ -47,6 +47,8 @@ Capture at least five baseline rows. Then summarize:
 
 ```powershell
 $Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
 C:\isaacsim-6.0.1\python.bat "$Assets\benchmark_summary.py" `
   "$Assets\fixtures\benchmark_runs.csv" `
   --output "$Assets\fixtures\benchmark_baseline.json"

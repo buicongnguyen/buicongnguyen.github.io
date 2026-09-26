@@ -83,10 +83,12 @@ Change one parameter family per sweep. Use at least three repetitions per candid
 
 ```powershell
 $Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
 C:\isaacsim-6.0.1\python.bat "$Assets\score_parameter_sweep.py" `
   "$Assets\fixtures\physics_sweep.csv" `
   "$Assets\fixtures\physics_targets.json" `
-  --output "$Assets\fixtures\physics_fit_report.json"
+  --output "$Run\physics_fit_report.json"
 ```
 
 The score is a weighted sum of absolute normalized errors:

@@ -20,17 +20,44 @@ def number(element: ET.Element | None, name: str) -> float | None:
     return value if math.isfinite(value) else None
 
 
-def positive_definite_inertia(inertia: ET.Element | None) -> bool:
+URDF_JOINT_TYPES = {"revolute", "continuous", "prismatic", "fixed", "floating", "planar"}
+# Relative slack for thin plates/rods, where I1 + I2 = I3 holds exactly and rounding can tip it.
+TRIANGLE_TOLERANCE = 1e-3
+
+
+def inertia_values(inertia: ET.Element | None) -> tuple[float, ...] | None:
+    """Return (ixx, ixy, ixz, iyy, iyz, izz), or None when any entry is missing or invalid."""
     if inertia is None:
-        return False
-    values = {key: number(inertia, key) for key in ("ixx", "ixy", "ixz", "iyy", "iyz", "izz")}
-    if any(value is None for value in values.values()):
-        return False
-    ixx, ixy, ixz = values["ixx"], values["ixy"], values["ixz"]
-    iyy, iyz, izz = values["iyy"], values["iyz"], values["izz"]
+        return None
+    values = tuple(number(inertia, key) for key in ("ixx", "ixy", "ixz", "iyy", "iyz", "izz"))
+    return None if any(value is None for value in values) else values
+
+
+def positive_definite(ixx: float, ixy: float, ixz: float, iyy: float, iyz: float, izz: float) -> bool:
+    """Sylvester's criterion for the symmetric 3x3 matrix with these six entries."""
     minor2 = ixx * iyy - ixy * ixy
     determinant = ixx * (iyy * izz - iyz * iyz) - ixy * (ixy * izz - iyz * ixz) + ixz * (ixy * iyz - iyy * ixz)
     return bool(ixx > 0.0 and minor2 > 0.0 and determinant > 0.0)
+
+
+def positive_definite_inertia(inertia: ET.Element | None) -> bool:
+    values = inertia_values(inertia)
+    return values is not None and positive_definite(*values)
+
+
+def triangle_inequality_inertia(inertia: ET.Element | None, tolerance: float = TRIANGLE_TOLERANCE) -> bool:
+    """Check I1 + I2 >= I3 for every permutation of the principal moments.
+
+    Rotation-invariant form: every principal moment is at most trace/2, i.e. the
+    matrix trace/2 * E - I is positive semidefinite, so off-diagonal tensors need
+    no eigen-decomposition. The tolerance is relative to trace/2.
+    """
+    values = inertia_values(inertia)
+    if values is None:
+        return False
+    ixx, ixy, ixz, iyy, iyz, izz = values
+    shift = (ixx + iyy + izz) / 2.0 * (1.0 + tolerance)
+    return positive_definite(shift - ixx, -ixy, -ixz, shift - iyy, -iyz, shift - izz)
 
 
 def audit_urdf(path: Path) -> dict:
@@ -70,6 +97,8 @@ def audit_urdf(path: Path) -> dict:
         else:
             children[parent].append(child)
             child_links.add(child)
+        if joint_type not in URDF_JOINT_TYPES:
+            errors.append(f"joint {name!r} has unknown type {joint_type!r}")
         if joint_type in {"revolute", "prismatic"}:
             limit = joint.find("limit")
             lower, upper = number(limit, "lower"), number(limit, "upper")
@@ -116,6 +145,8 @@ def audit_urdf(path: Path) -> dict:
                 errors.append(f"link {name!r} has non-positive or invalid mass")
             if not positive_definite_inertia(inertial.find("inertia")):
                 errors.append(f"link {name!r} inertia matrix is not symmetric positive definite")
+            elif not triangle_inequality_inertia(inertial.find("inertia")):
+                errors.append(f"link {name!r} principal moments violate the triangle inequality I1 + I2 >= I3")
         if link.find("collision") is None:
             warnings.append(f"link {name!r} has no collision geometry")
 
@@ -140,9 +171,13 @@ def main() -> None:
     except (OSError, ET.ParseError) as error:
         report = {"ok": False, "path": str(args.urdf), "errors": [str(error)], "warnings": []}
     rendered = json.dumps(report, indent=2)
-    print(rendered)
     if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+        try:
+            args.output.write_text(rendered + "\n", encoding="utf-8")
+        except OSError as error:
+            report = {"ok": False, "path": str(args.urdf), "errors": [f"cannot write --output: {error}"], "warnings": []}
+            rendered = json.dumps(report, indent=2)
+    print(rendered)
     if not report["ok"]:
         sys.exit(2)
 

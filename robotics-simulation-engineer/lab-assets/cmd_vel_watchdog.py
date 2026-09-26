@@ -1,13 +1,16 @@
 """Forward fresh Twist commands and publish zero when input becomes stale."""
 
 import argparse
+import math
 import time
 
 import rclpy
 from geometry_msgs.msg import Twist
 from lab_contracts import is_stale
 from rclpy.clock import Clock, ClockType
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
 
 
 class TwistWatchdog(Node):
@@ -54,19 +57,29 @@ def main() -> None:
     parser.add_argument("--timeout", type=float, default=0.5)
     parser.add_argument("--rate", type=float, default=20.0)
     args = parser.parse_args()
-    if args.timeout <= 0.0 or args.rate <= 0.0:
-        parser.error("--timeout and --rate must be positive")
+    # argparse accepts "nan" and "inf"; a NaN timeout would never go stale (fail open).
+    if not (math.isfinite(args.timeout) and math.isfinite(args.rate)) or args.timeout <= 0.0 or args.rate <= 0.0:
+        parser.error("--timeout and --rate must be positive and finite")
 
-    rclpy.init()
+    # rclpy's default SIGINT handler shuts the context down before spin returns, which
+    # makes the final zero command impossible. Leave SIGINT to Python instead: Ctrl-C
+    # raises KeyboardInterrupt while the context is still valid.
+    rclpy.init(signal_handler_options=SignalHandlerOptions.NO)
     node = TwistWatchdog(args.input, args.output, args.timeout, args.rate)
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
-        node.publisher.publish(Twist())
+        # An external shutdown can still invalidate the context first, so the final
+        # zero command stays best effort and must not mask the exit path.
+        if rclpy.ok():
+            try:
+                node.publisher.publish(Twist())
+            except Exception as error:
+                node.get_logger().error(f"Final zero Twist was not published: {error}")
         node.destroy_node()
-        rclpy.shutdown()
+        rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

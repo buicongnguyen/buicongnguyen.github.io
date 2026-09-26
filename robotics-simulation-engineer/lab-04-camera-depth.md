@@ -63,7 +63,9 @@ Expected uncompressed image type: `sensor_msgs/msg/Image`.
 ## Step 3 — run a bounded payload probe
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
+pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets\camera_probe.py" --topic /camera_1/rgb/image_raw --samples 5 --timeout 15 --output "$Run\camera_probe.json"
 ```
 
 The JSON report must show:
@@ -72,8 +74,8 @@ The JSON report must show:
 ok: true
 width > 0
 height > 0
-step > 0
-payload_bytes >= step * height
+step >= width * bytes_per_pixel (step_covers_row)
+payload_bytes == step * height
 non-empty encoding
 non-empty optical frame_id
 five timestamps strictly increase in simulation time

@@ -1,9 +1,13 @@
 """Receive multiple sensor_msgs/Image messages and emit a bounded contract report."""
 
+from __future__ import annotations
+
 import argparse
 import json
+import math
 import sys
 import time
+from pathlib import Path
 
 import rclpy
 from lab_contracts import build_image_report
@@ -38,14 +42,30 @@ def normalize(message: Image) -> dict:
     }
 
 
+def emit(report: dict, output: Path | None) -> bool:
+    """Print the report and optionally save it as UTF-8 JSON; return False if saving failed."""
+    # Prefer --output over shell redirection: Windows PowerShell 5.1 ">" writes UTF-16.
+    rendered = json.dumps(report, indent=2)
+    saved = True
+    if output:
+        try:
+            output.write_text(rendered + "\n", encoding="utf-8")
+        except OSError as error:
+            rendered = json.dumps({"ok": False, "topic": report.get("topic"), "error": f"cannot write --output: {error}"}, indent=2)
+            saved = False
+    print(rendered)
+    return saved
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--topic", required=True)
     parser.add_argument("--timeout", type=float, default=10.0)
     parser.add_argument("--samples", type=int, default=5)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    if args.timeout <= 0.0 or args.samples < 2:
-        parser.error("--timeout must be positive and --samples must be at least 2")
+    if not math.isfinite(args.timeout) or args.timeout <= 0.0 or args.samples < 2:
+        parser.error("--timeout must be positive and finite and --samples must be at least 2")
 
     rclpy.init()
     node = ImageProbe(args.topic, args.samples)
@@ -54,27 +74,26 @@ def main() -> None:
         while len(node.messages) < args.samples and time.monotonic() < deadline:
             rclpy.spin_once(node, timeout_sec=0.2)
         if len(node.messages) < args.samples:
-            print(
-                json.dumps(
-                    {
-                        "ok": False,
-                        "topic": args.topic,
-                        "error": "timeout",
-                        "received": len(node.messages),
-                        "required": args.samples,
-                    },
-                    indent=2,
-                )
+            emit(
+                {
+                    "ok": False,
+                    "topic": args.topic,
+                    "error": "timeout",
+                    "received": len(node.messages),
+                    "required": args.samples,
+                },
+                args.output,
             )
             sys.exit(2)
 
         report = build_image_report(args.topic, [normalize(message) for message in node.messages])
-        print(json.dumps(report, indent=2))
+        if not emit(report, args.output):
+            sys.exit(2)
         if not report["ok"]:
             sys.exit(3)
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        rclpy.try_shutdown()
 
 
 if __name__ == "__main__":

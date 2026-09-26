@@ -40,9 +40,11 @@ Use the supplied known-good fixture first:
 
 ```powershell
 $Root = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer"
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
 C:\isaacsim-6.0.1\python.bat "$Root\lab-assets\urdf_audit.py" `
   "$Root\lab-assets\fixtures\valid_robot.urdf" `
-  --output "$Root\lab-assets\fixtures\valid_robot_report.json"
+  --output "$Run\model_audit.json"
 ```
 
 The auditor checks:

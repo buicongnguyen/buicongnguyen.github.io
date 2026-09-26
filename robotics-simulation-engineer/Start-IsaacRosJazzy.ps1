@@ -1,15 +1,24 @@
-[CmdletBinding()]
-param(
-    [ValidateSet("verify", "build", "check", "zenoh", "sim", "headless", "ros2", "python", "shell")]
-    [string]$Action = "verify",
-
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$ActionArguments
-)
+# Usage: Start-IsaacRosJazzy.ps1 [action] [arguments passed through to pixi]
+#
+# Arguments are read from $args rather than a param() block on purpose. An advanced
+# script binds pass-through flags to PowerShell's common parameters: ros2's --verbose
+# becomes -Verbose and is dropped, while -o, -p, -a, and -e fail as ambiguous names.
+$actions = @("verify", "build", "check", "zenoh", "sim", "headless", "ros2", "python", "shell")
+$Action = "verify"
+$ActionArguments = @()
+if ($args.Count -gt 0) {
+    $Action = [string]$args[0]
+    if ($args.Count -gt 1) { $ActionArguments = @($args[1..($args.Count - 1)]) }
+}
 
 $ErrorActionPreference = "Stop"
+if ($Action -notin $actions) {
+    throw "Unknown action '$Action'. Use one of: $($actions -join ', ')."
+}
+
 $workspace = "C:\IsaacSim-ros_workspaces\jazzy_ws"
-$pixi = "C:\Users\n\AppData\Local\pixi\bin\pixi.exe"
+$pixiCommand = Get-Command pixi -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+$pixi = if ($pixiCommand) { $pixiCommand.Source } else { Join-Path $env:LOCALAPPDATA "pixi\bin\pixi.exe" }
 
 if (-not (Test-Path -LiteralPath $pixi)) {
     throw "Pixi was not found at $pixi. Open a new terminal or reinstall prefix-dev.pixi."
@@ -37,10 +46,10 @@ Write-Host "Isaac ROS workspace: $workspace" -ForegroundColor Cyan
 Write-Host "Removed $($removed.Count) conflicting PATH entries for this process only." -ForegroundColor DarkGray
 
 function Invoke-Pixi {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
-    & $pixi @Arguments
+    # A simple function (no param block) so every argument reaches pixi verbatim.
+    & $pixi @args
     if ($LASTEXITCODE -ne 0) {
-        throw "pixi $($Arguments -join ' ') failed with exit code $LASTEXITCODE"
+        throw "pixi $($args -join ' ') failed with exit code $LASTEXITCODE"
     }
 }
 

@@ -14,6 +14,8 @@ from pathlib import Path
 def generate(bounds: dict[str, list[float]], count: int, seed: int) -> dict:
     if count <= 0:
         raise ValueError("count must be positive")
+    if not isinstance(bounds, dict):
+        raise ValueError("bounds must be a JSON object of name: [low, high]")
     rng = random.Random(seed)
     values: dict[str, list[float]] = {}
     for name, limits in sorted(bounds.items()):
@@ -40,6 +42,8 @@ def evaluate(manifest: dict, result_rows: list[dict[str, str]], minimum_pass_rat
     duplicates = sorted({name for name in observed if observed_ids.count(name) > 1})
     parsed_success = []
     for row in result_rows:
+        if row.get("success") is None:
+            raise ValueError(f"missing success value for {row['scenario_id']}")
         value = float(row["success"])
         if not math.isfinite(value) or not 0.0 <= value <= 1.0:
             raise ValueError(f"success must be finite and between 0 and 1 for {row['scenario_id']}")
@@ -76,21 +80,23 @@ def main() -> None:
     check.add_argument("--output", type=Path)
     args = parser.parse_args()
     try:
+        # utf-8-sig also accepts files saved with a BOM by Excel or Windows PowerShell.
         if args.command == "generate":
-            bounds = json.loads(args.bounds.read_text(encoding="utf-8"))
+            bounds = json.loads(args.bounds.read_text(encoding="utf-8-sig"))
             report = generate(bounds, args.count, args.seed)
             args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         else:
-            manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-            with args.results.open(newline="", encoding="utf-8") as stream:
+            manifest = json.loads(args.manifest.read_text(encoding="utf-8-sig"))
+            with args.results.open(newline="", encoding="utf-8-sig") as stream:
                 report = evaluate(manifest, list(csv.DictReader(stream)), args.minimum_pass_rate)
             if args.output:
                 args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(report, indent=2))
-    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         report = {"ok": False, "error": str(error)}
         print(json.dumps(report, indent=2))
-    if args.command == "evaluate" and not report.get("ok", False):
+    # A generated manifest has no "ok" field, so fail generate on an error report.
+    if "error" in report or (args.command == "evaluate" and not report.get("ok", False)):
         sys.exit(2)
 
 

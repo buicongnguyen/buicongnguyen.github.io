@@ -46,6 +46,8 @@ Each must fail for the correct reason. Restore the fixture and rerun green.
 
 ```powershell
 $Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
 C:\isaacsim-6.0.1\python.bat "$Assets\evidence_gate.py" `
   --require model="$Run\model_audit.json" `
   --require physics="$Run\physics_fit_report.json" `

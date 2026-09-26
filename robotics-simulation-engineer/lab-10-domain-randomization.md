@@ -50,6 +50,8 @@ For each field record units, nominal value, lower/upper source, application loca
 
 ```powershell
 $Assets = "C:\Users\n\source\repos\issac_sim\robotics-simulation-engineer\lab-assets"
+$Run = "C:\Users\n\source\repos\issac_sim\projects\sim_evidence"
+New-Item -ItemType Directory -Force -Path $Run | Out-Null
 C:\isaacsim-6.0.1\python.bat "$Assets\robustness_scenarios.py" generate `
   "$Assets\fixtures\robustness_bounds.json" `
   --count 32 --seed 20260803 --output "$Run\scenarios.json"

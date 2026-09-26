@@ -5,11 +5,24 @@ from __future__ import annotations
 import math
 from typing import Any
 
+# Bytes per pixel for the sensor_msgs/Image encodings the labs publish or record.
+BYTES_PER_PIXEL = {
+    "mono8": 1,
+    "mono16": 2,
+    "16UC1": 2,
+    "rgb8": 3,
+    "bgr8": 3,
+    "rgba8": 4,
+    "bgra8": 4,
+    "32FC1": 4,
+}
+
 
 def is_stale(last_receipt: float | None, now: float, timeout: float) -> bool:
     """Return whether a command has exceeded its steady-clock receipt timeout."""
-    if timeout <= 0.0:
-        raise ValueError("timeout must be positive")
+    # NaN compares False with everything, so an unchecked NaN timeout would never go stale.
+    if not math.isfinite(timeout) or timeout <= 0.0:
+        raise ValueError("timeout must be positive and finite")
     return last_receipt is None or now - last_receipt > timeout
 
 
@@ -24,9 +37,16 @@ def build_image_report(topic: str, samples: list[dict[str, Any]]) -> dict[str, A
         int(sample["width"]) > 0
         and int(sample["height"]) > 0
         and int(sample["step"]) > 0
-        and int(sample["payload_bytes"]) >= int(sample["step"]) * int(sample["height"])
+        # sensor_msgs/Image defines data as exactly step * height bytes.
+        and int(sample["payload_bytes"]) == int(sample["step"]) * int(sample["height"])
         for sample in samples
     )
+    # A row must hold width * bytes-per-pixel; unknown encodings still need at least one byte per pixel.
+    row_stride = all(
+        int(sample["step"]) >= int(sample["width"]) * BYTES_PER_PIXEL.get(sample["encoding"], 1)
+        for sample in samples
+    )
+    bytes_per_pixel = BYTES_PER_PIXEL.get(first["encoding"])
     identity = ("width", "height", "step", "encoding", "frame_id")
     consistent = all(tuple(sample[key] for key in identity) == tuple(first[key] for key in identity) for sample in samples)
     stamps_increase = all(current > previous for previous, current in zip(stamps, stamps[1:]))
@@ -35,6 +55,7 @@ def build_image_report(topic: str, samples: list[dict[str, Any]]) -> dict[str, A
     checks = {
         "sample_count": len(samples) >= 2,
         "structural_payload": structural,
+        "step_covers_row": row_stride,
         "encoding_nonempty": bool(first["encoding"]),
         "frame_id_nonempty": bool(first["frame_id"]),
         "geometry_consistent": consistent,
@@ -55,6 +76,8 @@ def build_image_report(topic: str, samples: list[dict[str, Any]]) -> dict[str, A
         "height": int(first["height"]),
         "encoding": first["encoding"],
         "step": int(first["step"]),
+        "bytes_per_pixel": bytes_per_pixel,
+        "minimum_step": int(first["width"]) * (bytes_per_pixel or 1),
         "payload_bytes": int(first["payload_bytes"]),
-        "minimum_expected_bytes": int(first["step"]) * int(first["height"]),
+        "expected_payload_bytes": int(first["step"]) * int(first["height"]),
     }

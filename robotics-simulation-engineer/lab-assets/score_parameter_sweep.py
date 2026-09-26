@@ -11,6 +11,8 @@ from pathlib import Path
 
 
 def score_rows(rows: list[dict[str, str]], contract: dict) -> list[dict]:
+    if not isinstance(contract, dict) or not all(isinstance(contract.get(key, {}), dict) for key in ("targets", "scales", "weights")):
+        raise ValueError("contract must be a JSON object whose targets, scales, and weights are objects")
     targets = contract["targets"]
     scales = contract["scales"]
     weights = contract.get("weights", {name: 1.0 for name in targets})
@@ -30,6 +32,9 @@ def score_rows(rows: list[dict[str, str]], contract: dict) -> list[dict]:
     for row in rows:
         contributions = {}
         for name, target in numeric_targets.items():
+            # csv.DictReader fills cells missing from a short row with None.
+            if row.get(name) is None:
+                raise ValueError(f"missing {name} in scenario {row.get('scenario_id')}")
             observed = float(row[name])
             if not math.isfinite(observed):
                 raise ValueError(f"non-finite {name} in scenario {row.get('scenario_id')}")
@@ -45,17 +50,22 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     try:
-        with args.csv.open(newline="", encoding="utf-8") as stream:
+        # utf-8-sig also accepts files saved with a BOM by Excel or Windows PowerShell.
+        with args.csv.open(newline="", encoding="utf-8-sig") as stream:
             rows = list(csv.DictReader(stream))
-        contract = json.loads(args.contract.read_text(encoding="utf-8"))
+        contract = json.loads(args.contract.read_text(encoding="utf-8-sig"))
         ranked = score_rows(rows, contract)
         report = {"ok": bool(ranked), "row_count": len(ranked), "best": ranked[0] if ranked else None, "ranking": ranked}
-    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         report = {"ok": False, "error": str(error)}
     rendered = json.dumps(report, indent=2)
-    print(rendered)
     if args.output:
-        args.output.write_text(rendered + "\n", encoding="utf-8")
+        try:
+            args.output.write_text(rendered + "\n", encoding="utf-8")
+        except OSError as error:
+            report = {"ok": False, "error": f"cannot write --output: {error}"}
+            rendered = json.dumps(report, indent=2)
+    print(rendered)
     if not report["ok"]:
         sys.exit(2)
 
