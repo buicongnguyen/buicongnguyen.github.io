@@ -106,16 +106,19 @@ def render(name: str) -> str:
     )
     # Sibling chapters link to each other as .md in the source and as .html here.
     generated = "|".join(re.escape(page) for page in PAGES)
-    body = re.sub(rf'href="({generated})\.md(#[^"]*)?"', r'href="\1.html\2"', body)
+    body = re.sub(rf'href="(?:\./)?({generated})\.md(#[^"]*)?"', r'href="\1.html\2"', body)
     # A "Live page" bullet would link a generated page to itself.
     body = re.sub(
         rf'<li>\s*(?:<p>)?Live [^<]*<a href="{re.escape(SITE)}{re.escape(name)}\.html">[^<]*</a>(?:</p>)?\s*</li>\n?',
         "",
         body,
     )
-    body = re.sub(r"<table>", '<div class="table-wrap"><table>', body)
+    # Wrap every table, with or without attributes, so each </table> has its own </div>.
+    body = re.sub(r"(<table\b[^>]*>)", r'<div class="table-wrap">\1', body)
     body = body.replace("</table>", "</table></div>")
-    title = re.sub(r"[`*]", "", title_match.group(1)).strip()
+    # Plain-text title: drop Markdown emphasis and inline tags, and decode entities once so
+    # html.escape below does not double-escape an author's &amp;.
+    title = html.unescape(re.sub(r"<[^>]+>|[`*]", "", title_match.group(1))).strip()
     return TEMPLATE.format(
         name=name,
         site=SITE,

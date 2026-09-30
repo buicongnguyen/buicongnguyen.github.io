@@ -13,8 +13,11 @@
 
 $ErrorActionPreference = "Stop"
 $actions = "verify", "build", "check", "zenoh", "sim", "headless", "ros2", "python", "shell"
-$Action = if ($args.Count) { [string]$args[0] } else { "verify" }
-$ActionArguments = if ($args.Count -gt 1) { @($args[1..($args.Count - 1)]) } else { @() }
+# Pixi task names are case-sensitive, so normalize the action before it reaches pixi.
+$Action = if ($args.Count) { ([string]$args[0]).ToLowerInvariant() } else { "verify" }
+# Assign an array directly: an `if` statement would unroll a one-element array into a plain
+# string, and splatting a string passes one character per argument (--help -> - - h e l p).
+$ActionArguments = @($args | Select-Object -Skip 1)
 if ($actions -notcontains $Action) {
     throw "Unknown action '$Action'. Use one of: $($actions -join ', ')."
 }

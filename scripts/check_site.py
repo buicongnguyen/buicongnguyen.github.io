@@ -17,7 +17,13 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
-USER_PATH = re.compile(r"[A-Za-z]:\\Users\\[^\\\s\"'<>`]+\\")
+# A personal home directory under a drive's Users folder, in Windows form (either slash,
+# JSON-escaped backslashes, any case), Git Bash form (/drive/...), or WSL form (/mnt/drive/...).
+USER_PATH = re.compile(r"(?i)(?:\b[a-z]:[\\/]+|/mnt/[a-z]/|(?<![\w.~-])/[a-z]/)users[\\/]+[^\\/\s\"'<>`]+")
+TEXT_SUFFIXES = {
+    ".html", ".md", ".ps1", ".js", ".mjs", ".py", ".json", ".yaml", ".yml", ".css", ".txt",
+    ".csv", ".c", ".h", ".map", ".urdf", ".toml", ".cfg", ".sh",
+}
 # Anchors that a page's own script creates at runtime, confirmed in a browser. Keep this
 # list short: a static id is always better than an allowlist entry.
 RUNTIME_IDS = {"interview-practice.html": {"deep-learning", "os", "embedded"}}
@@ -32,9 +38,11 @@ class PageParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
-        for key in ("id", "name"):
-            if values.get(key):
-                self.ids.add(values[key])
+        if values.get("id"):
+            self.ids.add(values["id"])
+        # Browsers scroll to a legacy name= only on <a>; a <meta> or <input> name is not a target.
+        if tag == "a" and values.get("name"):
+            self.ids.add(values["name"])
         for key in ("href", "src"):
             if values.get(key):
                 self.links.append(values[key])
@@ -103,6 +111,9 @@ def check_link(source: Path, link: str, cache: dict[Path, PageParser]) -> str | 
 
 def spine_paths() -> list[str]:
     source = (ROOT / "book-layout.js").read_text(encoding="utf-8")
+    # A commented-out chapter is not in the book.
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.S)
+    source = re.sub(r"(?m)^\s*//.*$", "", source)
     return re.findall(r'\[\s*"[^"]+",\s*"([^"]+\.html)"\s*\]', source)
 
 
@@ -132,7 +143,7 @@ def main() -> int:
         if "book-layout.js" in page.read_text(encoding="utf-8") and relative not in spine:
             problems.append(f"{relative}: loads book-layout.js but is not a chapter in its spine (no outline or prev/next)")
 
-    for document in tracked("*.html", "*.md", "*.ps1", "*.js", "*.py", "*.json", "*.yaml"):
+    for document in (path for path in tracked() if path.suffix.lower() in TEXT_SUFFIXES):
         for number, line in enumerate(document.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
             if USER_PATH.search(line):
                 problems.append(f"{document.relative_to(ROOT).as_posix()}:{number}: machine-specific user path")

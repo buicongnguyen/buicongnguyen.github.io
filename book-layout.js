@@ -85,7 +85,8 @@
     const url = new URL(value, window.location.href);
     let path = url.pathname.replace(/\/+/g, "/");
     if (path.endsWith("/")) path += "index.html";
-    return path.toLowerCase();
+    // GitHub Pages also serves /page as page.html, so compare paths without the suffix.
+    return path.replace(/\.html$/i, "").toLowerCase();
   }
 
   function slug(text, index) {
@@ -279,6 +280,19 @@
       !document.body.classList.contains("book-menu-open");
     sidebar.toggleAttribute("inert", hiddenOnMobile);
     sidebar.setAttribute("aria-hidden", String(hiddenOnMobile));
+    // While the drawer is open on a phone, keep keyboard focus inside it: the page behind
+    // becomes inert. The scrim stays clickable so a tap outside still closes the drawer.
+    const trapFocus = mobileQuery.matches && document.body.classList.contains("book-menu-open");
+    Array.from(document.body.children).forEach(function (element) {
+      if (element === sidebar || element === scrim || element.tagName === "SCRIPT") return;
+      if (trapFocus && !element.hasAttribute("inert")) {
+        element.setAttribute("inert", "");
+        element.dataset.bookInert = "true";
+      } else if (!trapFocus && element.dataset.bookInert) {
+        element.removeAttribute("inert");
+        delete element.dataset.bookInert;
+      }
+    });
   }
 
   function setMenu(open, restoreFocus = true) {

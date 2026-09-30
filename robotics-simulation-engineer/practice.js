@@ -128,6 +128,18 @@
     feedback.textContent = "Choose one answer, then check your reasoning.";
   }
 
+  function isTestMode() {
+    return assessmentMode !== "practice";
+  }
+
+  // In a pre-test or post-test the first check is final: its feedback reveals the correct
+  // answer, so the card must not accept another pick afterwards.
+  function setLocked(card, locked) {
+    card.querySelectorAll('input[type="radio"]').forEach(function (radio) { radio.disabled = locked; });
+    const check = card.querySelector(".check-answer");
+    if (check) check.disabled = locked;
+  }
+
   function applyResult(card, group, question, selected) {
     clearVisualResult(card);
     const choices = card.querySelectorAll(".choice");
@@ -190,6 +202,12 @@
       radio.value = String(choiceIndex);
       radio.addEventListener("change", function () {
         const previous = results[id] || {};
+        // A checked test answer is final even if the radios are re-enabled by hand.
+        if (isTestMode() && previous.checked === true) {
+          const kept = card.querySelector('input[value="' + previous.selected + '"]');
+          if (kept) kept.checked = true;
+          return;
+        }
         results[id] = {
           selected: choiceIndex,
           correct: false,
@@ -217,6 +235,7 @@
     const feedback = make("p", "feedback", "Choose one answer, then check your reasoning.");
     feedback.setAttribute("aria-live", "polite");
     check.addEventListener("click", function () {
+      if (isTestMode() && results[id] && results[id].checked !== false) return;
       const selected = card.querySelector("input[type=radio]:checked");
       if (!selected) {
         feedback.className = "feedback is-wrong";
@@ -235,6 +254,7 @@
       const nextReview = correct ? (due ? now + delays[Math.max(0, reviewStage - 1)] * 86400000 : previous.nextReview) : now;
       results[id] = { selected: selectedIndex, correct: correct, checked: true, mode: assessmentMode, attemptedAt: now, reviewStage: reviewStage, nextReview: nextReview };
       saveResults();
+      if (isTestMode()) setLocked(card, true);
       updateStats();
     });
     actions.appendChild(check);
@@ -247,6 +267,7 @@
       const radio = card.querySelector('input[value="' + saved.selected + '"]');
       radio.checked = true;
       if (saved.checked !== false) applyResult(card, group, question, saved.selected);
+      setLocked(card, isTestMode() && saved.checked !== false);
     }
 
     return card;
@@ -366,28 +387,40 @@
         if (!card) return;
         card.querySelectorAll('input[type="radio"]').forEach(function (radio) { radio.checked = false; });
         clearVisualResult(card);
+        setLocked(card, false);
         card.open = false;
         const saved = results[id];
         if (saved && Number.isInteger(saved.selected)) {
           const radio = card.querySelector('input[value="' + saved.selected + '"]');
           if (radio) radio.checked = true;
           if (saved.checked !== false) applyResult(card, group, question, saved.selected);
+          setLocked(card, isTestMode() && saved.checked !== false);
         }
       });
     });
   }
 
+  const totalQuestions = groups.reduce(function (sum, group) { return sum + group.questions.length; }, 0);
+
   function startAssessment(mode) {
+    // Re-selecting the current mode must not wipe the answers already given in it.
+    if (mode === assessmentMode) return;
     const history = readHistory();
     if (Object.keys(results).length) history[assessmentMode] = { savedAt: Date.now(), results: results };
+    // Practice answers (with their 1/3/7-day review schedule) and an unfinished test resume
+    // where they stopped. A completed test is a baseline, so replacing it must be deliberate.
+    let next = history[mode] ? history[mode].results : {};
+    const answered = Object.values(next).filter(function (entry) { return entry.checked !== false; }).length;
+    if (mode !== "practice" && answered >= totalQuestions && totalQuestions > 0) {
+      if (!window.confirm("A completed " + mode + " is saved. Start a new " + mode + " and replace it once you answer?")) return;
+      next = {};
+    }
     try {
       localStorage.setItem(historyKey, JSON.stringify(history));
     } catch (_error) { /* assessment remains usable without history */ }
     assessmentMode = mode;
     try { localStorage.setItem(modeKey, mode); } catch (_error) { /* ignore */ }
-    // A pre-test or post-test always starts blank, but practice answers and their
-    // 1/3/7-day review schedule come back when practice resumes.
-    results = mode === "practice" && history.practice ? history.practice.results : {};
+    results = next;
     saveResults();
     syncCards();
     category.value = "all";
@@ -426,9 +459,14 @@
   document.getElementById("reset-answers").addEventListener("click", function () {
     results = {};
     saveResults();
+    // Also drop this mode's saved snapshot, or the next mode switch would restore it.
+    const history = readHistory();
+    delete history[assessmentMode];
+    try { localStorage.setItem(historyKey, JSON.stringify(history)); } catch (_error) { /* ignore */ }
     document.querySelectorAll(".question-card").forEach(function (card) {
       card.querySelectorAll("input[type=radio]").forEach(function (radio) { radio.checked = false; });
       clearVisualResult(card);
+      setLocked(card, false);
     });
     category.value = "all";
     search.value = "";
