@@ -58,3 +58,19 @@ def test_reports_the_first_divergent_sample_not_just_a_mismatch():
     perturbed[80] += 1.0
     assert first_divergence(reference, perturbed) == 37
     assert first_divergence(reference, reference + 1e-15, atol=1e-12, rtol=0) is None
+
+
+def test_divergence_index_counts_samples_for_multi_joint_traces():
+    reference = np.zeros((10, 3))
+    perturbed = reference.copy()
+    perturbed[4, 2] = 1.0
+    assert first_divergence(reference, perturbed) == 4
+
+
+def test_rollout_follows_the_declared_process():
+    rng = np.random.default_rng(42)
+    state, expected = 0.0, []
+    for _ in range(5):
+        state = 0.98 * state + rng.normal(0, 0.01)
+        expected.append(state)
+    np.testing.assert_allclose(rollout(42, steps=5), expected, rtol=0, atol=1e-15)

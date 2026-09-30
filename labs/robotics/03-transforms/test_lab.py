@@ -39,3 +39,20 @@ def test_rejects_non_rigid_transform_and_non_finite_point():
         transform_point(np.eye(4)[:3], [0, 0, 0])
     with pytest.raises(ValueError):
         transform_point(np.eye(4), [np.nan, 0, 0])
+
+
+def test_rejects_reflections_and_checks_both_arguments():
+    reflection = np.diag([-1.0, 1.0, 1.0, 1.0])
+    with pytest.raises(ValueError):
+        compose(np.eye(4), reflection)
+    scaled = np.eye(4)
+    scaled[1, 1] = 2
+    with pytest.raises(ValueError):
+        compose(np.eye(4), scaled)
+
+
+def test_accepts_float32_rigid_transforms():
+    angle = 0.3
+    rotation = np.eye(4, dtype=np.float32)
+    rotation[:2, :2] = [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+    np.testing.assert_allclose(compose(rotation, np.eye(4)), rotation, atol=1e-6)

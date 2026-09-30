@@ -72,7 +72,8 @@ def run_opposing_pair(transfer, account_type, timeout: float = 2.0) -> tuple[boo
     left = account_type("left", 100, lock=TracedLock("L1", events, barrier))
     right = account_type("right", 100, lock=TracedLock("L2", events, barrier))
     threads = [
-        threading.Thread(target=transfer, args=(left, right, 1), name="T1", daemon=True),
+        # Unequal amounts: a transfer that silently does nothing cannot net back to 100/100.
+        threading.Thread(target=transfer, args=(left, right, 3), name="T1", daemon=True),
         threading.Thread(target=transfer, args=(right, left, 1), name="T2", daemon=True),
     ]
     for thread in threads:

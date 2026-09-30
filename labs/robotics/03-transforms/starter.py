@@ -14,7 +14,8 @@ def compose(a_from_b, b_from_c):
 
     Raise ValueError unless both inputs are finite 4x4 homogeneous rigid transforms:
     last row [0, 0, 0, 1], rotation block orthonormal (R.T @ R == I) with det(R) == +1.
-    A scale or a reflection is not a rigid transform.
+    A scale or a reflection is not a rigid transform. Compare with a tolerance of 1e-6:
+    simulator poses are often float32, where R.T @ R differs from I by about 5e-8.
     """
     raise NotImplementedError("implement compose")
 

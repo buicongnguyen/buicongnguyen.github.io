@@ -16,6 +16,7 @@ def validate_inertia(tensor, atol=1e-10):
     if not np.allclose(values, values.T, atol=atol, rtol=0):
         raise ValueError("inertia must be symmetric")
     principal = np.linalg.eigvalsh(values)
-    if np.any(principal <= 0) or 2 * principal.max() > principal.sum() + atol:
+    # eigvalsh sorts ascending; comparing differences cannot overflow the way 2 * max can.
+    if np.any(principal <= 0) or principal[2] - principal[1] > principal[0] + atol:
         raise ValueError("principal moments are not physically consistent")
     return principal

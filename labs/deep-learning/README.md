@@ -15,6 +15,6 @@ python -m pytest test_solution.py -q
 $env:LAB_IMPL = "solution"; python -m pytest test_solution.py -q; Remove-Item Env:LAB_IMPL   # reference
 ```
 
-Hint, if you are stuck after step 3: fixing only the weight update leaves the loss at about 4.5 and accuracy near 0.55. Ask which other parameter is updated.
+Hint, if you are stuck after step 3: fixing only the weight update leaves the loss at about 13 and accuracy near 0.30. Ask which other parameter is updated. The class boundary does not pass through the origin, so the bias has to learn too.
 
 Submit observation → invariant → discriminating check → repair → regression. The artifact is the causal diagnosis, not only the corrected lines.

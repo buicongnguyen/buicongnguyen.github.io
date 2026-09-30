@@ -40,4 +40,6 @@ def first_divergence(left, right, atol=1e-12, rtol=1e-12):
     if left_values.size == 0:
         return None
     matches = np.isclose(left_values, right_values, atol=atol, rtol=rtol, equal_nan=False)
-    return None if matches.all() else int(np.flatnonzero(~matches)[0])
+    # One sample is one row of a multi-joint trace: report the sample, not the flattened element.
+    per_sample = matches.reshape(matches.shape[0], -1).all(axis=1) if matches.ndim else matches.reshape(1)
+    return None if per_sample.all() else int(np.flatnonzero(~per_sample)[0])

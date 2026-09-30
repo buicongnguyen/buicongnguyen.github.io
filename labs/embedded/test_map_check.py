@@ -51,3 +51,15 @@ Linker script and memory map
 def test_malformed_or_incomplete_map_is_rejected(text):
     with pytest.raises(ValueError):
         analyze_map(text)
+
+
+def test_section_with_a_load_address_is_found():
+    text = """
+Memory Configuration
+SRAM 0x20000000 0x00010000
+Linker script and memory map
+.data 0x20000000 0x00003000 load address 0x08018000
+"""
+    report = analyze_map(text, ".data")
+    assert report["fits"] is True
+    assert report["section_end"] == 0x20003000

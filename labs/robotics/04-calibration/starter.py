@@ -27,6 +27,7 @@ def rmse(expected, observed):
     """Return the root-mean-square error of two non-empty, finite, same-shape arrays.
 
     Raise ValueError otherwise. Hint: [1, 2] versus [[1], [2]] broadcasts to 2x2 in
-    NumPy, which silently turns a shape bug into a wrong number.
+    NumPy, which silently turns a shape bug into a wrong number. A large but finite error
+    must not overflow: rmse([1e200], [-1e200]) is 2e200, so scale before squaring.
     """
     raise NotImplementedError("implement rmse")

@@ -20,16 +20,20 @@ def normalize_rows(vectors: np.ndarray) -> np.ndarray:
     return scaled / np.linalg.norm(scaled, axis=1, keepdims=True)
 
 
+# Loose enough for float32 poses from a simulator, tight enough to reject scale or shear.
+RIGID_TOLERANCE = 1e-6
+
+
 def _as_rigid_transform(value: np.ndarray) -> np.ndarray:
     transform = np.asarray(value, dtype=float)
     if transform.shape != (4, 4) or not np.isfinite(transform).all():
         raise ValueError("transforms must be finite 4x4 matrices")
-    if not np.allclose(transform[3], [0.0, 0.0, 0.0, 1.0], atol=1e-10, rtol=0):
+    if not np.allclose(transform[3], [0.0, 0.0, 0.0, 1.0], atol=RIGID_TOLERANCE, rtol=0):
         raise ValueError("transform must have a homogeneous [0, 0, 0, 1] final row")
     rotation = transform[:3, :3]
     if (
-        not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-10, rtol=0)
-        or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-10, rtol=0)
+        not np.allclose(rotation.T @ rotation, np.eye(3), atol=RIGID_TOLERANCE, rtol=0)
+        or not np.isclose(np.linalg.det(rotation), 1.0, atol=RIGID_TOLERANCE, rtol=0)
     ):
         raise ValueError("transform rotation must be orthonormal with determinant +1")
     return transform

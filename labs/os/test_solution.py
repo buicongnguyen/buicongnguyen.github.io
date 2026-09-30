@@ -67,7 +67,15 @@ def test_forced_ab_ba_interleaving_completes():
     # Deterministic: both threads hold their first lock before either asks for its second.
     completed, events, (left, right) = run_opposing_pair(lab.transfer, Account)
     assert completed, f"deadlock; wait-for graph: {wait_for_graph(events)}"
-    assert left.balance + right.balance == 200
+    # T1 moves 3 from left to right and T2 moves 1 back, so both transfers must have happened.
+    assert (left.balance, right.balance) == (98, 102)
+
+
+def test_a_single_transfer_moves_money():
+    source = Account("A", 10)
+    target = Account("B", 5)
+    call_bounded(lab.transfer, source, target, 3)
+    assert (source.balance, target.balance) == (7, 8)
 
 
 def test_opposing_transfers_complete_and_conserve_balance():
@@ -75,13 +83,14 @@ def test_opposing_transfers_complete_and_conserve_balance():
     left = Account("account", 1000, SlowLock())
     right = Account("account", 1000, SlowLock())
 
-    def worker(source, target):
+    def worker(source, target, amount):
         for _ in range(20):
-            lab.transfer(source, target, 1)
+            lab.transfer(source, target, amount)
 
+    # Unequal amounts, so dropped transfers cannot cancel out: left pays 2x40 and receives 1x40.
     threads = [
-        threading.Thread(target=worker, args=pair, daemon=True)
-        for pair in [(left, right), (right, left)] * 2
+        threading.Thread(target=worker, args=job, daemon=True)
+        for job in [(left, right, 2), (right, left, 1)] * 2
     ]
     for thread in threads:
         thread.start()
@@ -89,7 +98,7 @@ def test_opposing_transfers_complete_and_conserve_balance():
     for thread in threads:
         thread.join(max(0.0, deadline - time.monotonic()))
     assert not any(thread.is_alive() for thread in threads), "opposing transfers deadlocked (wait-for cycle)"
-    assert (left.balance, right.balance) == (1000, 1000)
+    assert (left.balance, right.balance) == (960, 1040)
 
 
 @pytest.mark.parametrize("amount", [0, -1, float("nan"), float("inf"), True])

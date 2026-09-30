@@ -2,8 +2,11 @@
 complete; LAB_IMPL=solution runs them against the reference implementation.
 """
 
+import ast
 import importlib
+import inspect
 import os
+import textwrap
 
 import numpy as np
 import pytest
@@ -47,3 +50,25 @@ def test_box_inertia():
     np.testing.assert_allclose(box_inertia(12.0, 2.0, 4.0, 6.0), np.diag([52.0, 40.0, 20.0]))
     with pytest.raises(ValueError):
         box_inertia(float("nan"), 2.0, 4.0, 6.0)
+
+
+def test_normalize_rows_uses_array_operations_not_a_python_loop():
+    tree = ast.parse(textwrap.dedent(inspect.getsource(normalize_rows)))
+    loops = [node for node in ast.walk(tree)
+             if isinstance(node, (ast.For, ast.While, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))]
+    assert not loops, "normalize_rows must use NumPy array operations, not a Python loop"
+
+
+def test_box_inertia_rejects_non_positive_mass_and_dimensions():
+    for arguments in ((-12.0, 2.0, 4.0, 6.0), (12.0, 0.0, 4.0, 6.0)):
+        with pytest.raises(ValueError):
+            box_inertia(*arguments)
+
+
+def test_compose_checks_both_arguments_and_rejects_reflections():
+    with pytest.raises(ValueError):
+        compose(np.eye(4), np.diag([-1.0, 1.0, 1.0, 1.0]))
+    scaled = np.eye(4)
+    scaled[2, 2] = 3.0
+    with pytest.raises(ValueError):
+        compose(np.eye(4), scaled)

@@ -13,7 +13,8 @@ def train(seed=7, steps=300, learning_rate=0.2):
         raise ValueError("learning_rate must be a positive finite scalar")
     rng = np.random.default_rng(seed)
     x = rng.normal(size=(200, 2))
-    y = (x[:, 0] + 0.5 * x[:, 1] > 0).astype(float)
+    # The class boundary misses the origin, so a model without a working bias cannot fit it.
+    y = (x[:, 0] + 0.5 * x[:, 1] > 0.5).astype(float)
     weights = np.zeros(2)
     bias = 0.0
     losses = []

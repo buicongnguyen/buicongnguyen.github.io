@@ -27,3 +27,14 @@ def test_tree_contracts():
         validate_tree([("", "arm")])
     with pytest.raises(ValueError):
         validate_tree([("base",)])
+
+
+def test_multiple_parents_are_rejected_even_with_one_root():
+    # "tool" has two parents, yet "base" is still the only root.
+    with pytest.raises(ValueError):
+        validate_tree([("base", "arm"), ("base", "tool"), ("arm", "tool")])
+
+
+def test_detached_cycles_of_any_length_are_rejected():
+    with pytest.raises(ValueError):
+        validate_tree([("base", "arm"), ("x", "y"), ("y", "z"), ("z", "x")])

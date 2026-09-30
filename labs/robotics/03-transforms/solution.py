@@ -1,16 +1,20 @@
 import numpy as np
 
+# Loose enough for float32 poses from a simulator (R^T R - I is ~5e-8 there), tight enough
+# to reject any real scale or shear.
+RIGID_TOLERANCE = 1e-6
+
 
 def _as_transform(value):
     transform = np.asarray(value, float)
     if transform.shape != (4, 4) or not np.isfinite(transform).all():
         raise ValueError("expected a finite 4x4 transform")
-    if not np.allclose(transform[3], [0, 0, 0, 1], atol=1e-10, rtol=0):
+    if not np.allclose(transform[3], [0, 0, 0, 1], atol=RIGID_TOLERANCE, rtol=0):
         raise ValueError("expected a homogeneous final row")
     rotation = transform[:3, :3]
     if (
-        not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-10, rtol=0)
-        or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-10, rtol=0)
+        not np.allclose(rotation.T @ rotation, np.eye(3), atol=RIGID_TOLERANCE, rtol=0)
+        or not np.isclose(np.linalg.det(rotation), 1.0, atol=RIGID_TOLERANCE, rtol=0)
     ):
         raise ValueError("rotation must be orthonormal with determinant +1")
     return transform

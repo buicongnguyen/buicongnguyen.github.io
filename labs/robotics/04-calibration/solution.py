@@ -36,7 +36,11 @@ def rmse(expected, observed):
     ):
         raise ValueError("expected and observed must be non-empty finite arrays with matching shapes")
     with np.errstate(over="ignore", invalid="ignore"):
-        result = np.sqrt(np.mean((expected_values - observed_values) ** 2))
-    if not np.isfinite(result):
+        difference = expected_values - observed_values
+    scale = float(np.max(np.abs(difference)))
+    if not np.isfinite(scale):
         raise ValueError("RMSE must remain finite")
-    return float(result)
+    if scale == 0.0:
+        return 0.0
+    # Scaling before squaring keeps a large but finite error (1e200) from overflowing.
+    return float(scale * np.sqrt(np.mean((difference / scale) ** 2)))

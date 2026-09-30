@@ -13,7 +13,7 @@ def train(seed=7, steps=300, learning_rate=0.2):
         or learning_rate <= 0
     ):
         raise ValueError("learning_rate must be a positive finite scalar")
-    rng=np.random.default_rng(seed); x=rng.normal(size=(200,2)); y=(x[:,0]+0.5*x[:,1]>0).astype(float)
+    rng=np.random.default_rng(seed); x=rng.normal(size=(200,2)); y=(x[:,0]+0.5*x[:,1]>0.5).astype(float)
     weights=np.zeros(2); bias=0.0; losses=[]
     for _ in range(steps):
         logits=x@weights+bias; probability=1/(1+np.exp(-np.clip(logits,-30,30)))

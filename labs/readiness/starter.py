@@ -25,7 +25,8 @@ def compose(a_from_b: np.ndarray, b_from_c: np.ndarray) -> np.ndarray:
     """Return A_from_C = A_from_B @ B_from_C for finite 4x4 rigid transforms.
 
     Raise ValueError unless both inputs have the final row [0, 0, 0, 1] and an orthonormal
-    rotation block with determinant +1 (no scale, no reflection).
+    rotation block with determinant +1 (no scale, no reflection). Use a tolerance of 1e-6
+    so float32 poses from a simulator still count as rigid.
     """
     raise NotImplementedError("implement compose")
 

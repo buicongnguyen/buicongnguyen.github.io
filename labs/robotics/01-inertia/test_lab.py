@@ -33,3 +33,23 @@ def test_valid_and_invalid_inertia():
 def test_flat_plate_on_the_triangle_boundary_is_valid():
     # A thin plate has I3 == I1 + I2 exactly; it is a real body, not a violation.
     np.testing.assert_allclose(validate_inertia(np.diag([1.0, 1.0, 2.0])), [1.0, 1.0, 2.0])
+
+
+@pytest.mark.parametrize(
+    "tensor",
+    [np.eye(2), [[np.nan, 0, 0], [0, 1, 0], [0, 0, 1]], np.diag([-1.0, 2.0, 2.0])],
+)
+def test_rejects_malformed_tensors(tensor):
+    with pytest.raises(ValueError):
+        validate_inertia(tensor)
+
+
+def test_rejects_boolean_tolerance():
+    with pytest.raises(ValueError):
+        validate_inertia(np.eye(3), atol=True)
+
+
+def test_huge_moments_do_not_overflow_the_triangle_check():
+    # 2 * max overflows to inf here; the violation must still be caught.
+    with pytest.raises(ValueError):
+        validate_inertia(np.diag([0.5e308, 0.1e308, 1.7e308]))

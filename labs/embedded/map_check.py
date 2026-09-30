@@ -9,7 +9,8 @@ from pathlib import Path
 
 # GNU ld prints an optional Attributes column (for example "xrw" or "!w") after the length.
 MEMORY_LINE = re.compile(r"^\s*([A-Za-z_]\w*)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)(?:\s+!?[rwxailRWXAIL!]+)?\s*$")
-SECTION_LINE = re.compile(r"^\s*(\.[^\s]+)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)\s*$")
+# GNU ld prints "load address 0x..." after sections whose load and run addresses differ (.data).
+SECTION_LINE = re.compile(r"^\s*(\.[^\s]+)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)(?:\s+load address\s+0x[0-9a-fA-F]+)?\s*$")
 
 
 def _insert_unique(table, name, value, kind):
