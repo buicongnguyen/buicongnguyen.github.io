@@ -1,4 +1,4 @@
-import {LABELS, RECIPES, BASKETS, CHAPTERS, REGULARS, CARDS} from './core.mjs';
+import {LABELS, RECIPES, BASKETS, CHAPTERS, REGULARS, CARDS, PERKS} from './core.mjs';
 
 export const VI = {
   'Ingredients · {0}/{1}': 'Nguyên liệu · {0}/{1}', 'Any two · one cup': 'Hai nguyên liệu · một ly',
@@ -159,3 +159,29 @@ const cards = {
   dusk:['Nơi hoàng hôn bắt đầu','Nơi ráng chiều gặp những vì sao đầu tiên.'], lantern:['Ánh sáng bên cửa sổ','Vàng từ đàn ong, xanh từ ngọn đồi.'],
 };
 for (const c of CARDS) { VI[c.title] = cards[c.id][0]; VI[c.riddle] = cards[c.id][1]; }
+// Shop, settings and the start card.
+Object.assign(VI, {
+  'Finish “{0}” to unlock the next upgrade.': 'Hoàn thành “{0}” để mở nâng cấp tiếp theo.', 'At lantern {0}': 'Ở đèn lồng {0}',
+  'Your shelf is full. Tap a saved cup to serve it.': 'Kệ đã đầy. Chạm vào một ly đã cất để phục vụ.',
+  'Shop': 'Cửa hàng', 'Close shop': 'Đóng cửa hàng', 'Make the café yours': 'Làm quán thật của riêng bạn',
+  'All built': 'Đã xây xong', 'Next · {0}': 'Tiếp · {0}', 'Ready to buy': 'Sẵn sàng mua', '{0} more coins': 'Còn {0} xu',
+  'Unlocks at lantern {0}': 'Mở ở đèn lồng {0}', 'Owned': 'Đã có', 'Buy': 'Mua', 'Open the café': 'Mở quán',
+  'Settings': 'Cài đặt', 'Settings · saving needs attention': 'Cài đặt · cần kiểm tra việc lưu', 'Close settings': 'Đóng cài đặt', 'Make it comfortable': 'Chỉnh cho thoải mái',
+  'Sound': 'Âm thanh', 'Soft chimes when you pour and serve': 'Tiếng chuông nhẹ khi pha và phục vụ',
+  'The café, letters and recipes speak your language': 'Quán, thư và công thức đều nói ngôn ngữ của bạn',
+  'Saving': 'Lưu tiến độ', 'Progress saves automatically on this device.': 'Tiến độ tự động được lưu trên thiết bị này.',
+  'This browser cannot keep your progress safe between tabs, so it is only kept while this page stays open.': 'Trình duyệt này không bảo vệ được tiến độ giữa các tab, nên chỉ giữ lại khi trang còn mở.',
+  'Saving is unavailable in this browser.': 'Trình duyệt này không lưu được tiến độ.',
+  'Start over': 'Chơi lại từ đầu', 'Start over…': 'Chơi lại…', "Erase this device's progress and begin a new café": 'Xóa tiến độ trên thiết bị này và bắt đầu một quán mới',
+  'This erases your coins, lanterns, recipes and friendships. It cannot be undone.': 'Thao tác này xóa xu, đèn lồng, công thức và tình bạn của bạn. Không thể hoàn tác.',
+  'Keep playing': 'Tiếp tục chơi', 'Erase everything': 'Xóa tất cả',
+  'Petal Café · Lantern Street · v0.9 · all art modelled in Blender': 'Petal Café · Phố Đèn Lồng · v0.9 · toàn bộ hình ảnh được dựng bằng Blender',
+});
+const perks = {
+  sign: 'Hàng chờ ba khách, kệ pha sẵn và một biển hiệu rực rỡ.',
+  bench: 'Chuối và ca cao lên bàn. Sora và Leo bắt đầu ghé quán.',
+  mina: 'Mina kiếm 10 xu mỗi 20 giây, kể cả khi bạn vắng mặt.',
+  garden: 'Việt quất, cam và trà lên bàn. Noor bắt đầu ghé quán.',
+  terrace: 'Đào, mật ong và matcha lên bàn, và lễ hội có thể bắt đầu.',
+};
+for (const [id, text] of Object.entries(PERKS)) VI[text] = perks[id];

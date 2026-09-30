@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main id="petal" class="app" aria-label="Petal Café game" data-i18n-aria="Petal Café game">
+  <main id="petal" class="app" data-kbd="false" aria-label="Petal Café game" data-i18n-aria="Petal Café game">
     <header class="topbar">
       <div class="wordmark"><span class="flower" aria-hidden="true">✿</span><div><h1>Petal Café</h1><span class="subtitle" data-i18n="Lantern Street">Lantern Street</span></div></div>
       <div class="glow" data-glow role="img" aria-label="Golden hour meter" data-i18n-aria="Golden hour meter">
@@ -17,8 +17,7 @@
         <span class="glow-pips" data-glow-pips><i></i><i></i><i></i><i></i><i></i></span>
       </div>
       <div class="balance" aria-label="Coins" data-i18n-aria="Coins"><img src="assets/sprites/icon-coin.webp" alt="" class="coin-icon"><strong data-coins>0</strong></div>
-      <select class="language" data-language aria-label="Language" title="English / Tiếng Việt" data-i18n-aria="Language"><option value="en">EN</option><option value="vi">VI</option></select>
-      <button class="icon-button" data-sound aria-label="Turn sound on" aria-pressed="false" data-i18n-aria="Turn sound on"><span aria-hidden="true">♪</span><span class="sound-slash" aria-hidden="true"></span></button>
+      <button class="icon-button" data-settings aria-label="Settings" data-i18n-aria="Settings"><img src="assets/sprites/icon-gear.webp" alt=""><span class="warn-dot" data-warn-dot hidden></span></button>
     </header>
 
     <section class="scene" data-scene aria-label="Your café on Lantern Street" data-i18n-aria="Your café on Lantern Street">
@@ -90,15 +89,33 @@
     </section>
 
     <nav class="bottom-bar" aria-label="Café extras" data-i18n-aria="Café extras">
-      <button data-book><img src="assets/sprites/icon-book.webp" alt=""> <span data-i18n="Recipes">Recipes</span> <span class="count" data-book-count>0/23</span></button>
-      <button data-letters><img src="assets/sprites/icon-letter.webp" alt=""> <span data-i18n="Letters">Letters</span> <span class="count" data-letter-count>0</span></button>
-      <span class="staff-status" data-staff-status><span data-staff-label>Made with love</span><span class="staff-track" data-staff-track hidden><i data-staff-fill></i></span></span>
+      <button class="tab" data-shop><img src="assets/sprites/icon-shop.webp" alt=""><span class="tab-text"><span class="tab-label" data-i18n="Shop">Shop</span><span class="tab-note" data-shop-note></span></span></button>
+      <button class="tab" data-book><img src="assets/sprites/icon-book.webp" alt=""><span class="tab-text"><span class="tab-label" data-i18n="Recipes">Recipes</span><span class="tab-note" data-book-count>0/23</span></span></button>
+      <button class="tab" data-letters><img src="assets/sprites/icon-letter.webp" alt=""><span class="tab-text"><span class="tab-label" data-i18n="Letters">Letters</span><span class="tab-note" data-letter-count>0</span></span></button>
     </nav>
 
     <div class="effects" aria-hidden="true"></div>
 
+    <dialog class="sheet shop" data-shop-dialog aria-labelledby="shop-title">
+      <div class="sheet-top"><div class="sheet-heading"><span class="eyebrow" data-i18n="Make the café yours">Make the café yours</span><h2 id="shop-title" data-i18n="Shop">Shop</h2></div><div class="sheet-coins" aria-hidden="true"><img src="assets/sprites/icon-coin.webp" alt=""><strong data-shop-coins>0</strong></div><button class="close" data-close aria-label="Close shop" data-i18n-aria="Close shop">×</button></div>
+      <p class="shop-hint" data-shop-hint hidden></p>
+      <div class="shop-list" data-shop-list></div>
+      <div class="staff-status" data-staff-status hidden><span data-staff-label>Made with love</span><span class="staff-track" data-staff-track hidden><i data-staff-fill></i></span></div>
+    </dialog>
+
+    <dialog class="sheet settings" data-settings-dialog aria-labelledby="settings-title">
+      <div class="sheet-top"><div class="sheet-heading"><span class="eyebrow" data-i18n="Make it comfortable">Make it comfortable</span><h2 id="settings-title" data-i18n="Settings">Settings</h2></div><button class="close" data-close aria-label="Close settings" data-i18n-aria="Close settings">×</button></div>
+      <div class="setting-rows">
+        <div class="setting"><img src="assets/sprites/icon-sound-off.webp" alt="" data-sound-icon><div class="setting-text"><strong id="sound-label" data-i18n="Sound">Sound</strong><small data-i18n="Soft chimes when you pour and serve">Soft chimes when you pour and serve</small></div><button type="button" class="switch" role="switch" data-sound aria-checked="false" aria-labelledby="sound-label"><span></span></button></div>
+        <div class="setting wrap"><img src="assets/sprites/icon-globe.webp" alt=""><div class="setting-text"><strong data-i18n="Language">Language</strong><small data-i18n="The café, letters and recipes speak your language">The café, letters and recipes speak your language</small></div><div class="lang-chips" data-lang-chips role="radiogroup" aria-label="Language" data-i18n-aria="Language"><button type="button" role="radio" data-lang="en" aria-checked="false">English</button><button type="button" role="radio" data-lang="vi" aria-checked="false">Tiếng Việt</button></div></div>
+        <div class="setting"><img src="assets/sprites/icon-check.webp" alt="" data-save-icon><div class="setting-text"><strong data-i18n="Saving">Saving</strong><small data-save-status role="status"></small></div></div>
+        <div class="setting wrap danger"><img src="assets/sprites/icon-reset.webp" alt=""><div class="setting-text"><strong data-i18n="Start over">Start over</strong><small data-i18n="Erase this device's progress and begin a new café">Erase this device's progress and begin a new café</small></div><button type="button" class="ghost" data-reset data-i18n="Start over…">Start over…</button>
+          <div class="reset-confirm" data-reset-confirm hidden><p data-i18n="This erases your coins, lanterns, recipes and friendships. It cannot be undone.">This erases your coins, lanterns, recipes and friendships. It cannot be undone.</p><div class="reset-actions"><button type="button" class="ghost" data-reset-cancel data-i18n="Keep playing">Keep playing</button><button type="button" class="danger-button" data-reset-confirm-go data-i18n="Erase everything">Erase everything</button></div></div></div>
+      </div>
+      <p class="about" data-i18n="Petal Café · Lantern Street · v0.9 · all art modelled in Blender">Petal Café · Lantern Street · v0.9 · all art modelled in Blender</p>
+    </dialog>
+
     <dialog class="sheet" data-book-dialog aria-labelledby="book-title">
-      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
       <div class="sheet-top"><span class="eyebrow" data-i18n="Everything you have poured">Everything you have poured</span><button class="close" data-close aria-label="Close recipe book" data-i18n-aria="Close recipe book">×</button></div>
       <h2 id="book-title" data-i18n="Recipe book">Recipe book</h2>
       <div class="card-box" data-card-box hidden>
@@ -110,7 +127,6 @@
     </dialog>
 
     <dialog class="sheet" data-letters-dialog aria-labelledby="letters-title">
-      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
       <div class="sheet-top"><span class="eyebrow" data-i18n="Letters from Lantern Street">Letters from Lantern Street</span><button class="close" data-close aria-label="Close letters" data-i18n-aria="Close letters">×</button></div>
       <h2 id="letters-title" data-i18n="Letters">Letters</h2>
       <div class="friends" data-friends></div>
@@ -118,17 +134,18 @@
     </dialog>
 
     <dialog class="moment" data-moment aria-labelledby="moment-title">
-      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <img class="title-logo" src="assets/sprites/title-logo.webp" alt="Petal Café" data-moment-logo>
       <div class="moment-lantern" data-moment-art><img src="assets/sprites/icon-lantern.webp" alt=""></div>
       <span class="eyebrow" data-moment-eyebrow>Lantern lit</span>
       <h2 id="moment-title" data-moment-title>Open the shutters</h2>
       <div class="moment-letter"><img alt="" data-moment-portrait><p data-moment-text></p><span class="signature" data-moment-from></span></div>
       <p class="moment-reward" data-moment-reward></p>
       <p class="moment-next" data-moment-next></p>
-      <button class="buy wide" data-moment-close data-i18n="Continue">Continue</button>
+<div class="lang-chips intro-lang" data-lang-chips role="radiogroup" aria-label="Language" data-i18n-aria="Language"><button type="button" role="radio" data-lang="en" aria-checked="false">English</button><button type="button" role="radio" data-lang="vi" aria-checked="false">Tiếng Việt</button></div>
+      <button class="buy wide" data-moment-close>Continue</button>
     </dialog>
     <dialog class="moment session-dialog" data-session-dialog aria-labelledby="session-title">
-      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <div class="lang-chips" data-lang-chips role="radiogroup" aria-label="Language" data-i18n-aria="Language"><button type="button" role="radio" data-lang="en" aria-checked="false">English</button><button type="button" role="radio" data-lang="vi" aria-checked="false">Tiếng Việt</button></div>
       <h2 id="session-title" data-i18n="This café is open in another tab">This café is open in another tab</h2>
       <p data-i18n="Your progress is safe. Continue here to pause the other tab, or close it and try again.">Your progress is safe. Continue here to pause the other tab, or close it and try again.</p>
       <p data-session-status role="status"></p>

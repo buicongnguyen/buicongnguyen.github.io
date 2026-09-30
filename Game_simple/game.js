@@ -40,8 +40,8 @@ function rememberLetters(chapters) {
 }
 // Keyboard players get focus back after a pour; pointer players never see a focus ring from it.
 let keyboardInput = false, sessionStatus = '';
-document.addEventListener('keydown', () => { keyboardInput = true; }, true);
-document.addEventListener('pointerdown', () => { keyboardInput = false; }, true);
+document.addEventListener('keydown', () => { keyboardInput = true; root.dataset.kbd = 'true'; }, true);
+document.addEventListener('pointerdown', () => { keyboardInput = false; root.dataset.kbd = 'false'; }, true);
 let welcome = 0;
 
 function save() {
@@ -80,7 +80,7 @@ function sound(kind) {
       o.connect(g); g.connect(audio.destination);
       o.start(t); o.stop(t + .32);
     });
-  } catch { state.sound = false; }
+  } catch { try { audio?.close(); } catch { /* already closed */ } audio = undefined; /* no audio device or autoplay block: stay silent, keep the player's choice */ }
 }
 
 // ----------------------------------------------------------------- geometry ---
@@ -177,9 +177,8 @@ function render() {
   q('[data-glow]').setAttribute('aria-label', s.golden > 0 ? t`Golden hour: ${s.golden} doubled cups left` : t`Golden hour meter: ${s.glow} of ${C.GLOW_MAX} favorites`);
   q('[data-golden-badge]').hidden = !(s.golden > 0);
   q('[data-golden-left]').textContent = s.golden;
-  q('[data-sound]').setAttribute('aria-pressed', String(s.sound));
-  q('[data-sound]').setAttribute('aria-label', t(s.sound ? 'Turn sound off' : 'Turn sound on'));
-  q('.sound-slash').hidden = s.sound;
+  q('[data-sound]').setAttribute('aria-checked', String(s.sound));
+  q('[data-sound-icon]').src = sprite(s.sound ? 'icon-sound-on' : 'icon-sound-off');
   q('[data-room]').src = sprite(s.festival ? 'cafe-festival' : 'cafe-' + s.level);
   const minaInLine = lineNow().some(g => g.person === 'mina');
   q('[data-staff]').hidden = s.level < 3 || minaInLine;
@@ -197,6 +196,15 @@ function render() {
   q('[data-letters]').dataset.new = String(unread > 0);
   q('[data-staff-label]').textContent = t(s.level >= 3 ? (minaInLine ? 'Mina is on her break' : 'Mina · +10 every 20s') : s.festival ? 'All lanterns lit' : 'Made with love');
   q('[data-staff-track]').hidden = s.level < 3;
+  q('[data-staff-status]').hidden = s.level < 3;
+  const step = C.chapterProgress(s), next = C.RENOVATIONS.find(r => s.level < r.level);
+  const ready = step?.kind === 'buy' && s.coins >= step.cost;
+  q('[data-shop]').dataset.new = String(ready);
+  q('[data-shop-note]').textContent = !next ? t('All built') : ready ? t('Ready!') : step?.index === next.index ? t`Next · ${next.cost}` : t`At lantern ${next.index + 1}`;
+  q('[data-warn-dot]').hidden = savingHealthy();
+  q('[data-settings]').setAttribute('aria-label', t(savingHealthy() ? 'Settings' : 'Settings · saving needs attention'));
+  if (q('[data-shop-dialog]').open) paintShop();
+  if (q('[data-settings-dialog]').open) paintSettings();
   staffProgress();
 }
 
@@ -331,7 +339,7 @@ function renderChapter() {
   q('[data-chapter-task]').textContent = t(p.task);
   if (p.kind === 'buy') {
     const affordable = state.coins >= p.cost;
-    q('[data-chapter-count]').textContent = affordable ? t('Ready!') : t`${p.cost - state.coins} to go`;
+    q('[data-chapter-count]').textContent = affordable ? t('Ready!') : t`${p.cost - state.coins} more coins`;
     fill.style.width = Math.min(100, state.coins / p.cost * 100) + '%';
     bar.setAttribute('aria-valuemax', String(p.cost));
     bar.setAttribute('aria-valuenow', String(Math.min(state.coins, p.cost)));
@@ -441,7 +449,7 @@ function tickTiming(now) {
 function addIngredient(id) {
   if (!session.active || !state.tokens[id] || busy || cupParts.length === 2 || cupParts.includes(id)) return;
   if (state.prep && state.stock.length >= C.STOCK_LIMIT) {
-    say('Your shelf is full.', 'Tap a saved cup to serve it, or switch to Serve now.'); return;
+    say('Your shelf is full. Tap a saved cup to serve it.'); return;
   }
   if (!cupParts.length) { lastTaste = null; timingElapsed = timingValue = 0; }
   cupParts.push(id);
@@ -474,7 +482,7 @@ function commit(idA, idB, perfect) {
     resetCup();
     clearTarget();
     render();
-    if (state.prep) say('Your shelf is full.', 'Tap a saved cup to serve it, or switch to Serve now.');
+    if (state.prep) say('Your shelf is full. Tap a saved cup to serve it.');
     else say('Auntie Rosa is waiting for her Lantern latte.', 'Only that cup will do. Read her recipe card in the book.');
     return;
   }
@@ -508,6 +516,14 @@ function restoreFocus(previous, fallback) {
   const target = [previous, buttons.get(fallback), ...buttons.values()].find(usable);
   target?.focus({preventScroll: true});
 }
+let pendingOpen = null;
+const whenIdle = open => () => { if (busy) pendingOpen = open; else open(); };
+function runPending() {
+  if (!pendingOpen || busy || q('[data-moment]').open) return;
+  const open = pendingOpen;
+  pendingOpen = null;
+  open();
+}
 function finish(result) {
   const pour = active;
   busy = false;
@@ -531,6 +547,7 @@ function finish(result) {
     toast('rosa', 'Golden hour! The next 5 cups pay double.');
   }
   scheduleStock();
+  runPending();
 }
 
 function deliverStock(index, automatic = false) {
@@ -664,14 +681,23 @@ function nextMoment() {
   shownMoment = ch || null;
   if (!ch) { if (dlg.open) dlg.close(); else nextToast(); return; }
   paintMoment();
-  if (!dlg.open) dlg.showModal();
+  showMoment();
   sound('lantern');
   const lamp = q(`[data-garland] .lamp:nth-of-type(${ch.index + 1})`);
   if (lamp) pulse(lamp);
 }
+function showMoment() {
+  const dlg = q('[data-moment]');
+  if (!dlg.open) dlg.showModal();
+  dlg.scrollTop = 0;
+  q('[data-moment-close]').focus({preventScroll: true});
+}
 function paintMoment() {
   const ch = shownMoment;
   if (!ch) return;
+  const dlg = q('[data-moment]');
+  dlg.dataset.intro = String(ch === 'intro');
+  q('[data-moment-close]').textContent = t(ch === 'intro' ? 'Open the café' : 'Continue');
   if (ch === 'intro') {
     q('[data-moment-eyebrow]').textContent = t('A letter from the seaside');
     q('[data-moment-title]').textContent = t('The key is under the flowerpot');
@@ -901,11 +927,11 @@ q('[data-tidy]').addEventListener('click', () => {
   say('The cup is empty. Try a fresh pair.');
   scheduleStock();
 });
-q('[data-buy]').addEventListener('click', () => {
-  if (busy || drag) return;
+function purchase() {
+  if (busy || drag) return false;
   save();
   const res = C.buy(state);
-  if (!res) return;
+  if (!res) return false;
   rememberLetters(res.chapters);
   hint = null;
   save();
@@ -916,11 +942,121 @@ q('[data-buy]').addEventListener('click', () => {
     res.level === 5 ? 'Peach, honey and matcha are on the table. Someone special is coming.' : res.level === 1 ? 'Your prep shelf is open. Make ahead for the line of three!' : 'Mina is making coffees on her own.');
   queueMoments(res.chapters);
   scheduleStock();
+  return true;
+}
+q('[data-buy]').addEventListener('click', purchase);
+
+// ------------------------------------------------------------------------------ shop ---
+// Assigning identical text still makes screen readers repeat a live region.
+function setText(el, text) { if (el.textContent !== String(text)) el.textContent = text; }
+function renovationState(r) {
+  if (state.level >= r.level) return 'owned';
+  return C.chapterProgress(state)?.index === r.index ? 'next' : 'locked';
+}
+let shopSignature = '';
+function paintShop(force = false) {
+  setText(q('[data-shop-coins]'), state.coins);
+  const step = C.chapterProgress(state), hintEl = q('[data-shop-hint]');
+  hintEl.hidden = step?.kind === 'buy' || !C.RENOVATIONS.some(r => state.level < r.level);
+  setText(hintEl, step ? t`Finish “${t(step.task)}” to unlock the next upgrade.` : '');
+  const signature = [getLanguage(), busy, step?.index, ...C.RENOVATIONS.map(r => renovationState(r) + (state.coins >= r.cost ? '+' : '-') + (renovationState(r) === 'next' ? state.coins < r.cost ? r.cost - state.coins : '' : ''))].join('|');
+  if (!force && signature === shopSignature && q('[data-shop-list]').children.length) return;
+  shopSignature = signature;
+  q('[data-shop-list]').replaceChildren(...C.RENOVATIONS.map(r => {
+    const st = renovationState(r), el = document.createElement('article'), affordable = state.coins >= r.cost;
+    el.className = 'shop-item';
+    el.dataset.state = st;
+    el.dataset.renovation = r.id;
+    const art = Object.assign(document.createElement('img'), {className: 'shop-art', src: sprite('shop-' + r.id), alt: ''});
+    const body = document.createElement('div');
+    body.className = 'shop-body';
+    const title = Object.assign(document.createElement('strong'), {textContent: t(r.action)});
+    const perk = Object.assign(document.createElement('p'), {textContent: t(C.PERKS[r.id])});
+    const status = document.createElement('span');
+    status.className = 'shop-status';
+    status.textContent = st === 'owned' ? t('Owned') : st === 'locked' ? t`Unlocks at lantern ${r.index + 1}` :
+      affordable ? t('Ready to buy') : t`${r.cost - state.coins} more coins`;
+    body.append(title, perk, status);
+    const side = document.createElement('div');
+    side.className = 'shop-side';
+    if (st === 'next') {
+      const buy = document.createElement('button');
+      buy.type = 'button';
+      buy.className = 'buy';
+      buy.dataset.shopBuy = r.id;
+      buy.disabled = busy || !affordable;
+      buy.innerHTML = '<span></span><small></small>';
+      buy.querySelector('span').textContent = t('Buy');
+      buy.querySelector('small').textContent = r.cost;
+      buy.setAttribute('aria-label', t`${t(r.action)} for ${r.cost} coins`);
+      buy.addEventListener('click', () => { if (purchase()) { afterLetterFocus = q('[data-shop]'); q('[data-shop-dialog]').close(); } });
+      side.append(buy);
+    } else {
+      side.append(Object.assign(document.createElement('img'), {className: 'shop-badge', src: sprite(st === 'owned' ? 'icon-check' : 'icon-lock'), alt: ''}));
+      const price = Object.assign(document.createElement('small'), {textContent: st === 'owned' ? '' : r.cost, className: 'shop-price'});
+      side.append(price);
+    }
+    el.append(art, body, side);
+    el.setAttribute('aria-label', `${t(r.action)}. ${status.textContent}`);
+    return el;
+  }));
+}
+function openShop() {
+  if (busy || drag) return;
+  paintShop(true);
+  if (!q('[data-shop-dialog]').open) q('[data-shop-dialog]').showModal();
+}
+
+// ------------------------------------------------------------------------- settings ---
+const savingHealthy = () => session.persistent && storageOK;
+function paintSettings() {
+  const ok = savingHealthy();
+  setText(q('[data-save-status]'), t(!session.persistent ? 'This browser cannot keep your progress safe between tabs, so it is only kept while this page stays open.' :
+    !storageOK ? 'Saving is unavailable in this browser.' : 'Progress saves automatically on this device.'));
+  q('[data-save-icon]').src = sprite(ok ? 'icon-check' : 'icon-lock');
+  q('[data-settings-dialog]').dataset.saveWarn = String(!ok);
+  q('[data-reset]').disabled = busy;
+  q('[data-reset-confirm-go]').disabled = busy;
+}
+function showResetConfirm(on) {
+  q('[data-reset-confirm]').hidden = !on;
+  q('[data-reset]').hidden = on;
+}
+function openSettings() {
+  if (drag) return;
+  showResetConfirm(false);
+  paintSettings();
+  if (!q('[data-settings-dialog]').open) q('[data-settings-dialog]').showModal();
+  q('[data-settings-dialog] [data-close]').focus({preventScroll: true});
+}
+q('[data-reset]').addEventListener('click', () => { showResetConfirm(true); q('[data-reset-cancel]').focus(); });
+q('[data-reset-cancel]').addEventListener('click', () => { showResetConfirm(false); q('[data-reset]').focus(); });
+q('[data-reset-confirm-go]').addEventListener('click', () => {
+  if (busy || !session.active) return;
+  const keepSound = state.sound;
+  state = C.freshState();
+  state.sound = keepSound;
+  // save() writes nothing without Web Locks, so remove every stored save explicitly (current and legacy).
+  try { for (const key of [C.STORAGE, C.STORAGE + ':letters', C.LEGACY_V4, C.LEGACY_V3]) localStorage.removeItem(key); } catch { /* storage optional */ }
+  save();
+  location.reload();
 });
-q('[data-book]').addEventListener('click', openBook);
+q('[data-shop]').addEventListener('click', whenIdle(openShop));
+q('[data-settings]').addEventListener('click', openSettings);
+q('[data-book]').addEventListener('click', whenIdle(openBook));
 q('[data-chapter-open]').addEventListener('click', () => (C.chapterProgress(state)?.kind === 'friends' ? openLetters : openBook)());
-q('[data-letters]').addEventListener('click', openLetters);
+q('[data-letters]').addEventListener('click', whenIdle(openLetters));
 q('[data-sound]').addEventListener('click', () => { state.sound = !state.sound; sound('pick'); save(); render(); });
+// Language chips: a radio group that also works with the arrow keys.
+root.addEventListener('click', e => { const chip = e.target.closest('[data-lang]'); if (chip && chip.dataset.lang !== getLanguage()) changeLanguage(chip.dataset.lang); });
+root.addEventListener('keydown', e => {
+  const chip = e.target.closest?.('[data-lang]');
+  if (!chip || e.altKey || e.ctrlKey || e.metaKey || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  e.preventDefault();
+  const other = chip.parentElement.querySelector(`[data-lang]:not([data-lang="${chip.dataset.lang}"])`);
+  other.focus();
+  changeLanguage(other.dataset.lang);
+});
 for (const d of root.querySelectorAll('dialog.sheet')) {
   d.addEventListener('close', scheduleStock);
   d.querySelector('[data-close]').addEventListener('click', () => d.close());
@@ -930,7 +1066,14 @@ for (const d of root.querySelectorAll('dialog.sheet')) {
     if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
   });
 }
-q('[data-moment]').addEventListener('close', () => { if (moments.length) nextMoment(); else { nextToast(); render(); scheduleStock(); } });
+let afterLetterFocus = null;
+q('[data-moment]').addEventListener('close', () => {
+  if (moments.length) { nextMoment(); return; }
+  nextToast(); render(); scheduleStock();
+  if (afterLetterFocus && keyboardInput) afterLetterFocus.focus({preventScroll: true});
+  afterLetterFocus = null;
+  runPending();
+});
 q('[data-toast]').addEventListener('click', nextToast);
 document.addEventListener('visibilitychange', () => {
   if (!session.active) return;
@@ -958,7 +1101,7 @@ new ResizeObserver(() => {
 
 function suspendSession() {
   for (const timer of [staffTimer, stockTimer, finishTimer, toastTimer]) clearTimeout(timer);
-  busy = false; active = drag = hint = shownMoment = shownToast = null;
+  busy = false; active = drag = hint = shownMoment = shownToast = pendingOpen = null;
   resetCup();
   moments.length = toasts.length = 0;
   effects.replaceChildren();
@@ -993,11 +1136,11 @@ async function startSession() {
   else if (state.served === 0) {
     hint = C.recipeByKey(state.queue[0].key).parts;
     render();
-    say('Mina would love a strawberry milk.', 'Drag the strawberry and milk into the center cup.');
+    say('Drag the strawberry and milk into the center cup.');
     if (state.chapter === 0 && !letterEntries().length) {
       shownMoment = 'intro';
       paintMoment();
-      q('[data-moment]').showModal();
+      showMoment();
     }
   } else say('Welcome back to Lantern Street.', welcome ? () => t`Mina earned ${welcome} coins while you were away.` : 'Your guests are waiting.');
   if (!storageOK) say('Your café is open. Saving is unavailable in this browser.');
@@ -1005,7 +1148,7 @@ async function startSession() {
 }
 // Even synthetic clicks and keyboard events must not mutate a suspended tab.
 for (const event of ['click', 'pointerdown', 'keydown']) root.addEventListener(event, e => {
-  if (session.active || e.target.closest('[data-session-dialog], [data-language]')) return;
+  if (session.active || e.target.closest('[data-session-dialog], [data-lang-chips]')) return;
   e.preventDefault();
   e.stopImmediatePropagation();
 }, true);
@@ -1037,8 +1180,9 @@ function changeLanguage(language) {
   q('[data-session-status]').textContent = sessionStatus ? t(sessionStatus) : '';
   if (q('[data-book-dialog]').open) openBook();
   if (q('[data-letters-dialog]').open) openLetters();
+  if (q('[data-shop-dialog]').open) paintShop(true);
+  if (q('[data-settings-dialog]').open) paintSettings();
 }
-root.addEventListener('change', e => { if (e.target.matches('[data-language]')) changeLanguage(e.target.value); });
 window.addEventListener('storage', e => { if (e.key === LANGUAGE_KEY && e.newValue && e.newValue !== getLanguage()) changeLanguage(e.newValue); });
 startSession();
 // Preload sprites so drinks never pop in mid-animation.

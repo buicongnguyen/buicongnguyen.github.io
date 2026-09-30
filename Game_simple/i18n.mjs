@@ -22,8 +22,8 @@ export function localizePage() {
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   for (const el of document.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', t(el.dataset.i18nAria));
   for (const el of document.querySelectorAll('[data-i18n-alt]')) el.setAttribute('alt', t(el.dataset.i18nAlt));
-  for (const select of document.querySelectorAll('[data-language]')) {
-    select.value = language;
-    select.setAttribute('aria-label', t('Language'));
+  for (const chip of document.querySelectorAll('[data-lang]')) {
+    chip.setAttribute('aria-checked', String(chip.dataset.lang === language));
+    chip.tabIndex = chip.dataset.lang === language ? 0 : -1;   // a radio group is one tab stop
   }
 }

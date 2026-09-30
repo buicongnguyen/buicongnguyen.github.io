@@ -143,6 +143,15 @@ export const CHAPTERS = [
     letter: 'I could see the lanterns from the bus. Every window on the street is glowing. You did not just reopen a café, you lit up a whole street. Keep the key. It is yours now.'},
 ];
 export const FESTIVAL = CHAPTERS.findIndex(c => c.id === 'festival');
+// The shop lists every renovation; only the one matching the current chapter can be bought.
+export const PERKS = {
+  sign: 'A line of three guests, the make-ahead shelf and a bright new sign.',
+  bench: 'Banana and cocoa join the table. Sora and Leo start visiting.',
+  mina: 'Mina earns 10 coins every 20 seconds, even while you are away.',
+  garden: 'Blueberry, orange and tea join the table. Noor starts visiting.',
+  terrace: 'Peach, honey and matcha join the table, and the festival can begin.',
+};
+export const RENOVATIONS = CHAPTERS.map((c, index) => ({...c, index})).filter(c => c.kind === 'buy');
 const BOX = CHAPTERS.findIndex(c => c.id === 'box');
 const PICTURE_ORDERS = CHAPTERS.findIndex(c => c.id === 'cups');
 
