@@ -64,10 +64,30 @@ def score_rows(rows: list[dict[str, str]], contract: dict, targets: dict | None 
     return sorted(scored, key=lambda item: (item["score"], item.get("scenario_id", "")))
 
 
-def parameter_columns(rows: list[dict[str, str]], metrics: set[str]) -> list[str]:
+def metric_names(contract: dict) -> set[str]:
+    holdout = contract.get("holdout_targets")
+    return set(contract["targets"]) | (set(holdout) if isinstance(holdout, dict) else set())
+
+
+def parameter_columns(rows: list[dict[str, str]], contract: dict) -> list[str]:
+    """The columns that identify a candidate, in CSV order.
+
+    When the contract names a `baseline`, its keys are the calibration parameters, so an
+    extra recorded-but-unscored column (for example peak_wheel_speed) is ignored instead of
+    being mistaken for a second swept parameter. Without a baseline, every column that is
+    not a metric or a reserved name is treated as a parameter.
+    """
     if not rows:
         raise ValueError("no rows to score")
-    return [name for name in rows[0] if name not in metrics and name not in RESERVED_COLUMNS]
+    header = [name for name in rows[0] if name is not None]
+    baseline = contract.get("baseline")
+    if isinstance(baseline, dict) and baseline:
+        missing = [name for name in baseline if name not in header]
+        if missing:
+            raise ValueError(f"CSV lacks the baseline parameter columns named in the contract: {missing}")
+        return [name for name in header if name in baseline]
+    metrics = metric_names(contract)
+    return [name for name in header if name not in metrics and name not in RESERVED_COLUMNS]
 
 
 def candidate_key(row: dict[str, str], parameters: list[str]) -> tuple[float, ...]:
@@ -75,7 +95,8 @@ def candidate_key(row: dict[str, str], parameters: list[str]) -> tuple[float, ..
 
 
 def label(key: tuple[float, ...], parameters: list[str]) -> str:
-    return ", ".join(f"{name}={value:g}" for name, value in zip(parameters, key))
+    # repr is the shortest exact round-trip form, so distinct values never share a label.
+    return ", ".join(f"{name}={value!r}" for name, value in zip(parameters, key))
 
 
 def summarize_candidates(scored: list[dict], parameters: list[str]) -> list[dict]:
@@ -107,7 +128,11 @@ def separated(better: dict, worse: dict) -> tuple[float, float, bool]:
 
 def calibrate(rows: list[dict[str, str]], contract: dict, family: list[str] | None, min_repeats: int) -> dict:
     scored = score_rows(rows, contract)
-    parameters = parameter_columns(rows, set(contract["targets"]))
+    parameters = parameter_columns(rows, contract)
+    ignored = [
+        name for name in rows[0]
+        if name is not None and name not in parameters and name not in metric_names(contract) and name not in RESERVED_COLUMNS
+    ]
     candidates = summarize_candidates(scored, parameters)
     errors: list[str] = []
     varied = [
@@ -137,6 +162,7 @@ def calibrate(rows: list[dict[str, str]], contract: dict, family: list[str] | No
         "ok": not errors,
         "errors": errors,
         "parameters": parameters,
+        "ignored_columns": ignored,
         "varied_parameters": varied,
         "row_count": len(scored),
         "selected": best,
@@ -153,7 +179,7 @@ def validate_holdout(rows: list[dict[str, str]], contract: dict, selected: dict,
         raise ValueError("contract needs a 'baseline' object naming the pre-calibration parameters")
     targets = contract.get("holdout_targets", contract["targets"])
     scored = score_rows(rows, contract, targets)
-    parameters = parameter_columns(rows, set(targets))
+    parameters = parameter_columns(rows, contract)
     if set(parameters) != set(selected["parameters"]):
         raise ValueError("holdout CSV must use the same parameter columns as the calibration sweep")
     candidates = {item["candidate"]: item for item in summarize_candidates(scored, parameters)}
@@ -203,13 +229,19 @@ def main() -> None:
         if args.holdout:
             report["holdout"] = validate_holdout(read_rows(args.holdout), contract, report["selected"], args.min_repeats)
             report["ok"] = report["ok"] and report["holdout"]["ok"]
-        elif not args.calibration_only:
+        elif args.calibration_only:
+            # Exploring is not a failure, but an unvalidated selection must never satisfy a gate.
+            report["ok"] = False
+            report["calibration_only"] = True
+            report["note"] = "calibration-only exploration: no held-out validation, so this report cannot satisfy a gate"
+        else:
             report["ok"] = False
             report["errors"].append("no --holdout rows: selection is unvalidated (use --calibration-only to explore)")
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError, statistics.StatisticsError) as error:
         report = {"ok": False, "error": str(error)}
     report, _ = emit(report, args.output)
-    if not report["ok"]:
+    exploring = report.get("calibration_only") and not report.get("errors")
+    if not report["ok"] and not exploring:
         sys.exit(2)
 
 

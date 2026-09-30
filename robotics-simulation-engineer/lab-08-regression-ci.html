@@ -47,7 +47,7 @@
 - <strong>Every contract:</strong> clock, JointState, TF tree, watchdog latency, image payload, and CameraInfo.
 - <strong>Every URDF planted fault from Lab 06.</strong>
 - <strong>Sweep, benchmark, and robustness statistics:</strong> candidate means and identifiability, the held-out rule, the exact Mann–Whitney p-value, workload identity, the Latin-hypercube strata, the Wilson interval, and failure bins.
-- <strong>Two end-to-end command runs</strong> that execute the documented Lab 06–10 commands on the shipped fixtures, feed their reports to the evidence gate, and check that failing inputs exit non-zero.</p>
+- <strong>Command-line runs</strong> of each Lab 06–10 tool on the shipped fixtures, whose reports feed the evidence gate. They also check that failing inputs exit non-zero, and that a <code>--calibration-only</code> report can never satisfy the gate. The fixtures are small, so these runs use the rehearsal thresholds. The gates you run on your own data (for example Lab 10's lower-bound gate over 96 scenarios) are exercised by the unit tests instead.</p>
 <p>The local ROS lane runs the tools against real ROS: it writes MCAP bags through <code>bag_contract_check.py</code> and runs the watchdog node, including <code>Ctrl+C</code>.</p>
 <pre><code class="language-powershell">pwsh -NoProfile -ExecutionPolicy Bypass -File $Launcher python -m unittest discover -s &quot;$Assets\tests\ros&quot; -v
 </code></pre>
@@ -67,7 +67,7 @@
 </tr>
 <tr>
 <td>repeated or truncated image payload, short stride, empty encoding</td>
-<td><code>ContractTests.test_image_planted_faults</code></td>
+<td><code>RuntimeContractTests.test_image_planted_faults</code></td>
 </tr>
 <tr>
 <td>missing, malformed, non-object, <code>ok:false</code>, or <code>ok:"true"</code> evidence</td>
@@ -83,7 +83,7 @@
 </tr>
 <tr>
 <td>NaN watchdog timeout</td>
-<td><code>ContractTests.test_watchdog_rejects_timeouts_that_would_fail_open</code></td>
+<td><code>RuntimeContractTests.test_watchdog_rejects_timeouts_that_would_fail_open</code></td>
 </tr>
 </tbody>
 </table></div>

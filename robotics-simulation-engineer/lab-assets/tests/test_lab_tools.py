@@ -520,6 +520,10 @@ class RuntimeContractTests(unittest.TestCase):
         self.assertFalse(check_watchdog(raw, late, 0.5, 20.0)["ok"])
         never = [(stamp, False) for stamp, _ in safe]
         self.assertFalse(check_watchdog(raw, never, 0.5, 20.0)["ok"])
+        # A final zero raw command is merely forwarded, so it proves nothing about the timeout.
+        forwarded = check_watchdog(raw, safe, 0.5, 20.0, last_raw_is_zero=True)
+        self.assertFalse(forwarded["ok"])
+        self.assertIn("already zero", forwarded["error"])
         self.assertTrue(check_watchdog([], safe, 0.5, 20.0)["ok"])
         with self.assertRaises(ValueError):
             check_watchdog(raw, safe, float("nan"), 20.0)
@@ -593,6 +597,30 @@ class ParameterSweepTests(unittest.TestCase):
     def test_single_runs_are_rejected(self):
         rows = [row for row in read_csv(FIXTURES / "physics_sweep.csv") if row["repeat"] == "1"]
         self.assertFalse(calibrate(rows, self.contract, None, 3)["ok"])
+
+    def test_recorded_but_unscored_columns_are_not_parameters(self):
+        # Lab 07 lists peak_wheel_speed as an output; recording it must not look like a confound.
+        rows = read_csv(FIXTURES / "physics_sweep.csv")
+        for index, row in enumerate(rows):
+            row["peak_wheel_speed"] = str(9.0 + 0.1 * index)
+        report = calibrate(rows, self.contract, None, 3)
+        self.assertTrue(report["ok"], report["errors"])
+        self.assertEqual(report["ignored_columns"], ["peak_wheel_speed"])
+        self.assertEqual(report["varied_parameters"], ["friction"])
+
+    def test_nearby_parameter_values_keep_distinct_labels(self):
+        rows = read_csv(FIXTURES / "physics_sweep.csv")
+        for row in rows:
+            row["friction"] = {"0.5": "0.12345671", "0.7": "0.12345674"}.get(row["friction"], row["friction"])
+        labels = [item["candidate"] for item in calibrate(rows, self.contract, None, 3)["candidates"]]
+        self.assertEqual(len(labels), len(set(labels)), labels)
+
+    def test_missing_baseline_column_is_reported(self):
+        rows = read_csv(FIXTURES / "physics_sweep.csv")
+        for row in rows:
+            del row["damping"]
+        with self.assertRaises(ValueError):
+            calibrate(rows, self.contract, None, 3)
 
     def test_overlapping_candidates_are_reported_as_not_identifiable(self):
         rows = read_csv(FIXTURES / "physics_sweep.csv")
@@ -676,6 +704,21 @@ class RobustnessTests(unittest.TestCase):
         self.assertFalse(evaluate_robustness(manifest, rows, 0.85, require_lower_bound=True)["ok"])
         self.assertEqual(point["weakest_bins"][0]["range"], [0.0, 0.25])
 
+    def test_lower_bound_gate_reports_when_it_cannot_be_reached(self):
+        # 32/32 passes only supports "at least 89%", so a 0.90 lower-bound gate can never pass at n=32.
+        small = generate({"friction": [0.0, 1.0]}, 32, 3)
+        perfect = [{"scenario_id": item["scenario_id"], "success": "1"} for item in small["scenarios"]]
+        report = evaluate_robustness(small, perfect, 0.90, require_lower_bound=True)
+        self.assertFalse(report["ok"])
+        self.assertFalse(report["lower_bound_gate"]["reachable"])
+        self.assertEqual(report["lower_bound_gate"]["minimum_scenarios"], 35)
+        large = generate({"friction": [0.0, 1.0]}, 96, 3)
+        rows = [{"scenario_id": item["scenario_id"], "success": "0" if index < 3 else "1"}
+                for index, item in enumerate(large["scenarios"])]
+        report = evaluate_robustness(large, rows, 0.90, require_lower_bound=True)
+        self.assertTrue(report["ok"], report)
+        self.assertEqual(report["lower_bound_gate"]["max_failures_allowed"], 3)
+
 
 class EvidenceGateTests(unittest.TestCase):
     def test_missing_false_malformed_and_non_object_reports_fail(self):
@@ -730,6 +773,19 @@ class CommandLineTests(unittest.TestCase):
                     result = self.run_tool(*step)
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertTrue(json.loads((run / "gate.json").read_text(encoding="utf-8"))["ok"])
+
+    def test_calibration_only_exploration_exits_zero_but_cannot_satisfy_a_gate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "explore.json"
+            result = self.run_tool(
+                "score_parameter_sweep.py", "fixtures/physics_sweep.csv", "fixtures/physics_targets.json",
+                "--family", "friction", "--calibration-only", "--output", str(report),
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(report.read_text(encoding="utf-8"))
+            self.assertFalse(payload["ok"])
+            self.assertTrue(payload["calibration_only"])
+            self.assertFalse(evaluate_evidence([f"physics={report}"])["ok"])
 
     def test_failing_tools_exit_nonzero(self):
         with tempfile.TemporaryDirectory() as directory:

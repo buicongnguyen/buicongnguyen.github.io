@@ -52,10 +52,17 @@ Use the session variables from [Shared startup](ros2-labs.md#shared-startup):
 
 ```powershell
 python "$Assets\robustness_scenarios.py" generate "$Assets\fixtures\robustness_bounds.json" `
-  --count 32 --seed 20260803 --output "$Run\scenarios.json"
+  --count 96 --seed 20260803 --output "$Run\scenarios.json"
 ```
 
 The generator uses one shuffled sample from every stratum of every dimension. This provides better marginal coverage than unrelated uniform draws at the same count. The seed, bounds, and exact samples are saved.
+
+Choose the count from the claim, not from convenience. Step 5 gates on the lower end of a 95% confidence interval, and small samples cannot support high claims:
+- To support "at least 90%", even a perfect run needs at least 35 scenarios.
+- With 32 scenarios, the gate is unreachable: 32/32 only supports "at least 89%".
+- With 96 scenarios, up to 3 failures still clear it.
+
+The evaluator reports this budget under `lower_bound_gate`.
 
 ## Step 3 — apply one scenario at episode reset
 
@@ -114,11 +121,13 @@ Overall pass rate alone can hide a complete failure at one physically important 
 
 `--require-lower-bound` gates on the lower end of the Wilson interval instead of the point estimate. 29/32 passes looks like 90.6%, but the data only support "at least about 76%".
 
-To rehearse, evaluate the committed example results against the committed bounds (same seed and count as above):
+To rehearse, generate the 32-scenario manifest that the committed example results were written for, then evaluate them:
 
 ```powershell
-python "$Assets\robustness_scenarios.py" evaluate "$Run\scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85
-python "$Assets\robustness_scenarios.py" evaluate "$Run\scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85 --require-lower-bound
+python "$Assets\robustness_scenarios.py" generate "$Assets\fixtures\robustness_bounds.json" `
+  --count 32 --seed 20260803 --output "$Run\rehearsal_scenarios.json"
+python "$Assets\robustness_scenarios.py" evaluate "$Run\rehearsal_scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85
+python "$Assets\robustness_scenarios.py" evaluate "$Run\rehearsal_scenarios.json" "$Assets\fixtures\robustness_results_example.csv" --minimum-pass-rate 0.85 --require-lower-bound
 ```
 
 The example's 28/32 (87.5%) passes the point-estimate gate. Its Wilson lower bound of 0.72 fails the second command, and the first weakest bin shows half the lowest-friction quarter failing.

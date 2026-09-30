@@ -105,7 +105,8 @@ def write_episode(path: Path, faults: set[str] = frozenset()) -> None:
     # Raw commands at 10 Hz for the first 1.0 s, watchdog output at 20 Hz for 2 s.
     last_raw = base + 900 * MS
     for index in range(10):
-        put("/cmd_vel_raw", twist(0.2), base + index * 100 * MS)
+        final_zero = "raw_ends_with_zero" in faults and index == 9
+        put("/cmd_vel_raw", twist(0.0 if final_zero else 0.2), base + index * 100 * MS)
     for index in range(40):
         t_ns = base + index * 50 * MS
         stale = t_ns - last_raw > 500 * MS
@@ -130,7 +131,12 @@ class BagContractCheckTests(unittest.TestCase):
         self.assertAlmostEqual(report["checks"]["watchdog"]["stale_to_zero_s"], 0.55, places=6)
 
     def test_each_planted_fault_fails_its_own_contract(self):
-        expectations = {"clock_backward": "clock", "tf_two_parents": "tf", "watchdog_never_zero": "watchdog"}
+        expectations = {
+            "clock_backward": "clock",
+            "tf_two_parents": "tf",
+            "watchdog_never_zero": "watchdog",
+            "raw_ends_with_zero": "watchdog",
+        }
         for fault, contract in expectations.items():
             with self.subTest(fault=fault):
                 report = self.check({fault})

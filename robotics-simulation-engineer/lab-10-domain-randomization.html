@@ -84,9 +84,14 @@
 <h2 id="step-2-generate-deterministic-stratified-scenarios">Step 2 — generate deterministic stratified scenarios</h2>
 <p>Use the session variables from <a href="ros2-labs.html#shared-startup">Shared startup</a>:</p>
 <pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; generate &quot;$Assets\fixtures\robustness_bounds.json&quot; `
-  --count 32 --seed 20260803 --output &quot;$Run\scenarios.json&quot;
+  --count 96 --seed 20260803 --output &quot;$Run\scenarios.json&quot;
 </code></pre>
 <p>The generator uses one shuffled sample from every stratum of every dimension. This provides better marginal coverage than unrelated uniform draws at the same count. The seed, bounds, and exact samples are saved.</p>
+<p>Choose the count from the claim, not from convenience. Step 5 gates on the lower end of a 95% confidence interval, and small samples cannot support high claims:
+- To support "at least 90%", even a perfect run needs at least 35 scenarios.
+- With 32 scenarios, the gate is unreachable: 32/32 only supports "at least 89%".
+- With 96 scenarios, up to 3 failures still clear it.</p>
+<p>The evaluator reports this budget under <code>lower_bound_gate</code>.</p>
 <h2 id="step-3-apply-one-scenario-at-episode-reset">Step 3 — apply one scenario at episode reset</h2>
 <p>Use USD/PhysX APIs or Replicator to apply the manifest values before the episode begins. Keep one ownership point:</p>
 <pre class="mermaid">sequenceDiagram
@@ -125,9 +130,11 @@ all timestamps/frames/contracts pass
 - <code>weakest_bins</code>, the pass rate in each quarter of every parameter's range, weakest first.</p>
 <p>Overall pass rate alone can hide a complete failure at one physically important corner. The bins show where the failures cluster.</p>
 <p><code>--require-lower-bound</code> gates on the lower end of the Wilson interval instead of the point estimate. 29/32 passes looks like 90.6%, but the data only support "at least about 76%".</p>
-<p>To rehearse, evaluate the committed example results against the committed bounds (same seed and count as above):</p>
-<pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85
-python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85 --require-lower-bound
+<p>To rehearse, generate the 32-scenario manifest that the committed example results were written for, then evaluate them:</p>
+<pre><code class="language-powershell">python &quot;$Assets\robustness_scenarios.py&quot; generate &quot;$Assets\fixtures\robustness_bounds.json&quot; `
+  --count 32 --seed 20260803 --output &quot;$Run\rehearsal_scenarios.json&quot;
+python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\rehearsal_scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85
+python &quot;$Assets\robustness_scenarios.py&quot; evaluate &quot;$Run\rehearsal_scenarios.json&quot; &quot;$Assets\fixtures\robustness_results_example.csv&quot; --minimum-pass-rate 0.85 --require-lower-bound
 </code></pre>
 <p>The example's 28/32 (87.5%) passes the point-estimate gate. Its Wilson lower bound of 0.72 fails the second command, and the first weakest bin shows half the lowest-friction quarter failing.</p>
 <h2 id="step-6-use-held-out-scenarios">Step 6 — use held-out scenarios</h2>

@@ -110,7 +110,7 @@ peak_wheel_speed   [rad/s]
 <p>Use the provided CSV schema:</p>
 <pre><code class="language-csv">scenario_id,friction,damping,mass_scale,repeat,stop_distance,yaw_error,settling_time
 </code></pre>
-<p>A <em>candidate</em> is one combination of parameter values. Every column that is not <code>scenario_id</code>, <code>repeat</code>, <code>notes</code>, or a metric counts as a parameter. Change one parameter family per sweep, and run every candidate at least three times. Keep every raw row, not only the best-looking run.</p>
+<p>A <em>candidate</em> is one combination of parameter values. The contract's <code>baseline</code> object names the parameter columns. Any other recorded column, such as an extra unscored metric, is listed under <code>ignored_columns</code> rather than mistaken for a second swept parameter. Without a <code>baseline</code>, every column that is not <code>scenario_id</code>, <code>repeat</code>, <code>notes</code>, or a metric counts as a parameter. Change one parameter family per sweep, and run every candidate at least three times. Keep every raw row, not only the best-looking run.</p>
 <p>The scorer enforces both rules:
 - It rejects a sweep in which more than one parameter column varies, unless you declare those columns as one family with <code>--family</code>.
 - It rejects any candidate with fewer than <code>--min-repeats</code> runs (default 3).</p>
@@ -123,7 +123,7 @@ peak_wheel_speed   [rad/s]
 <pre><code class="language-text">score = Σ weight_i × |observed_i - target_i| / scale_i
 </code></pre>
 <p>Candidates are ranked by their <strong>mean</strong> score over repeats, never by their luckiest single run. The report gives each candidate's mean, standard deviation, and standard error. It sets <code>identifiable: false</code> when another candidate is within two standard errors of the difference, and lists those candidates under <code>indistinguishable_from_selected</code>.</p>
-<p>Write the targets, normalization scales, weights, pre-calibration <code>baseline</code>, and <code>holdout_targets</code> into the contract before looking at results. Otherwise the scoring rule can be tuned to select a preferred answer. Use <code>--calibration-only</code> while exploring; it reports a ranking but cannot pass the gate.</p>
+<p>Write the targets, normalization scales, weights, pre-calibration <code>baseline</code>, and <code>holdout_targets</code> into the contract before looking at results. Otherwise the scoring rule can be tuned to select a preferred answer. Use <code>--calibration-only</code> while exploring. It prints the ranking and exits 0, but its report says <code>"ok": false</code> and <code>"calibration_only": true</code>, so it can never satisfy the Lab 08 evidence gate.</p>
 <h2 id="step-6-challenge-the-candidate-on-a-held-out-episode">Step 6 — challenge the candidate on a held-out episode</h2>
 <p>Do not validate with the same command used for calibration. Examples:</p>
 <ul>

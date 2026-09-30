@@ -79,7 +79,7 @@ Use the provided CSV schema:
 scenario_id,friction,damping,mass_scale,repeat,stop_distance,yaw_error,settling_time
 ```
 
-A *candidate* is one combination of parameter values. Every column that is not `scenario_id`, `repeat`, `notes`, or a metric counts as a parameter. Change one parameter family per sweep, and run every candidate at least three times. Keep every raw row, not only the best-looking run.
+A *candidate* is one combination of parameter values. The contract's `baseline` object names the parameter columns. Any other recorded column, such as an extra unscored metric, is listed under `ignored_columns` rather than mistaken for a second swept parameter. Without a `baseline`, every column that is not `scenario_id`, `repeat`, `notes`, or a metric counts as a parameter. Change one parameter family per sweep, and run every candidate at least three times. Keep every raw row, not only the best-looking run.
 
 The scorer enforces both rules:
 - It rejects a sweep in which more than one parameter column varies, unless you declare those columns as one family with `--family`.
@@ -102,7 +102,7 @@ score = Σ weight_i × |observed_i - target_i| / scale_i
 
 Candidates are ranked by their **mean** score over repeats, never by their luckiest single run. The report gives each candidate's mean, standard deviation, and standard error. It sets `identifiable: false` when another candidate is within two standard errors of the difference, and lists those candidates under `indistinguishable_from_selected`.
 
-Write the targets, normalization scales, weights, pre-calibration `baseline`, and `holdout_targets` into the contract before looking at results. Otherwise the scoring rule can be tuned to select a preferred answer. Use `--calibration-only` while exploring; it reports a ranking but cannot pass the gate.
+Write the targets, normalization scales, weights, pre-calibration `baseline`, and `holdout_targets` into the contract before looking at results. Otherwise the scoring rule can be tuned to select a preferred answer. Use `--calibration-only` while exploring. It prints the ranking and exits 0, but its report says `"ok": false` and `"calibration_only": true`, so it can never satisfy the Lab 08 evidence gate.
 
 ## Step 6 — challenge the candidate on a held-out episode
 

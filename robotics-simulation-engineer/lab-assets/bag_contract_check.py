@@ -60,6 +60,7 @@ def read_bag(path: Path, manifest: dict) -> dict:
         "joint_states": [],
         "tf_edges": [],
         "raw_ns": [],
+        "last_raw": (-1, False),
         "safe": [],
         "images": [],
         "camera_info": None,
@@ -89,6 +90,8 @@ def read_bag(path: Path, manifest: dict) -> dict:
             )
         elif topic == watchdog.get("raw"):
             data["raw_ns"].append(received_ns)
+            if received_ns >= data["last_raw"][0]:
+                data["last_raw"] = (received_ns, is_zero_twist(message))
         elif topic == watchdog.get("safe"):
             data["safe"].append((received_ns, is_zero_twist(message)))
         elif topic == image.get("topic"):
@@ -144,6 +147,7 @@ def evaluate(data: dict, manifest: dict) -> dict:
         checks["watchdog"] = check_watchdog(
             data["raw_ns"], data["safe"], float(watchdog["timeout_s"]), float(watchdog["rate_hz"]),
             float(watchdog.get("slack_s", 0.05)),
+            last_raw_is_zero=data.get("last_raw", (-1, False))[1],
         )
     image = manifest.get("image")
     if image:

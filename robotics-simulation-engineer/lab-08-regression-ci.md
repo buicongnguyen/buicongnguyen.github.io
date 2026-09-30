@@ -33,7 +33,7 @@ It covers four areas:
 - **Every contract:** clock, JointState, TF tree, watchdog latency, image payload, and CameraInfo.
 - **Every URDF planted fault from Lab 06.**
 - **Sweep, benchmark, and robustness statistics:** candidate means and identifiability, the held-out rule, the exact Mann–Whitney p-value, workload identity, the Latin-hypercube strata, the Wilson interval, and failure bins.
-- **Two end-to-end command runs** that execute the documented Lab 06–10 commands on the shipped fixtures, feed their reports to the evidence gate, and check that failing inputs exit non-zero.
+- **Command-line runs** of each Lab 06–10 tool on the shipped fixtures, whose reports feed the evidence gate. They also check that failing inputs exit non-zero, and that a `--calibration-only` report can never satisfy the gate. The fixtures are small, so these runs use the rehearsal thresholds. The gates you run on your own data (for example Lab 10's lower-bound gate over 96 scenarios) are exercised by the unit tests instead.
 
 The local ROS lane runs the tools against real ROS: it writes MCAP bags through `bag_contract_check.py` and runs the watchdog node, including `Ctrl+C`.
 
@@ -48,11 +48,11 @@ Each planted fault below is already a test, so CI proves the validators can stil
 | Planted fault | Test |
 |---|---|
 | zero mass, unknown link, negative `ixx`, triangle violation, zero axis | `UrdfAuditTests.test_planted_faults` |
-| repeated or truncated image payload, short stride, empty encoding | `ContractTests.test_image_planted_faults` |
+| repeated or truncated image payload, short stride, empty encoding | `RuntimeContractTests.test_image_planted_faults` |
 | missing, malformed, non-object, `ok:false`, or `ok:"true"` evidence | `EvidenceGateTests.test_missing_false_malformed_and_non_object_reports_fail` |
 | zero wall duration | `BenchmarkTests.test_zero_wall_duration_is_rejected` |
 | confounded sweep, single runs | `ParameterSweepTests.test_confounded_sweep_is_rejected`, `test_single_runs_are_rejected` |
-| NaN watchdog timeout | `ContractTests.test_watchdog_rejects_timeouts_that_would_fail_open` |
+| NaN watchdog timeout | `RuntimeContractTests.test_watchdog_rejects_timeouts_that_would_fail_open` |
 
 Each must fail for the correct reason. Restore the fixture and rerun green.
 

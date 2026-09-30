@@ -224,12 +224,16 @@ def check_watchdog(
     timeout_s: float,
     rate_hz: float,
     slack_s: float = 0.05,
+    last_raw_is_zero: bool = False,
 ) -> dict[str, Any]:
     """Lab 03 contract: after the raw command stream stops, a zero command follows within the bound.
 
     ``raw_ns`` are receipt times of /cmd_vel_raw; ``safe`` holds (receipt time, is_zero) for
     /cmd_vel. The bound is timeout + one publish period + slack. Times come from the
     recorder, so the slack absorbs recorder-side receipt jitter.
+
+    If the last raw command was itself a zero Twist, the zero on /cmd_vel is just that
+    command forwarded, so the episode never exercised the timeout and cannot pass.
     """
     _finite_positive(timeout_s, "timeout_s")
     _finite_positive(rate_hz, "rate_hz")
@@ -248,11 +252,14 @@ def check_watchdog(
     last_raw = max(raw_ns)
     first_zero = min((stamp for stamp, is_zero in safe if is_zero and stamp > last_raw), default=None)
     latency_s = None if first_zero is None else (first_zero - last_raw) / 1e9
-    return {
-        "ok": latency_s is not None and latency_s <= bound_s,
+    report = {
+        "ok": not last_raw_is_zero and latency_s is not None and latency_s <= bound_s,
         "mode": "raw-and-safe",
         "last_raw_ns": last_raw,
         "first_zero_after_raw_ns": first_zero,
         "stale_to_zero_s": latency_s,
         "bound_s": bound_s,
     }
+    if last_raw_is_zero:
+        report["error"] = "the last raw command was already zero; stop a nonzero stream so the timeout is exercised"
+    return report

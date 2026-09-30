@@ -56,6 +56,31 @@ def wilson_interval(passed: int, total: int, z: float = 1.959964) -> tuple[float
     return max(0.0, center - half), min(1.0, center + half)
 
 
+def lower_bound_budget(total: int, minimum_pass_rate: float) -> dict:
+    """What a Wilson lower-bound gate demands of `total` scenarios.
+
+    A lower-bound gate can be unreachable: even 32/32 passes only supports "at least 89%",
+    so a 0.90 gate over 32 scenarios fails however good the controller is.
+    """
+    allowed = max((failures for failures in range(total + 1)
+                   if wilson_interval(total - failures, total)[0] >= minimum_pass_rate), default=None)
+    budget = {"reachable": allowed is not None, "max_failures_allowed": allowed}
+    if allowed is None:
+        if minimum_pass_rate >= 1.0:
+            budget["note"] = "a lower-bound gate of 1.0 can never pass; lower the gate"
+        else:
+            z2 = 1.959964 ** 2
+            needed = math.ceil(minimum_pass_rate * z2 / (1.0 - minimum_pass_rate))
+            while wilson_interval(needed, needed)[0] < minimum_pass_rate:
+                needed += 1
+            budget["minimum_scenarios"] = needed
+            budget["note"] = (
+                f"even {total}/{total} passes gives a Wilson lower bound of {wilson_interval(total, total)[0]:.3f}; "
+                f"this gate needs at least {needed} scenarios with no failures (generate more with --count)"
+            )
+    return budget
+
+
 def parse_success(value: str, scenario_id: str) -> bool:
     text = str(value).strip().lower()
     if text in TRUE_VALUES:
@@ -120,7 +145,7 @@ def evaluate(manifest: dict, result_rows: list[dict[str, str]], minimum_pass_rat
         if not outcomes[sid]
     ]
     bins = failure_bins(manifest, outcomes)
-    return {
+    report = {
         "ok": complete and meets_rate,
         "expected": denominator,
         "observed": len(result_rows),
@@ -135,6 +160,9 @@ def evaluate(manifest: dict, result_rows: list[dict[str, str]], minimum_pass_rat
         "failed_scenarios": failed[:25],
         "weakest_bins": [row for row in bins if row["pass_rate"] < 1.0][:8],
     }
+    if require_lower_bound:
+        report["lower_bound_gate"] = lower_bound_budget(denominator, minimum_pass_rate)
+    return report
 
 
 def main() -> None:
