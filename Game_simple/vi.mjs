@@ -79,7 +79,7 @@ export const VI = {
   'Try new pairs in every basket.': 'Thử các cặp nguyên liệu mới trong từng giỏ.', 'Every five favorites fill the sun.': 'Cứ năm món đúng ý khách sẽ làm đầy mặt trời.', 'Read the cups in the line.': 'Quan sát các ly khách đang gọi.',
   'Lantern {0} of {1} lit': 'Đã thắp đèn lồng {0}/{1}', 'A gift of {0} coins.': 'Bạn nhận được {0} xu.', 'Next lantern: {0}.{1}': 'Đèn tiếp theo: {0}.{1}',
   'Petal Café is yours. Keep pouring, every night is lantern night.': 'Petal Café đã là của bạn. Cứ tiếp tục pha chế để đêm nào cũng sáng đèn lồng.',
-  'Undiscovered': 'Chưa khám phá', 'Locked': 'Chưa mở', 'Unlocks with the {0}': 'Mở cùng {0}',
+  'Undiscovered': 'Chưa khám phá', 'Locked': 'Chưa mở', 'Unlocks with: {0}': 'Mở khi: {0}',
   '{0}: {1}. Highlight on the table.': '{0}: {1}. Gợi ý nguyên liệu trên bàn.', ' and ': ' và ',
   'Serve it to anyone, or to the guest who ordered it for a tip.': 'Bán cho khách bất kỳ, hoặc đúng khách gọi món để nhận tiền boa.',
   'not yet': 'chưa gặp', 'Lantern {0}': 'Đèn lồng {0}', '♥{0} with {1}': '♥{0} với {1}',

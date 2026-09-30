@@ -20,9 +20,8 @@ export function localizePage() {
   document.documentElement.lang = language;
   document.title = 'Petal Café · ' + t('Lantern Street');
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
-  for (const [data, attr] of [['i18nAria', 'aria-label'], ['i18nAlt', 'alt']]) {
-    for (const el of document.querySelectorAll(`[data-${data === 'i18nAria' ? 'i18n-aria' : 'i18n-alt'}]`)) el.setAttribute(attr, t(el.dataset[data]));
-  }
+  for (const el of document.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', t(el.dataset.i18nAria));
+  for (const el of document.querySelectorAll('[data-i18n-alt]')) el.setAttribute('alt', t(el.dataset.i18nAlt));
   for (const select of document.querySelectorAll('[data-language]')) {
     select.value = language;
     select.setAttribute('aria-label', t('Language'));

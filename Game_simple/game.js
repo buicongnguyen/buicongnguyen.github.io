@@ -3,11 +3,14 @@ import {t, getLanguage, setLanguage, localizePage, LANGUAGE_KEY} from './i18n.mj
 import {createSaveSession} from './save-session.mjs';
 
 const root = document.querySelector('#petal'), q = sel => root.querySelector(sel);
-const table = q('.worktop'), layer = q('[data-ingredients]'), effects = q('.effects'), buttons = new Map();
+const table = q('.worktop'), layer = q('[data-ingredients]'), effects = q('.effects'), buttons = new Map(), cells = new Map();
 const sprite = name => `assets/sprites/${name}.webp`;
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const LANTERNS = C.CHAPTERS.length;
+// The green zone drawn by CSS is the zone judged by core.
+root.style.setProperty('--green-from', C.GREEN_FROM * 100 + '%');
+root.style.setProperty('--green-width', (C.GREEN_TO - C.GREEN_FROM) * 100 + '%');
 
 let storageOK = true, migrated = false;
 const parse = raw => { try { return raw ? JSON.parse(raw) : null; } catch { return null; } };
@@ -281,12 +284,12 @@ function renderTable() {
   q('[data-table-count]').textContent = t`Ingredients · ${state.tokens.length}/${C.INGREDIENT_ORDER.length}`;
   for (const [id, button] of buttons) {
     button.hidden = id >= state.tokens.length;
-    q(`[data-cell="${id}"]`).hidden = button.hidden;
+    cells.get(id).hidden = button.hidden;
   }
   for (const token of state.tokens) {
     const b = buttons.get(token.id);
     const pos = gridPosition(token.id);
-    position(q(`[data-cell="${token.id}"]`), pos);
+    position(cells.get(token.id), pos);
     if (!drag || drag.id !== token.id) position(b, pos);
     b.querySelector('img').src = sprite(token.type);
     b.querySelector('span').textContent = t(C.LABELS[token.type]);
@@ -384,6 +387,7 @@ function showPair() {
   save();
   render();
   say(() => `${t(C.personName(g.person))}: ${t(r.name)}.`, () => t`Add ${t(C.LABELS[r.parts[0]]).toLowerCase()} and ${t(C.LABELS[r.parts[1]]).toLowerCase()} to the cup.`);
+  scheduleStock();
 }
 
 function clearTarget() {
@@ -708,6 +712,11 @@ function letterEntries() {
 }
 
 // ---------------------------------------------------------------- dialogs ---
+// The renovation that puts both of a recipe's ingredients on the table.
+function unlockAction(r) {
+  const level = Math.max(...r.parts.map(p => Math.min(...C.BASKET_ORDER.filter(b => C.BASKETS[b].items.includes(p)).map(b => C.BASKETS[b].level))));
+  return (C.CHAPTERS.find(c => c.kind === 'buy' && c.level >= level) || {action: 'Build terrace'}).action;
+}
 function openBook() {
   if (busy || drag) return;
   const grid = q('[data-recipes]');
@@ -722,7 +731,7 @@ function openBook() {
     const pic = Object.assign(document.createElement('img'), {src: sprite(r.art), alt: ''});
     const title = Object.assign(document.createElement('strong'), {textContent: t(known ? r.name : basket ? 'Undiscovered' : 'Locked')});
     const info = known ? partsChips(r) : Object.assign(document.createElement('small'), {textContent: basket ? t(r.clue) :
-      t`Unlocks with the ${t(C.BASKETS[C.BASKET_ORDER.find(b => r.parts.every(p => C.BASKETS[b].items.includes(p)))].name).toLowerCase()}`});
+      t`Unlocks with: ${t(unlockAction(r))}`});
     card.append(pic, title, info);
     card.disabled = !known;
     card.setAttribute('aria-label', known ? t`${t(r.name)}: ${r.parts.map(p => t(C.LABELS[p])).join(t(' and '))}. Highlight on the table.` : title.textContent + '. ' + info.textContent);
@@ -790,7 +799,7 @@ for (let i = 0; i < C.INGREDIENT_ORDER.length; i++) {
   button.type = 'button'; button.className = 'ingredient'; button.dataset.item = i;
   button.append(Object.assign(document.createElement('img'), {alt:'',draggable:false}), Object.assign(document.createElement('span'), {className:'label'}));
   buttons.set(i, button); layer.append(button);
-  const cell = document.createElement('i'); cell.dataset.cell = i; q('[data-cells]').append(cell);
+  const cell = document.createElement('i'); cell.dataset.cell = i; cells.set(i, cell); q('[data-cells]').append(cell);
   button.addEventListener('pointerdown', e => {
     if (!state.tokens[i] || busy || drag || cupParts.length === 2 || cupParts.includes(i) || e.button !== 0) return;
     const pos = gridPosition(i);
@@ -978,7 +987,9 @@ async function startSession() {
   render();
   scheduleStaff();
   scheduleStock();
-  if (migrated) say('Welcome back! Your café moved to Lantern Street.', 'Coins, renovations, recipes and friendships came with you.');
+  const justMigrated = migrated;
+  migrated = false;
+  if (justMigrated) say('Welcome back! Your café moved to Lantern Street.', 'Coins, renovations, recipes and friendships came with you.');
   else if (state.served === 0) {
     hint = C.recipeByKey(state.queue[0].key).parts;
     render();

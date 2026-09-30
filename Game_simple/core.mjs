@@ -164,7 +164,6 @@ export const unlockedIngredients = s => INGREDIENT_ORDER.filter(p => unlockedBas
 export const canMake = (s, r) => !!r && r.parts.every(p => unlockedIngredients(s).includes(p));
 export function syncTable(s) { s.tokens = unlockedIngredients(s).map((type, id) => ({id, type})); }
 export const available = s => RECIPES.filter(r => basketFor(s, r));
-export const onTable = (s, r) => r.parts.every(p => s.tokens.some(t => t.type === p));
 export const picturesOnly = s => s.chapter >= PICTURE_ORDERS;
 export const knows = (s, guest) => !!s.discovered[guest.key] || !picturesOnly(s) || !!guest.peeked;
 export const regularsHere = s => PEOPLE.filter(p => s.level >= REGULARS[p].joins);
