@@ -6,6 +6,13 @@ export const LEGACY_V3 = 'tiny-dessert-table-v3';
 export const BASE_PAY = 10, TIP = 5, SHARP_EYE = 10, GLOW_MAX = 5, GOLDEN_CUPS = 5, MAX_HEARTS = 5;
 export const BEST_FRIEND_GIFT = 40, STAFF_PAY = 10, STAFF_MS = 20000, OFFLINE_CAP_MS = 300000;
 export const STOCK_LIMIT = 3;
+export const TASTE_BONUS = 5, TIMING_PERIOD = 3000, GREEN_FROM = .32, GREEN_TO = .68;
+// One complete trip across the bar and back. Judge the same position drawn by the UI.
+export function timingPosition(elapsed, period = TIMING_PERIOD) {
+  const phase = Math.max(0, elapsed) % period / period;
+  return phase <= .5 ? phase * 2 : (1 - phase) * 2;
+}
+export const perfectTiming = position => Number.isFinite(position) && position >= GREEN_FROM && position <= GREEN_TO;
 
 export const LABELS = {
   strawberry: 'Strawberry', mango: 'Mango', milk: 'Milk', coffee: 'Coffee', banana: 'Banana', cocoa: 'Cocoa',
@@ -26,6 +33,7 @@ export const BASKETS = {
   lantern: {name: 'Lantern basket', short: 'Lantern', items: ['peach', 'honey', 'matcha', 'milk'], level: 5},
 };
 export const BASKET_ORDER = Object.keys(BASKETS);
+export const INGREDIENT_ORDER = Object.keys(LABELS);
 
 export const pairKey = (a, b) => [a, b].sort().join('+');
 const ORDER = ['strawberry', 'mango', 'banana', 'blueberry', 'orange', 'peach', 'cocoa', 'honey', 'matcha', 'coffee', 'tea', 'milk'];
@@ -58,8 +66,14 @@ export const RECIPES = [
   R('honey', 'peach', 'Honey peach fizz', 'honey-peach-fizz', 'Golden, blushing and fizzy.'),
 ];
 const BY_KEY = new Map(RECIPES.map(r => [r.key, r]));
-export const recipeByKey = key => BY_KEY.get(key) || null;
-export const recipe = (a, b) => BY_KEY.get(pairKey(a, b)) || null;
+export function recipeByKey(key) {
+  if (BY_KEY.has(key)) return BY_KEY.get(key);
+  if (typeof key !== 'string') return null;
+  const parts = key.split('+');
+  if (parts.length !== 2 || parts[0] === parts[1] || !parts.every(p => INGREDIENT_ORDER.includes(p)) || pairKey(...parts) !== key) return null;
+  return {key, parts: parts.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)), name: 'House blend', art: 'drink-house-blend', custom: true};
+}
+export const recipe = (a, b) => recipeByKey(pairKey(a, b));
 
 export const REGULARS = {
   mina: {name: 'Mina', role: 'the illustrator', joins: 0, likes: ['milk'],
@@ -132,8 +146,6 @@ export const FESTIVAL = CHAPTERS.findIndex(c => c.id === 'festival');
 const BOX = CHAPTERS.findIndex(c => c.id === 'box');
 const PICTURE_ORDERS = CHAPTERS.findIndex(c => c.id === 'cups');
 
-export const home = [[.27, .3], [.73, .3], [.27, .74], [.73, .74]];
-
 // ------------------------------------------------------------ helpers ---
 function mulberry(seed) {
   let t = seed >>> 0;
@@ -148,6 +160,9 @@ const rngFor = (s, id) => mulberry((s.seed ^ Math.imul(id + 1, 0x9e3779b1)) >>> 
 
 export const unlockedBaskets = s => BASKET_ORDER.filter(b => s.level >= BASKETS[b].level);
 export const basketFor = (s, r) => unlockedBaskets(s).find(b => r.parts.every(p => BASKETS[b].items.includes(p))) || null;
+export const unlockedIngredients = s => INGREDIENT_ORDER.filter(p => unlockedBaskets(s).some(b => BASKETS[b].items.includes(p)));
+export const canMake = (s, r) => !!r && r.parts.every(p => unlockedIngredients(s).includes(p));
+export function syncTable(s) { s.tokens = unlockedIngredients(s).map((type, id) => ({id, type})); }
 export const available = s => RECIPES.filter(r => basketFor(s, r));
 export const onTable = (s, r) => r.parts.every(p => s.tokens.some(t => t.type === p));
 export const picturesOnly = s => s.chapter >= PICTURE_ORDERS;
@@ -164,8 +179,8 @@ export function freshState(seed = Math.floor(Math.random() * 2 ** 31)) {
   const s = {
     version: 5, seed: seed >>> 0, coins: 0, served: 0, favorites: 0, level: 0, chapter: 0, mark: {served: 0, favorites: 0, golden: 0},
     glow: 0, golden: 0, goldenCount: 0, discovered: {}, bond: Object.fromEntries(PEOPLE.map(p => [p, 0])), beats: [],
-    cards: [], queue: [], stock: [], prep: false, nextGuest: 0, festival: false, staffMillis: 0, sound: false, lastSeen: Date.now(),
-    basket: 'sunrise', tokens: BASKETS.sunrise.items.map((type, i) => ({id: i, type, x: home[i][0], y: home[i][1]})),
+    cards: [], letters: [], queue: [], stock: [], stockPerfect: [], prep: false, nextGuest: 0, festival: false, staffMillis: 0, sound: false, lastSeen: Date.now(),
+    tokens: [],
   };
   ensureQueue(s);
   return s;
@@ -184,6 +199,7 @@ function pickOrder(s, person, rnd) {
 }
 
 export function ensureQueue(s) {
+  syncTable(s);
   s.queue ??= [];
   const here = regularsHere(s);
   if (s.chapter === FESTIVAL && !s.festival && !s.queue.some(g => g.person === 'rosa')) {
@@ -239,20 +255,11 @@ function settle(s) {
   for (let p = chapterProgress(s); p && p.value >= p.target; p = chapterProgress(s)) s.chapter++;
 }
 
-export function chooseBasket(s, basket) {
-  if (!unlockedBaskets(s).includes(basket)) return false;
-  s.basket = basket;
-  BASKETS[basket].items.forEach((type, i) => { s.tokens[i].type = type; });
-  return true;
-}
-
 export function peek(s, index) {
   const guest = s.queue[index];
   if (!guest) return null;
   const r = recipeByKey(guest.key);
   guest.peeked = true;
-  const basket = basketFor(s, r);
-  if (basket && !onTable(s, r)) chooseBasket(s, basket);
   return r;
 }
 
@@ -265,25 +272,27 @@ export function receiver(s, drink) {
   return index >= 0 ? {index, favorite: false} : null;
 }
 
-export function serve(s, idA, idB) {
+export function serve(s, idA, idB, perfect = false) {
   const a = s.tokens[idA], b = s.tokens[idB];
   if (!a || !b || a === b) return null;
   const drink = recipe(a.type, b.type);
-  return drink ? sellDrink(s, drink) : null;
+  return canMake(s, drink) ? sellDrink(s, drink, false, perfect) : null;
 }
 
-export function prepare(s, idA, idB) {
+export function prepare(s, idA, idB, perfect = false) {
   if (s.level < 1 || s.stock.length >= STOCK_LIMIT) return null;
   const a = s.tokens[idA], b = s.tokens[idB];
   if (!a || !b || a === b) return null;
   const drink = recipe(a.type, b.type);
-  if (!drink) return null;
-  const isNew = !s.discovered[drink.key];
+  if (!canMake(s, drink)) return null;
+  const isNew = !drink.custom && !s.discovered[drink.key];
+  s.stockPerfect = s.stock.map((_, i) => s.stockPerfect?.[i] === true);
   s.stock.push(drink.key);
-  s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
+  s.stockPerfect.push(perfect === true);
+  if (!drink.custom) s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
   const card = solveCard(s, drink), chapters = advance(s);
   ensureQueue(s);
-  return {...drink, stored: true, index: s.stock.length - 1, earned: 0, isNew, card, chapters};
+  return {...drink, stored: true, index: s.stock.length - 1, earned: 0, perfect: perfect === true, tasteBonus: 0, isNew, card, chapters};
 }
 
 export const stockMatch = s => s.stock.findIndex(key => s.queue.some(g => g.key === key));
@@ -291,9 +300,9 @@ export const stockMatch = s => s.stock.findIndex(key => s.queue.some(g => g.key 
 export function serveStock(s, index, matchOnly = false) {
   if (!Number.isInteger(index) || index < 0 || index >= s.stock.length) return null;
   const drink = recipeByKey(s.stock[index]), to = drink && receiver(s, drink);
-  if (!to || (matchOnly && !to.favorite)) return null;
-  const result = sellDrink(s, drink, true);
-  if (result) s.stock.splice(index, 1);
+  if (!to || !canMake(s, drink) || (matchOnly && !to.favorite)) return null;
+  const result = sellDrink(s, drink, true, s.stockPerfect?.[index] === true);
+  if (result) { s.stock.splice(index, 1); s.stockPerfect?.splice(index, 1); }
   return result && {...result, fromStock: true, stockIndex: index};
 }
 
@@ -303,19 +312,21 @@ function solveCard(s, drink) {
   return card || null;
 }
 
-function sellDrink(s, drink, fromStock = false) {
+function sellDrink(s, drink, fromStock = false, perfect = false) {
   const to = receiver(s, drink);
   if (!to) return null;
   const guest = s.queue[to.index], person = guest.person, favorite = to.favorite;
-  const isNew = !s.discovered[drink.key];
+  const isNew = !drink.custom && !s.discovered[drink.key];
   const sharp = !fromStock && favorite && isNew && !guest.peeked && person !== 'rosa' && picturesOnly(s);
   const golden = s.golden > 0;
+  const tasteBonus = perfect === true ? TASTE_BONUS * (golden ? 2 : 1) : 0;
   let earned = BASE_PAY + (favorite ? TIP : 0) + (sharp ? SHARP_EYE : 0);
   if (golden) { earned *= 2; s.golden--; }
+  earned += tasteBonus;
   s.coins += earned;
   s.served++;
   if (favorite) s.favorites++;
-  if (!fromStock) s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
+  if (!fromStock && !drink.custom) s.discovered[drink.key] = (s.discovered[drink.key] || 0) + 1;
 
   let heart = null, goldenStart = false, card = null;
   if (favorite && REGULARS[person] && hearts(s, person) < MAX_HEARTS) {
@@ -337,7 +348,7 @@ function sellDrink(s, drink, fromStock = false) {
   const chapters = advance(s);
   ensureQueue(s);
   const thanks = favorite && REGULARS[person] ? REGULARS[person].thanks[s.served % 3] : null;
-  return {...drink, favorite, index: to.index, person, earned, golden, goldenStart, sharp, isNew, heart, card, chapters, thanks};
+  return {...drink, favorite, index: to.index, person, earned, perfect: perfect === true, tasteBonus, golden, goldenStart, sharp, isNew, heart, card, chapters, thanks};
 }
 
 export function buy(s) {
@@ -362,11 +373,11 @@ export function offline(s, now = Date.now()) {
 
 // --------------------------------------------------------- persistence ---
 const nat = v => Number.isSafeInteger(v) && v >= 0;
-const validKey = key => typeof key === 'string' && BY_KEY.has(key);
+const validKey = key => !!recipeByKey(key);
 
 export function validate(s) {
   if (!s || s.version !== 5 || !['coins', 'served', 'favorites', 'level', 'chapter', 'seed'].every(k => nat(s[k]))) return null;
-  if (s.level > 5 || s.chapter > CHAPTERS.length || s.favorites > s.served || !Array.isArray(s.tokens) || s.tokens.length !== 4) return null;
+  if (s.level > 5 || s.chapter > CHAPTERS.length || s.favorites > s.served || !Array.isArray(s.tokens) || s.tokens.length < 4 || s.tokens.length > INGREDIENT_ORDER.length) return null;
   const clean = freshState(s.seed);
   const blocked = CHAPTERS.findIndex(c => c.kind === 'buy' && c.level > s.level);
   Object.assign(clean, {coins: s.coins, served: s.served, favorites: s.favorites, level: s.level,
@@ -377,24 +388,24 @@ export function validate(s) {
     golden: nat(s.mark?.golden) ? Math.min(s.mark.golden, clean.goldenCount) : clean.goldenCount};
   clean.glow = nat(s.glow) ? Math.min(s.glow, GLOW_MAX - 1) : 0;
   clean.golden = nat(s.golden) ? Math.min(s.golden, GOLDEN_CUPS) : 0;
-  for (const [k, v] of Object.entries(s.discovered || {})) if (validKey(k)) clean.discovered[k] = nat(v) && v > 0 ? v : 1;
+  for (const [k, v] of Object.entries(s.discovered || {})) if (BY_KEY.has(k)) clean.discovered[k] = nat(v) && v > 0 ? v : 1;
   for (const p of PEOPLE) clean.bond[p] = nat(s.bond?.[p]) ? Math.min(s.bond[p], MAX_HEARTS * BOND_PER_HEART) : 0;
   clean.beats = Array.isArray(s.beats) ? [...new Set(s.beats.filter(b => typeof b === 'string' && /^[a-z]+:[24]$/.test(b) &&
     REGULARS[b.split(':')[0]] && hearts(clean, b.split(':')[0]) >= Number(b.split(':')[1])))] : [];
   clean.cards = Array.isArray(s.cards) ? [...new Set(s.cards.filter(id => CARDS.some(c => c.id === id)))] : [];
+  // Chapter letters earned by a pour that was interrupted before its letter appeared.
+  clean.letters = Array.isArray(s.letters) ? [...new Set(s.letters.filter(i => nat(i) && i < clean.chapter))].sort((a, b) => a - b).slice(-3) : [];
   clean.festival = s.festival === true && clean.chapter >= FESTIVAL;
   clean.sound = s.sound === true;
   clean.lastSeen = Number.isFinite(s.lastSeen) ? Math.min(s.lastSeen, Date.now()) : Date.now();
   clean.staffMillis = Number.isFinite(s.staffMillis) && s.staffMillis >= 0 && s.staffMillis < STAFF_MS ? s.staffMillis : 0;
-  clean.basket = unlockedBaskets(clean).includes(s.basket) ? s.basket : 'sunrise';
-  clean.stock = cleanStock(clean, s.stock);
+  Object.assign(clean, cleanStock(clean, s.stock, s.stockPerfect));
   clean.prep = clean.level >= 1 && s.prep === true;
-  const items = BASKETS[clean.basket].items, unit = v => Math.min(1, Math.max(0, v));
-  clean.tokens = s.tokens.map((t, i) => ({id: i, type: items[i],
-    x: Number.isFinite(t?.x) ? unit(t.x) : home[i][0], y: Number.isFinite(t?.y) ? unit(t.y) : home[i][1]}));
+  // Old saves contain only the selected basket. Rebuild the full unlocked table.
+  syncTable(clean);
   const people = new Set([...regularsHere(clean), ...(clean.chapter === FESTIVAL && !clean.festival ? ['rosa'] : [])]);
   clean.queue = (Array.isArray(s.queue) ? s.queue : [])
-    .filter(g => g && nat(g.id) && people.has(g.person) && validKey(g.key) && basketFor(clean, recipeByKey(g.key)))
+    .filter(g => g && nat(g.id) && people.has(g.person) && BY_KEY.has(g.key) && canMake(clean, recipeByKey(g.key)))
     .slice(0, queueSize(clean)).map(g => ({id: g.id, person: g.person, key: g.key, peeked: g.peeked === true}));
   if (new Set(clean.queue.map(g => g.id)).size !== clean.queue.length) clean.queue = [];
   clean.nextGuest = Math.max(nat(s.nextGuest) ? s.nextGuest : 0, ...clean.queue.map(g => g.id + 1), 0);
@@ -403,8 +414,10 @@ export function validate(s) {
   return clean;
 }
 
-function cleanStock(s, stock) {
-  return s.level >= 1 && Array.isArray(stock) ? stock.filter(key => validKey(key) && basketFor(s, recipeByKey(key))).slice(0, STOCK_LIMIT) : [];
+function cleanStock(s, stock, perfect = []) {
+  const entries = s.level >= 1 && Array.isArray(stock) ? stock.map((key, i) => ({key, perfect: perfect?.[i] === true}))
+    .filter(e => validKey(e.key) && canMake(s, recipeByKey(e.key))).slice(0, STOCK_LIMIT) : [];
+  return {stock: entries.map(e => e.key), stockPerfect: entries.map(e => e.perfect)};
 }
 
 // Carries coins, renovations, recipes, saved drinks and friendships forward from v4.
@@ -420,8 +433,8 @@ export function migrate(old, seed) {
   s.served = old.served;
   s.favorites = Math.min(nat(old.exact) ? old.exact : 0, old.served);
   s.level = old.level;
-  s.stock = cleanStock(s, old.stock);
-  for (const k of Object.keys(old.discovered || {})) if (validKey(k)) s.discovered[k] = 1;
+  Object.assign(s, cleanStock(s, old.stock));
+  for (const k of Object.keys(old.discovered || {})) if (BY_KEY.has(k)) s.discovered[k] = 1;
   for (const p of PEOPLE) {
     s.bond[p] = Math.min(4 * BOND_PER_HEART, Math.floor((nat(old.visits?.[p]) ? old.visits[p] : 0) / 2));
     for (const h of [2, 4]) if (hearts(s, p) >= h) s.beats.push(`${p}:${h}`);

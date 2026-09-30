@@ -9,32 +9,33 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main id="petal" class="app" aria-label="Petal Café game">
+  <main id="petal" class="app" aria-label="Petal Café game" data-i18n-aria="Petal Café game">
     <header class="topbar">
-      <div class="wordmark"><span class="flower" aria-hidden="true">✿</span><div><h1>Petal Café</h1><span class="subtitle">Lantern Street</span></div></div>
-      <div class="glow" data-glow role="img" aria-label="Golden hour meter">
+      <div class="wordmark"><span class="flower" aria-hidden="true">✿</span><div><h1>Petal Café</h1><span class="subtitle" data-i18n="Lantern Street">Lantern Street</span></div></div>
+      <div class="glow" data-glow role="img" aria-label="Golden hour meter" data-i18n-aria="Golden hour meter">
         <img src="assets/sprites/icon-sun.webp" alt="" class="glow-sun">
         <span class="glow-pips" data-glow-pips><i></i><i></i><i></i><i></i><i></i></span>
       </div>
-      <div class="balance" aria-label="Coins"><img src="assets/sprites/icon-coin.webp" alt="" class="coin-icon"><strong data-coins>0</strong></div>
-      <button class="icon-button" data-sound aria-label="Turn sound on" aria-pressed="false"><span aria-hidden="true">♪</span><span class="sound-slash" aria-hidden="true"></span></button>
+      <div class="balance" aria-label="Coins" data-i18n-aria="Coins"><img src="assets/sprites/icon-coin.webp" alt="" class="coin-icon"><strong data-coins>0</strong></div>
+      <select class="language" data-language aria-label="Language" title="English / Tiếng Việt" data-i18n-aria="Language"><option value="en">EN</option><option value="vi">VI</option></select>
+      <button class="icon-button" data-sound aria-label="Turn sound on" aria-pressed="false" data-i18n-aria="Turn sound on"><span aria-hidden="true">♪</span><span class="sound-slash" aria-hidden="true"></span></button>
     </header>
 
-    <section class="scene" data-scene aria-label="Your café on Lantern Street">
-      <img class="room" data-room src="assets/sprites/cafe-0.webp" alt="Petal Café, a warm little café diorama">
+    <section class="scene" data-scene aria-label="Your café on Lantern Street" data-i18n-aria="Your café on Lantern Street">
+      <img class="room" data-room src="assets/sprites/cafe-0.webp" alt="Petal Café, a warm little café diorama" data-i18n-alt="Petal Café, a warm little café diorama">
       <div class="garland" data-garland aria-hidden="true"><svg viewBox="0 0 120 12" preserveAspectRatio="none"><path d="M0 2 Q 30 11 60 4 T 120 2" /></svg></div>
       <div class="golden-sky" aria-hidden="true"></div>
-      <div class="staff" data-staff hidden><img src="assets/sprites/mina.webp" alt="Mina, helping behind the counter"><span class="staff-pay">+10</span></div>
-      <div class="rosa-guest" data-rosa-home hidden><img src="assets/sprites/rosa.webp" alt="Auntie Rosa, home for the festival"></div>
-      <div class="line" data-line aria-label="Guests waiting"></div>
-      <div class="golden-badge" data-golden-badge hidden>Golden hour · ×2 <span data-golden-left>5</span></div>
+      <div class="staff" data-staff hidden><img src="assets/sprites/mina.webp" alt="Mina, helping behind the counter" data-i18n-alt="Mina, helping behind the counter"><span class="staff-pay">+10</span></div>
+      <div class="rosa-guest" data-rosa-home hidden><img src="assets/sprites/rosa.webp" alt="Auntie Rosa, home for the festival" data-i18n-alt="Auntie Rosa, home for the festival"></div>
+      <div class="line" data-line aria-label="Guests waiting" data-i18n-aria="Guests waiting"></div>
+      <div class="golden-badge" data-golden-badge hidden><span data-i18n="Golden hour · ×2">Golden hour · ×2</span> <span data-golden-left>5</span></div>
       <div class="story-toast" data-toast hidden role="status"><img alt="" data-toast-portrait><p><strong data-toast-name></strong><span data-toast-text></span></p></div>
     </section>
 
-    <section class="order" data-order aria-label="Selected guest">
+    <section class="order" data-order aria-label="Selected guest" data-i18n-aria="Selected guest">
       <div class="portrait"><img data-portrait src="assets/sprites/mina-portrait.webp" alt=""></div>
       <div class="order-copy">
-        <div class="order-top"><span data-guest-name>Mina</span><span class="hearts" data-guest-hearts aria-label="Friendship"></span></div>
+        <div class="order-top"><span data-guest-name>Mina</span><span class="hearts" data-guest-hearts aria-label="Friendship" data-i18n-aria="Friendship"></span></div>
         <h2 data-order-name>Strawberry milk</h2>
         <div class="order-detail" data-order-detail></div>
       </div>
@@ -42,72 +43,96 @@
       <button class="peek" data-peek aria-pressed="false"><span data-peek-label>Show pair</span></button>
     </section>
 
-    <section class="worktop" aria-label="Mixing table: drag an ingredient onto another, or tap two ingredients.">
+    <section class="worktop" aria-label="Drag two different ingredients into the cup, then stop the marker in green." data-i18n-aria="Drag two different ingredients into the cup, then stop the marker in green.">
       <div class="cloth" aria-hidden="true"></div>
-      <div class="baskets" data-baskets role="toolbar" aria-label="Ingredient baskets"></div>
-      <div class="coaster" aria-hidden="true"><span>✿</span></div>
+      <div class="table-heading"><strong data-table-count></strong><span data-i18n="Any two · one cup">Any two · one cup</span></div>
+      <div class="rack-cells" data-cells aria-hidden="true"></div>
+      <button class="mix-cup" data-cup>
+        <span class="cup-shadow" aria-hidden="true"></span>
+        <span class="cup-art" aria-hidden="true"><img class="cup-back" src="assets/sprites/cup-back.webp" alt=""><span class="cup-well"><span class="cup-liquid" data-cup-liquid></span></span><span class="cup-parts" data-cup-parts></span><img class="cup-front" src="assets/sprites/cup-front.webp" alt=""></span>
+        <img class="cup-finished" data-cup-finished alt="" hidden>
+        <span class="cup-count" data-cup-count>0 / 2</span><span class="cup-caption" data-cup-caption></span>
+      </button>
       <div class="ingredients" data-ingredients></div>
       <div class="pair-preview" data-pair-preview hidden></div>
-      <button class="tidy" data-tidy aria-label="Return ingredients to their places">↺</button>
+      <button class="tidy" data-tidy aria-label="Empty the mixing cup" data-i18n-aria="Empty the mixing cup">↺</button>
     </section>
 
-    <section class="prep-shelf" data-shelf hidden aria-label="Make-ahead shelf. Matching orders serve automatically.">
+    <section class="mix-panel" aria-label="Taste timing" data-i18n-aria="Taste timing">
+      <div class="timing-controls">
+        <div class="timing-meter"><div class="timing-heading"><span data-timing-label></span><strong data-i18n="Green = best taste">Green = best taste</strong></div>
+          <div class="timing-track" data-timing-track aria-hidden="true"><span class="sweet-spot"></span><span class="timing-marker" data-timing-marker></span></div>
+        </div>
+        <button class="mix-stop" data-mix-stop disabled><span data-mix-label></span><small data-mix-detail></small></button>
+      </div>
+      <div class="feedback" role="status" aria-live="polite"><span data-feedback></span><small data-feedback-detail></small></div>
+    </section>
+
+    <section class="prep-shelf" data-shelf hidden aria-label="Make-ahead shelf. Matching orders serve automatically." data-i18n-aria="Make-ahead shelf. Matching orders serve automatically.">
       <button class="prep-toggle" data-prep aria-pressed="false"><strong data-prep-label>Serve now</strong><small data-prep-detail>Tap to make ahead</small></button>
-      <div class="saved-cups" aria-label="Three saved drinks">
+      <div class="saved-cups" aria-label="Three saved drinks" data-i18n-aria="Three saved drinks">
         <button class="saved-cup" data-stock="0" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
         <button class="saved-cup" data-stock="1" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
         <button class="saved-cup" data-stock="2" disabled><img alt="" hidden><span aria-hidden="true">＋</span></button>
       </div>
-      <span class="shelf-note">Saved cups<br>serve matches</span>
+      <span class="shelf-note" data-i18n="Saved cups serve matches">Saved cups serve matches</span>
     </section>
 
-    <div class="feedback" role="status" aria-live="polite"><span data-feedback>Drag the strawberry onto the milk.</span><small data-feedback-detail>Every cup earns coins. A guest's favorite earns a tip.</small></div>
-
-    <section class="chapter" data-chapter-card aria-label="Current chapter">
+    <section class="chapter" data-chapter-card aria-label="Current chapter" data-i18n-aria="Current chapter">
       <div class="chapter-lantern"><img src="assets/sprites/icon-lantern.webp" alt=""><span data-chapter-number>1</span></div>
       <div class="chapter-copy">
         <span class="eyebrow" data-chapter-eyebrow>Lantern 1 of 12</span>
         <h3 data-chapter-title>Open the shutters</h3>
-        <div class="chapter-task"><span data-chapter-task>Serve 3 cups</span><button class="chapter-open" data-chapter-open hidden aria-label="Open the book for this chapter">Open ›</button><span class="chapter-count" data-chapter-count>0 / 3</span></div>
-        <div class="track" role="progressbar" aria-label="Chapter progress" aria-valuemin="0" data-chapter-progress><i data-chapter-fill></i></div>
+        <div class="chapter-task"><span data-chapter-task>Serve 3 cups</span><button class="chapter-open" data-chapter-open hidden aria-label="Open the book for this chapter" data-i18n-aria="Open the book for this chapter" data-i18n="Open ›">Open ›</button><span class="chapter-count" data-chapter-count>0 / 3</span></div>
+        <div class="track" role="progressbar" aria-label="Chapter progress" aria-valuemin="0" data-chapter-progress data-i18n-aria="Chapter progress"><i data-chapter-fill></i></div>
       </div>
       <button class="buy" data-buy hidden><span data-buy-label>Paint sign</span><small data-buy-cost>60</small></button>
     </section>
 
-    <nav class="bottom-bar" aria-label="Café extras">
-      <button data-book><img src="assets/sprites/icon-book.webp" alt=""> Recipes <span class="count" data-book-count>0/23</span></button>
-      <button data-letters><img src="assets/sprites/icon-letter.webp" alt=""> Letters <span class="count" data-letter-count>0</span></button>
+    <nav class="bottom-bar" aria-label="Café extras" data-i18n-aria="Café extras">
+      <button data-book><img src="assets/sprites/icon-book.webp" alt=""> <span data-i18n="Recipes">Recipes</span> <span class="count" data-book-count>0/23</span></button>
+      <button data-letters><img src="assets/sprites/icon-letter.webp" alt=""> <span data-i18n="Letters">Letters</span> <span class="count" data-letter-count>0</span></button>
       <span class="staff-status" data-staff-status><span data-staff-label>Made with love</span><span class="staff-track" data-staff-track hidden><i data-staff-fill></i></span></span>
     </nav>
 
     <div class="effects" aria-hidden="true"></div>
 
     <dialog class="sheet" data-book-dialog aria-labelledby="book-title">
-      <div class="sheet-top"><span class="eyebrow">Everything you have poured</span><button class="close" data-close aria-label="Close recipe book">×</button></div>
-      <h2 id="book-title">Recipe book</h2>
+      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <div class="sheet-top"><span class="eyebrow" data-i18n="Everything you have poured">Everything you have poured</span><button class="close" data-close aria-label="Close recipe book" data-i18n-aria="Close recipe book">×</button></div>
+      <h2 id="book-title" data-i18n="Recipe book">Recipe book</h2>
       <div class="card-box" data-card-box hidden>
-        <h3>Auntie Rosa's recipe box</h3>
-        <p class="sheet-note">Each card is a riddle about one pair. Mix that pair to solve it.</p>
+        <h3 data-i18n="Auntie Rosa's recipe box">Auntie Rosa's recipe box</h3>
+        <p class="sheet-note" data-i18n="Each card is a riddle about one pair. Mix that pair to solve it.">Each card is a riddle about one pair. Mix that pair to solve it.</p>
         <div class="riddles" data-riddles></div>
       </div>
       <div class="recipe-grid" data-recipes></div>
     </dialog>
 
     <dialog class="sheet" data-letters-dialog aria-labelledby="letters-title">
-      <div class="sheet-top"><span class="eyebrow">Letters from Lantern Street</span><button class="close" data-close aria-label="Close letters">×</button></div>
-      <h2 id="letters-title">Letters</h2>
+      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <div class="sheet-top"><span class="eyebrow" data-i18n="Letters from Lantern Street">Letters from Lantern Street</span><button class="close" data-close aria-label="Close letters" data-i18n-aria="Close letters">×</button></div>
+      <h2 id="letters-title" data-i18n="Letters">Letters</h2>
       <div class="friends" data-friends></div>
       <div class="letters" data-letter-list></div>
     </dialog>
 
     <dialog class="moment" data-moment aria-labelledby="moment-title">
+      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
       <div class="moment-lantern" data-moment-art><img src="assets/sprites/icon-lantern.webp" alt=""></div>
       <span class="eyebrow" data-moment-eyebrow>Lantern lit</span>
       <h2 id="moment-title" data-moment-title>Open the shutters</h2>
       <div class="moment-letter"><img alt="" data-moment-portrait><p data-moment-text></p><span class="signature" data-moment-from></span></div>
       <p class="moment-reward" data-moment-reward></p>
       <p class="moment-next" data-moment-next></p>
-      <button class="buy wide" data-moment-close>Continue</button>
+      <button class="buy wide" data-moment-close data-i18n="Continue">Continue</button>
+    </dialog>
+    <dialog class="moment session-dialog" data-session-dialog aria-labelledby="session-title">
+      <select class="language" data-language aria-label="Language" data-i18n-aria="Language"><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <h2 id="session-title" data-i18n="This café is open in another tab">This café is open in another tab</h2>
+      <p data-i18n="Your progress is safe. Continue here to pause the other tab, or close it and try again.">Your progress is safe. Continue here to pause the other tab, or close it and try again.</p>
+      <p data-session-status role="status"></p>
+      <button class="buy wide" data-session-continue data-i18n="Continue in this tab">Continue in this tab</button>
     </dialog>
     <noscript>JavaScript is needed to play Petal Café.</noscript>
   </main>
