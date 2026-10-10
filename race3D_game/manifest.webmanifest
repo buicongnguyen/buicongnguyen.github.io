@@ -1,0 +1,10 @@
+{
+  "name": "WILDLINE",
+  "short_name": "WILDLINE",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#172528",
+  "theme_color": "#172528"
+}
